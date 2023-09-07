@@ -22,17 +22,12 @@ export class UserController {
 
   @Get('/:id')
   findUser(@Param('id') id: string): any {
-    return this.userService.findOne(parseInt(id));
+    return this.userService.findOne(id);
   }
 
   @Post('/signup')
   createUser(@Body() body: CreateUserDto): any {
-    return this.userService.create(
-      body.username,
-      body.password,
-      body.email,
-      body.avatar,
-    );
+    return this.userService.create(body);
   }
 
   @Patch('/:id')
@@ -40,6 +35,6 @@ export class UserController {
 
   @Delete('/:id')
   removeUser(@Param('id') id: string): any {
-    return this.userService.remove(parseInt(id));
+    return this.userService.remove(id);
   }
 }
