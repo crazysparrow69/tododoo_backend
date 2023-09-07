@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 
 import { User } from './user.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { QueryUserDto } from './dtos/query-user.dto';
 
 @Injectable()
 export class UserService {
@@ -13,8 +14,8 @@ export class UserService {
     return this.userModel.findById(id);
   }
 
-  find(email: string): Promise<[User]> {
-    return;
+  find(query: QueryUserDto): any {
+    return this.userModel.find(query);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -22,7 +23,11 @@ export class UserService {
     return createdUser.save();
   }
 
-  update() {}
+  async update(id: string, attrs: Partial<User>): Promise<User> {
+    const foundUser = await this.userModel.findById(id);
+    Object.assign(foundUser, attrs);
+    return foundUser.save();
+  }
 
   remove(id: string) {
     return this.userModel.findByIdAndDelete(id);
