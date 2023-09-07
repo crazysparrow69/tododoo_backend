@@ -1,34 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
+import { User } from './user.schema';
+import { CreateUserDto } from './dtos/create-user.dto';
 
 @Injectable()
 export class UserService {
-  users = [];
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  findOne(id: number) {
-    return this.users.find((user) => user.id === id);
+  findOne(id: string): Promise<User> {
+    return this.userModel.findById(id);
   }
 
-  find(email: string) {
-    return this.users.filter((user) => user.email === email);
+  find(email: string): Promise<[User]> {
+    return;
   }
 
-  create(username: string, password: string, email: string, avatar: string) {
-    this.users.push({
-      id: Math.floor(Math.random() * 10000),
-      username,
-      password,
-      email,
-      avatar,
-    });
-
-    return this.users[this.users.length - 1];
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const createdUser = new this.userModel(createUserDto);
+    return createdUser.save();
   }
 
   update() {}
 
-  remove(id: number) {
-    this.users = this.users.filter((user) => user.id !== id);
-
-    return 'deleted';
+  remove(id: string) {
+    return this.userModel.findByIdAndDelete(id);
   }
 }
