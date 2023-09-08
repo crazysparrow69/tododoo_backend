@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Query } from 'mongoose';
-import { BadRequestException } from '@nestjs/common/exceptions';
+import { Model } from 'mongoose';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 
@@ -35,17 +38,18 @@ export class UserService {
     const hash = (await scrypt(createUserDto.password, salt, 32)) as Buffer;
     const result = salt + '.' + hash.toString('hex');
 
-    const createdUser = new this.userModel({
+    return this.userModel.create({
       ...createUserDto,
       password: result,
     });
-    return createdUser.save();
   }
 
   async update(id: string, attrs: Partial<User>): Promise<User> {
-    const foundUser = await this.userModel.findById(id);
-    Object.assign(foundUser, attrs);
-    return foundUser.save();
+    const updatedUser = await this.userModel.findByIdAndUpdate(id, attrs);
+
+    if (!updatedUser) throw new NotFoundException('User not found');
+
+    return updatedUser;
   }
 
   remove(id: string): Promise<User> {
