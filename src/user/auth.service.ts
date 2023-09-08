@@ -3,13 +3,12 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common/exceptions';
-import { randomBytes, scrypt as _scrypt } from 'crypto';
+import { scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
-import { SigninUserDto } from './dtos/signin-user.dto';
 
 const scrypt = promisify(_scrypt);
 
