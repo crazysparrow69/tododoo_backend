@@ -36,11 +36,11 @@ export class UserService {
 
     const salt = randomBytes(8).toString('hex');
     const hash = (await scrypt(createUserDto.password, salt, 32)) as Buffer;
-    const result = salt + '.' + hash.toString('hex');
+    const hashedPassword = salt + '.' + hash.toString('hex');
 
     return this.userModel.create({
       ...createUserDto,
-      password: result,
+      password: hashedPassword,
     });
   }
 
