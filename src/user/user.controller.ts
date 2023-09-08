@@ -6,16 +6,22 @@ import {
   Delete,
   Body,
   Param,
-  Query
+  Query,
 } from '@nestjs/common';
+
 import { UserService } from './user.service';
+import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
+import { SigninUserDto } from './dtos/signin-user.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private authService: AuthService,
+  ) {}
 
   @Get('/:id')
   findUser(@Param('id') id: string): any {
@@ -29,7 +35,12 @@ export class UserController {
 
   @Post('/signup')
   createUser(@Body() body: CreateUserDto): any {
-    return this.userService.create(body);
+    return this.authService.signup(body);
+  }
+
+  @Post('/signin')
+  signIn(@Body() body: SigninUserDto) {
+    return this.authService.signin(body.email, body.password);
   }
 
   @Patch('/:id')
