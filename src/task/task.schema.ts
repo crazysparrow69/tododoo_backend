@@ -3,6 +3,7 @@ import { HydratedDocument } from 'mongoose';
 import mongoose from 'mongoose';
 
 import { User } from 'src/user/user.schema';
+import { Category } from 'src/category/category.schema';
 
 export type TaskDocument = HydratedDocument<Task>;
 
@@ -14,8 +15,8 @@ export class Task {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ default: [] })
-  categories: Array<{}>;
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }] })
+  categories: Category[];
 
   @Prop({ default: false })
   isCompleted: boolean;
