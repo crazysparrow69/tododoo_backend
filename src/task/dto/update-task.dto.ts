@@ -1,5 +1,7 @@
 import { Transform } from 'class-transformer';
-import { IsString, IsOptional, IsBoolean, IsDate } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsDate, IsArray } from 'class-validator';
+
+import { Category } from 'src/category/category.schema';
 
 export class UpdateTaskDto {
   @IsString()
@@ -10,9 +12,9 @@ export class UpdateTaskDto {
   @IsOptional()
   description: string;
 
-  @IsString()
+  @IsArray()
   @IsOptional()
-  categories: Array<{}>;
+  categories: Category[];
 
   @IsBoolean()
   @IsOptional()
