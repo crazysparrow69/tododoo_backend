@@ -12,6 +12,7 @@ import {
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
+import { QueryTaskDto } from './dtos/query-task.dto';
 
 @Controller('task')
 export class TaskController {
@@ -23,7 +24,9 @@ export class TaskController {
   }
 
   @Get('/')
-  getTasks() {}
+  getTasks(@Query() query: QueryTaskDto) {
+    return this.taskService.find(query);
+  }
 
   @Post('/')
   createTask(@Body() body: CreateTaskDto) {
