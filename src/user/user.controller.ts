@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
@@ -16,6 +18,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
 import { UpdateUserPipe } from './pipes/update-user.pipe';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -24,9 +27,10 @@ export class UserController {
     private authService: AuthService,
   ) {}
 
-  @Get('/:id')
-  getUser(@Param('id') id: string): any {
-    return this.userService.findOne(id);
+  @UseGuards(AuthGuard)
+  @Get('/me')
+  getUser(@Request() req): any {
+    return this.userService.findOne(req.user.sub);
   }
 
   @Get('/')
@@ -44,12 +48,10 @@ export class UserController {
     return this.authService.signin(body.email, body.password);
   }
 
-  @Patch('/:id')
-  updateUser(
-    @Param('id') id: string,
-    @Body(UpdateUserPipe) body: UpdateUserDto,
-  ): any {
-    return this.userService.update(id, body);
+  @UseGuards(AuthGuard)
+  @Patch('/')
+  updateUser(@Request() req, @Body(UpdateUserPipe) body: UpdateUserDto): any {
+    return this.userService.update(req.user.sub, body);
   }
 
   @Delete('/:id')
