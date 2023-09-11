@@ -1,17 +1,15 @@
-import { Transform } from 'class-transformer';
-import { IsString, IsOptional, IsBoolean, IsDate } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
-export class CreateTaskDto {
+export class QueryTaskDto {
   @IsString()
   @IsOptional()
-  categories: Array<{}>;
+  categories: string;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  isCompleted: boolean;
+  isCompleted: string;
 
-  @IsDate()
+  @IsString()
   @IsOptional()
-  @Transform(({ value }) => new Date(value))
-  deadline: Date;
+  deadline: string;
 }
