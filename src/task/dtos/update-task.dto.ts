@@ -1,5 +1,11 @@
 import { Transform } from 'class-transformer';
-import { IsString, IsOptional, IsBoolean, IsDate, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsDate,
+  IsArray,
+} from 'class-validator';
 
 import { Category } from 'src/category/category.schema';
 
