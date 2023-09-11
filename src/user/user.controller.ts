@@ -15,6 +15,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
+import { UpdateUserPipe } from './pipes/update-user.pipe';
 
 @Controller('user')
 export class UserController {
@@ -44,7 +45,10 @@ export class UserController {
   }
 
   @Patch('/:id')
-  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto): any {
+  updateUser(
+    @Param('id') id: string,
+    @Body(UpdateUserPipe) body: UpdateUserDto,
+  ): any {
     return this.userService.update(id, body);
   }
 
