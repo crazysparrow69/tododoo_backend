@@ -11,6 +11,7 @@ import { promisify } from 'util';
 import { User } from './user.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
+import mongoose from 'mongoose';
 
 const scrypt = promisify(_scrypt);
 
@@ -40,6 +41,7 @@ export class UserService {
 
     return this.userModel.create({
       ...createUserDto,
+      _id: new mongoose.Types.ObjectId(),
       password: hashedPassword,
     });
   }
