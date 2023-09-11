@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common/exceptions';
 import { scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
+import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -14,7 +15,10 @@ const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
   async signup(createUserDto: CreateUserDto) {
     const createdUser = await this.userService.create(createUserDto);
@@ -37,6 +41,10 @@ export class AuthService {
       throw new BadRequestException('Invalid password');
     }
 
-    return foundUser;
+    const token = await this.jwtService.signAsync({
+      sub: foundUser._id,
+    });
+
+    return { user: foundUser, token };
   }
 }
