@@ -7,24 +7,34 @@ import {
 } from '@nestjs/common/exceptions';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
+import mongoose from 'mongoose';
 
 import { User } from './user.schema';
+import { Task } from 'src/task/task.schema';
+import { Category } from 'src/category/category.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
-import mongoose from 'mongoose';
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Task.name) private taskModel: Model<Task>,
+    @InjectModel(Category.name) private categoryModel: Model<Category>,
+  ) {}
 
   findOne(id: string): Promise<User> {
-    return this.userModel.findById(id);
+    return this.userModel
+      .findById(id)
+      .select(['-categories', '-tasks', '-password', '-__v']);
   }
 
   find(query: QueryUserDto): Promise<User[]> {
-    return this.userModel.find(query);
+    return this.userModel
+      .find(query)
+      .select(['-categories', '-tasks', '-password', '-__v']);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -54,7 +64,14 @@ export class UserService {
     return updatedUser;
   }
 
-  remove(id: string): Promise<User> {
-    return this.userModel.findByIdAndDelete(id);
+  async remove(id: string): Promise<User> {
+    const deletedUser = await this.userModel.findByIdAndDelete(id);
+
+    if (deletedUser) {
+      await this.taskModel.deleteMany({ userId: deletedUser._id });
+      await this.categoryModel.deleteMany({ userId: deletedUser._id });
+    }
+
+    return;
   }
 }
