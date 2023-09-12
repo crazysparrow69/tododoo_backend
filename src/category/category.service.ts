@@ -6,42 +6,77 @@ import { NotFoundException } from '@nestjs/common';
 import { Category } from './category.schema';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { QueryCategoryDto } from './dtos/query-category.dto';
+import { User } from 'src/user/user.schema';
+import { Task } from 'src/task/task.schema';
 
 @Injectable()
 export class CategoryService {
   constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
   ) {}
 
-  async findOne(id: string): Promise<Category> {
-    const foundCategory = await this.categoryModel.findById(id);
+  async findOne(userId: string, id: string): Promise<Category> {
+    const foundCategory = await this.categoryModel.findOne({ _id: id, userId });
     if (!foundCategory) throw new NotFoundException('Category not found');
-    
+
     return foundCategory;
   }
 
-  find(query: QueryCategoryDto): Promise<Category[]> {
-    return this.categoryModel.find(query);
+  find(userId: string, query: QueryCategoryDto): Promise<Category[]> {
+    return this.categoryModel.find({ userId, ...query });
   }
 
-  create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    return this.categoryModel.create({
+  async create(
+    userId: string,
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<Category> {
+    const createdCategory = await this.categoryModel.create({
+      userId,
       ...createCategoryDto,
-      userId: '64fb1939b44653227cee1813',
     });
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { categories: createdCategory._id },
+    });
+
+    return createdCategory;
   }
 
-  async update(id: string, attrs: Partial<Category>): Promise<Category> {
-    const updatedCategory = await this.categoryModel.findByIdAndUpdate(
-      id,
+  async update(
+    userId: string,
+    id: string,
+    attrs: Partial<Category>,
+  ): Promise<Category> {
+    const updatedCategory = await this.categoryModel.findOneAndUpdate(
+      { _id: id, userId },
       attrs,
+      { new: true },
     );
     if (!updatedCategory) throw new NotFoundException('Category not found');
 
     return updatedCategory;
   }
 
-  remove(id: string): Promise<Category> {
-    return this.categoryModel.findByIdAndDelete(id);
+  async remove(userId: string, id: string): Promise<Category> {
+    const deletedCategory = await this.categoryModel.findOneAndDelete({
+      _id: id,
+      userId,
+    });
+
+    if (deletedCategory) {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $pull: { categories: deletedCategory._id },
+      });
+      await this.taskModel.updateMany(
+        { categories: deletedCategory._id },
+        {
+          $pull: { categories: deletedCategory._id },
+        },
+      );
+    }
+
+    return;
   }
 }
