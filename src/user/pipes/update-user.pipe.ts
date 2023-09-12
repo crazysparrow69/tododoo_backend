@@ -9,6 +9,8 @@ export class UpdateUserPipe implements PipeTransform {
         'You cannot change password through this endpoint',
       );
 
+    if (value._id) throw new BadRequestException('You cannot change _id');
+
     return value;
   }
 }
