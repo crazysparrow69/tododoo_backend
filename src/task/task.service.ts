@@ -4,10 +4,12 @@ import { Model } from 'mongoose';
 import { NotFoundException } from '@nestjs/common/exceptions';
 
 import { Task } from './task.schema';
+import { User } from 'src/user/user.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 
 interface queryParams {
+  userId: string;
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
@@ -15,14 +17,22 @@ interface queryParams {
 
 @Injectable()
 export class TaskService {
-  constructor(@InjectModel(Task.name) private taskModel: Model<Task>) {}
+  constructor(
+    @InjectModel(Task.name) private taskModel: Model<Task>,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
 
-  findOne(id: string): Promise<Task> {
-    return this.taskModel.findById(id);
+  async findOne(userId: string, id: string): Promise<Task> {
+    const foundTask = await this.taskModel.findOne({ _id: id, userId });
+    if (!foundTask) throw new NotFoundException('Task not found');
+
+    return foundTask;
   }
 
-  find(query: QueryTaskDto): Promise<Task[]> {
-    let queryParams: queryParams = {};
+  find(userId: string, query: QueryTaskDto): Promise<Task[]> {
+    let queryParams: queryParams = {
+      userId: userId,
+    };
     const { isCompleted = null, categories = null, deadline = null } = query;
 
     if (isCompleted) {
@@ -70,30 +80,52 @@ export class TaskService {
     return this.taskModel.find(queryParams).populate('categories');
   }
 
-  async create(createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.taskModel.create({
+  async create(userId: string, createTaskDto: CreateTaskDto): Promise<Task> {
+    const createdTask = await this.taskModel.create({
+      userId,
       ...createTaskDto,
-      userId: '64fb1939b44653227cee1813',
     });
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { tasks: createdTask._id },
+    });
+
+    return createdTask;
   }
 
-  async update(id: string, attrs: Partial<Task>): Promise<Task> {
+  async update(
+    userId: string,
+    id: string,
+    attrs: Partial<Task>,
+  ): Promise<Task> {
     if (attrs.isCompleted === true) {
       attrs.dateOfCompletion = new Date();
     } else if (attrs.isCompleted === false) {
       attrs.dateOfCompletion = null;
     }
 
-    const updatedTask = await this.taskModel.findByIdAndUpdate(id, attrs);
-
-    if (!updatedTask) {
-      throw new NotFoundException('Task not found');
-    }
+    const updatedTask = await this.taskModel.findOneAndUpdate(
+      { _id: id, userId },
+      attrs,
+      { new: true },
+    );
+    if (!updatedTask) throw new NotFoundException('Task not found');
 
     return updatedTask;
   }
 
-  remove(id: string): Promise<Task> {
-    return this.taskModel.findByIdAndDelete(id);
+  async remove(userId: string, id: string): Promise<Task> {
+    const deletedTask = await this.taskModel.findOneAndDelete({
+      _id: id,
+      userId,
+    });
+
+    if (deletedTask) {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $pull: { tasks: deletedTask._id },
+      });
+    }
+
+    return;
   }
 }
