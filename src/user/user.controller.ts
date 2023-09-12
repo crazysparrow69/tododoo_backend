@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Response,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
@@ -27,19 +28,20 @@ export class UserController {
     private authService: AuthService,
   ) {}
 
-  @UseGuards(AuthGuard)
   @Get('/me')
-  getUser(@Request() req): any {
+  @UseGuards(AuthGuard)
+  getUser(@Request() req) {
     return this.userService.findOne(req.user.sub);
   }
 
+  //Make this route to show only basic info about users
   @Get('/')
-  getUsers(@Query() query: QueryUserDto): any {
+  getUsers(@Query() query: QueryUserDto) {
     return this.userService.find(query);
   }
 
   @Post('/signup')
-  createUser(@Body() body: CreateUserDto): any {
+  createUser(@Body() body: CreateUserDto) {
     return this.authService.signup(body);
   }
 
@@ -48,14 +50,17 @@ export class UserController {
     return this.authService.signin(body.email, body.password);
   }
 
-  @UseGuards(AuthGuard)
   @Patch('/')
-  updateUser(@Request() req, @Body(UpdateUserPipe) body: UpdateUserDto): any {
+  @UseGuards(AuthGuard)
+  updateUser(@Request() req, @Body(UpdateUserPipe) body: UpdateUserDto) {
     return this.userService.update(req.user.sub, body);
   }
 
-  @Delete('/:id')
-  removeUser(@Param('id') id: string): any {
-    return this.userService.remove(id);
+  @Delete('/')
+  @UseGuards(AuthGuard)
+  removeUser(@Request() req, @Response() res) {
+    this.userService.remove(req.user.sub);
+
+    return res.sendStatus(204);
   }
 }
