@@ -3,27 +3,37 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common/exceptions';
-import { randomBytes, scrypt as _scrypt } from 'crypto';
+import { scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
+import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
-import { SigninUserDto } from './dtos/signin-user.dto';
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
   async signup(createUserDto: CreateUserDto) {
+    const [foundUser] = await this.userService.find({
+      email: createUserDto.email,
+    } as QueryUserDto);
+    if (foundUser)
+      throw new BadRequestException('User with this email already exists');
+
     const createdUser = await this.userService.create(createUserDto);
-    // creating jwt token
-    return {
-      createdUser,
-      token: 'mkdslpaMF89IDSjfuqnmi0f01q',
-    };
+
+    const token = await this.jwtService.signAsync({
+      sub: createdUser._id,
+    });
+
+    return { token };
   }
 
   async signin(email: string, password: string) {
@@ -38,6 +48,10 @@ export class AuthService {
       throw new BadRequestException('Invalid password');
     }
 
-    return foundUser;
+    const token = await this.jwtService.signAsync({
+      sub: foundUser._id,
+    });
+
+    return { user: foundUser, token };
   }
 }

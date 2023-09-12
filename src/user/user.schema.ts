@@ -2,10 +2,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { HydratedDocument } from 'mongoose';
 
+import { Category } from 'src/category/category.schema';
+import { Task } from 'src/task/task.schema';
+
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
+  @Prop()
+  _id: mongoose.Types.ObjectId;
+
   @Prop({ required: true })
   username: string;
 
@@ -14,6 +20,18 @@ export class User {
 
   @Prop({ required: true, unique: true })
   email: string;
+
+  @Prop({
+    required: false,
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
+  })
+  tasks: Task[];
+
+  @Prop({
+    required: false,
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
+  })
+  categories: Category[];
 
   @Prop({ default: 'noavatar' })
   avatar: string;
