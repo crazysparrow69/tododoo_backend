@@ -34,7 +34,7 @@ export class UserService {
   find(query: QueryUserDto): Promise<User[]> {
     return this.userModel
       .find(query)
-      .select(['-categories', '-tasks', '-password', '-__v']);
+      .select(['-categories', '-tasks', '-__v']);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
