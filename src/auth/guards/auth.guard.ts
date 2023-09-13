@@ -1,14 +1,13 @@
-import { InjectModel } from '@nestjs/mongoose';
 import {
   CanActivate,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import mongoose from 'mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { User } from 'src/user/user.schema';
 
@@ -34,7 +33,7 @@ export class AuthGuard implements CanActivate {
       const foundUser = await this.userModel.findById(payload.sub);
       if (!foundUser) throw new UnauthorizedException();
 
-      payload.sub = new mongoose.Types.ObjectId(payload.sub);
+      payload.sub = new Types.ObjectId(payload.sub);
 
       request['user'] = payload;
     } catch {
