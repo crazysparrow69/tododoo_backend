@@ -7,6 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './user.schema';
 import { Task, TaskSchema } from 'src/task/task.schema';
 import { Category, CategorySchema } from 'src/category/category.schema';
+import { AuthModule } from 'src/auth/auth.module';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Module({
   imports: [
@@ -15,8 +17,9 @@ import { Category, CategorySchema } from 'src/category/category.schema';
       { name: Task.name, schema: TaskSchema },
       { name: Category.name, schema: CategorySchema },
     ]),
+    AuthModule,
   ],
-  providers: [UserService, AuthService],
+  providers: [UserService, AuthService, AuthGuard],
   controllers: [UserController],
 })
 export class UserModule {}
