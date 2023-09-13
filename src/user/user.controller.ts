@@ -5,7 +5,6 @@ import {
   Patch,
   Delete,
   Body,
-  Param,
   Query,
   UseGuards,
   Request,
@@ -20,6 +19,7 @@ import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
 import { UpdateUserPipe } from './pipes/update-user.pipe';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -52,14 +52,14 @@ export class UserController {
 
   @Patch('/')
   @UseGuards(AuthGuard)
-  updateUser(@Request() req, @Body(UpdateUserPipe) body: UpdateUserDto) {
-    return this.userService.update(req.user.sub, body);
+  updateUser(@CurrentUser() userId: string, @Body(UpdateUserPipe) body: UpdateUserDto) {
+    return this.userService.update(userId, body);
   }
 
   @Delete('/')
   @UseGuards(AuthGuard)
-  removeUser(@Request() req, @Response() res) {
-    this.userService.remove(req.user.sub);
+  removeUser(@CurrentUser() userId: string, @Response() res) {
+    this.userService.remove(userId);
 
     return res.sendStatus(204);
   }
