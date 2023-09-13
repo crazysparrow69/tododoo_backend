@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TaskModule } from './task/task.module';
 import { CategoryModule } from './category/category.module';
+import { AuthModule } from './auth/auth.module';
 
 require('dotenv').config();
 
@@ -21,6 +22,7 @@ require('dotenv').config();
     UserModule,
     TaskModule,
     CategoryModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
