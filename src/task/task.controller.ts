@@ -15,7 +15,7 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { UpdateTaskPipe } from './pipes/update-task.pipe';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 
