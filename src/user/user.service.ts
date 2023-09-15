@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common/exceptions';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
-import { Types } from 'mongoose';
+import { Types, Model } from 'mongoose';
 
 import { User } from './user.schema';
 import { Task } from 'src/task/task.schema';
@@ -28,7 +27,7 @@ export class UserService {
   findOne(id: string): Promise<User> {
     return this.userModel
       .findById(id)
-      .select(['-categories', '-tasks', '-password', '-__v']);
+      .select(['-categories', '-tasks', '-__v']);
   }
 
   find(query: QueryUserDto): Promise<User[]> {
