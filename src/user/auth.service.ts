@@ -21,12 +21,6 @@ export class AuthService {
   ) {}
 
   async signup(createUserDto: CreateUserDto) {
-    const [foundUser] = await this.userService.find({
-      email: createUserDto.email,
-    } as QueryUserDto);
-    if (foundUser)
-      throw new BadRequestException('User with this email already exists');
-
     const createdUser = await this.userService.create(createUserDto);
 
     const token = await this.jwtService.signAsync({
