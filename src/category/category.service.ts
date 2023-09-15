@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { NotFoundException } from '@nestjs/common';
+import { Types } from 'mongoose';
 
 import { Category } from './category.schema';
 import { CreateCategoryDto } from './dtos/create-category.dto';
@@ -18,6 +22,9 @@ export class CategoryService {
   ) {}
 
   async findOne(userId: string, id: string): Promise<Category> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ObjectId');
+
     const foundCategory = await this.categoryModel.findOne({ _id: id, userId });
     if (!foundCategory) throw new NotFoundException('Category not found');
 
@@ -49,6 +56,9 @@ export class CategoryService {
     id: string,
     attrs: Partial<Category>,
   ): Promise<Category> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ObjectId');
+
     const updatedCategory = await this.categoryModel.findOneAndUpdate(
       { _id: id, userId },
       attrs,
@@ -60,6 +70,9 @@ export class CategoryService {
   }
 
   async remove(userId: string, id: string): Promise<Category> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ObjectId');
+
     const deletedCategory = await this.categoryModel.findOneAndDelete({
       _id: id,
       userId,

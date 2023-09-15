@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { NotFoundException } from '@nestjs/common/exceptions';
+import {
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common/exceptions';
+import { Types } from 'mongoose';
 
 import { Task } from './task.schema';
 import { User } from 'src/user/user.schema';
@@ -23,6 +27,9 @@ export class TaskService {
   ) {}
 
   async findOne(userId: string, id: string): Promise<Task> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ObjectId');
+
     const foundTask = await this.taskModel.findOne({ _id: id, userId });
     if (!foundTask) throw new NotFoundException('Task not found');
 
@@ -83,6 +90,7 @@ export class TaskService {
   async create(userId: string, createTaskDto: CreateTaskDto): Promise<Task> {
     const createdTask = await this.taskModel.create({
       userId,
+      dateOfCompletion: createTaskDto.isCompleted ? new Date() : null,
       ...createTaskDto,
     });
 
@@ -98,6 +106,9 @@ export class TaskService {
     id: string,
     attrs: Partial<Task>,
   ): Promise<Task> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ObjectId');
+
     if (attrs.isCompleted === true) {
       attrs.dateOfCompletion = new Date();
     } else if (attrs.isCompleted === false) {
@@ -115,6 +126,9 @@ export class TaskService {
   }
 
   async remove(userId: string, id: string): Promise<Task> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ObjectId');
+
     const deletedTask = await this.taskModel.findOneAndDelete({
       _id: id,
       userId,
