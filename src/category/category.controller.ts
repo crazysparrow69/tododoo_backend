@@ -7,11 +7,9 @@ import {
   Body,
   Param,
   Query,
-  Request,
-  Response,
   UseGuards,
   HttpCode,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
 
 import { CategoryService } from './category.service';
@@ -60,10 +58,7 @@ export class CategoryController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeCategory(
-    @CurrentUser() userId: string,
-    @Param('id') id: string,
-  ) {
+  removeCategory(@CurrentUser() userId: string, @Param('id') id: string) {
     return this.categoryService.remove(userId, id);
   }
 }
