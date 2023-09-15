@@ -27,7 +27,15 @@ export class UserService {
   findOne(id: string): Promise<User> {
     return this.userModel
       .findById(id)
-      .select(['-categories', '-tasks', '-__v']);
+      .select('-__v')
+      .populate({
+        path: 'tasks',
+        populate: {
+          path: 'categories',
+        },
+      })
+      .populate('categories')
+      .exec();
   }
 
   find(query: QueryUserDto): Promise<User[]> {
