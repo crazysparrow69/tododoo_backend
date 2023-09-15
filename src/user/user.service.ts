@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common/exceptions';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
 import { User } from './user.schema';
 import { Task } from 'src/task/task.schema';
@@ -32,9 +32,7 @@ export class UserService {
   }
 
   find(query: QueryUserDto): Promise<User[]> {
-    return this.userModel
-      .find(query)
-      .select(['-categories', '-tasks', '-__v']);
+    return this.userModel.find(query).select(['-categories', '-tasks', '-__v']);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -51,7 +49,7 @@ export class UserService {
 
     return this.userModel.create({
       ...createUserDto,
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       password: hashedPassword,
     });
   }
