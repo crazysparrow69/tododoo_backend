@@ -8,7 +8,6 @@ import {
   Query,
   UseGuards,
   Request,
-  Response,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -38,6 +37,7 @@ export class UserController {
 
   //Make this route to show only basic info about users
   @Get('/')
+  @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
     return this.userService.find(query);
   }
