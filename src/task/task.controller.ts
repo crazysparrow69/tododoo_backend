@@ -37,6 +37,7 @@ export class TaskController {
   }
 
   @Post('/')
+  @HttpCode(HttpStatus.CREATED)
   createTask(@CurrentUser() userId: string, @Body() body: CreateTaskDto) {
     return this.taskService.create(userId, body);
   }

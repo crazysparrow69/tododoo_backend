@@ -43,6 +43,7 @@ export class UserController {
   }
 
   @Post('/signup')
+  @HttpCode(HttpStatus.CREATED)
   createUser(@Body() body: CreateUserDto) {
     return this.authService.signup(body);
   }

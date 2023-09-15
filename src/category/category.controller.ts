@@ -41,6 +41,7 @@ export class CategoryController {
   }
 
   @Post('/')
+  @HttpCode(HttpStatus.CREATED)
   createCategory(
     @CurrentUser() userId: string,
     @Body() body: CreateCategoryDto,
