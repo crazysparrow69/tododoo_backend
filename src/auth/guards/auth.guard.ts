@@ -30,10 +30,10 @@ export class AuthGuard implements CanActivate {
         secret: process.env.ACCESS_TOKEN_SECRET,
       });
 
+      payload.sub = new Types.ObjectId(payload.sub);
+
       const foundUser = await this.userModel.findById(payload.sub);
       if (!foundUser) throw new UnauthorizedException();
-
-      payload.sub = new Types.ObjectId(payload.sub);
 
       request['user'] = payload;
     } catch {
