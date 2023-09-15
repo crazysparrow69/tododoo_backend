@@ -9,6 +9,8 @@ import {
   Query,
   UseGuards,
   Response,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { TaskService } from './task.service';
@@ -49,13 +51,8 @@ export class TaskController {
   }
 
   @Delete('/:id')
-  removeTask(
-    @CurrentUser() userId: string,
-    @Response() res,
-    @Param('id') id: string,
-  ) {
-    this.taskService.remove(userId, id);
-
-    return res.sendStatus(204);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
+    return this.taskService.remove(userId, id);
   }
 }

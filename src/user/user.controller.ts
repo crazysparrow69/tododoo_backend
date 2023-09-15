@@ -9,6 +9,8 @@ import {
   UseGuards,
   Request,
   Response,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
@@ -61,9 +63,8 @@ export class UserController {
 
   @Delete('/')
   @UseGuards(AuthGuard)
-  removeUser(@CurrentUser() userId: string, @Response() res) {
-    this.userService.remove(userId);
-
-    return res.sendStatus(204);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeUser(@CurrentUser() userId: string) {
+    return this.userService.remove(userId);
   }
 }
