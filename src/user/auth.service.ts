@@ -3,15 +3,11 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common/exceptions';
-import { scrypt as _scrypt } from 'crypto';
-import { promisify } from 'util';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
-
-const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
@@ -36,9 +32,12 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const [salt, storedHash] = foundUser.password.split('.');
-    const hash = (await scrypt(password, salt, 32)) as Buffer;
-    if (hash.toString('hex') !== storedHash) {
+    const isPasswordValid = await this.userService.comparePasswords(
+      foundUser.password,
+      password,
+    );
+
+    if (!isPasswordValid) {
       throw new BadRequestException('Invalid password');
     }
 
@@ -46,6 +45,6 @@ export class AuthService {
       sub: foundUser._id,
     });
 
-    return { user: foundUser, token };
+    return { token };
   }
 }
