@@ -18,6 +18,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 import { UpdateUserPipe } from './pipes/update-user.pipe';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
@@ -67,5 +68,14 @@ export class UserController {
   @HttpCode(HttpStatus.NO_CONTENT)
   removeUser(@CurrentUser() userId: string) {
     return this.userService.remove(userId);
+  }
+
+  @Post('/password')
+  @UseGuards(AuthGuard)
+  changePassword(
+    @CurrentUser() userId: string,
+    @Body() passwords: ChangePasswordDto,
+  ) {
+    return this.userService.changePassword(userId, passwords);
   }
 }
