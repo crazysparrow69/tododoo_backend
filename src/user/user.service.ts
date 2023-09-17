@@ -13,6 +13,7 @@ import { Task } from 'src/task/task.schema';
 import { Category } from 'src/category/category.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 
 const scrypt = promisify(_scrypt);
 
@@ -50,9 +51,7 @@ export class UserService {
       throw new BadRequestException('Email already in use');
     }
 
-    const salt = randomBytes(8).toString('hex');
-    const hash = (await scrypt(createUserDto.password, salt, 32)) as Buffer;
-    const hashedPassword = salt + '.' + hash.toString('hex');
+    const hashedPassword = await this.hashPassword(createUserDto.password);
 
     return this.userModel.create({
       ...createUserDto,
@@ -71,7 +70,7 @@ export class UserService {
     return updatedUser;
   }
 
-  async remove(id: string): Promise<User> {
+  async remove(id: string) {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
 
     if (deletedUser) {
@@ -80,5 +79,47 @@ export class UserService {
     }
 
     return;
+  }
+
+  async changePassword(id: string, passwords: ChangePasswordDto) {
+    const { oldPassword, newPassword } = passwords;
+    if (oldPassword === newPassword) throw new BadRequestException("Passwords cannot be the same");
+
+    const foundUser = await this.userModel.findById(id);
+
+    if (!foundUser) throw new NotFoundException('User not found');
+
+    const isOldPasswordValid = await this.comparePasswords(
+      foundUser.password,
+      oldPassword
+    );
+
+    if (!isOldPasswordValid)
+      throw new BadRequestException('Password is invalid');
+
+    foundUser.password = await this.hashPassword(newPassword);
+    foundUser.save();
+
+    return;
+  }
+
+  async comparePasswords(
+    hashedValidPass: string,
+    comparingPass: string,
+  ): Promise<boolean> {
+    const [salt, storedHash] = hashedValidPass.split('.');
+    const hash = ((await scrypt(comparingPass, salt, 32)) as Buffer).toString(
+      'hex',
+    );
+
+    return hash === storedHash ? true : false;
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const salt = randomBytes(8).toString('hex');
+    const hash = (await scrypt(password, salt, 32)) as Buffer;
+    const hashedPassword = salt + '.' + hash.toString('hex');
+
+    return hashedPassword;
   }
 }
