@@ -25,6 +25,9 @@ export class Task {
   dateOfCompletion: Date;
 
   @Prop({ default: null })
+  links: Array<string>;
+
+  @Prop({ default: null })
   deadline: Date;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
