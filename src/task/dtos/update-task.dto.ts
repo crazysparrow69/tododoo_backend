@@ -26,6 +26,9 @@ export class UpdateTaskDto {
   @IsOptional()
   isCompleted: boolean;
 
+  @IsArray()
+  links: Array<string>;
+
   @IsDate()
   @IsOptional()
   @Transform(({ value }) => new Date(value))

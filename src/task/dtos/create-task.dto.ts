@@ -24,6 +24,10 @@ export class CreateTaskDto {
   @IsOptional()
   isCompleted: boolean;
 
+  @IsArray()
+  @IsOptional()
+  links: Array<string>;
+
   @IsDate()
   @IsOptional()
   @Transform(({ value }) => new Date(value))
