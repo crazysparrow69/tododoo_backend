@@ -9,6 +9,7 @@ import { Types } from 'mongoose';
 
 import { Task } from './task.schema';
 import { User } from 'src/user/user.schema';
+import { Category } from 'src/category/category.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 
@@ -17,6 +18,20 @@ interface queryParams {
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
+}
+
+interface createdTaskDoc {
+  __v: string;
+  title: string;
+  description: string;
+  categories: Category[];
+  isCompleted: boolean;
+  dateOfCompletion: Date;
+  links: Array<string>;
+  deadline: Date;
+  userId: User;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 @Injectable()
@@ -30,7 +45,9 @@ export class TaskService {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid ObjectId');
 
-    const foundTask = await this.taskModel.findOne({ _id: id, userId });
+    const foundTask = await this.taskModel
+      .findOne({ _id: id, userId })
+      .select(['-__v']);
     if (!foundTask) throw new NotFoundException('Task not found');
 
     return foundTask;
@@ -84,7 +101,10 @@ export class TaskService {
       }
     }
 
-    return this.taskModel.find(queryParams).populate('categories');
+    return this.taskModel
+      .find(queryParams)
+      .populate('categories')
+      .select(['-__v']);
   }
 
   async create(userId: string, createTaskDto: CreateTaskDto): Promise<Task> {
@@ -98,7 +118,12 @@ export class TaskService {
       $push: { tasks: createdTask._id },
     });
 
-    return createdTask;
+    await createdTask.populate('categories');
+
+    const { __v, ...createdTaskData } =
+      createdTask.toObject() as createdTaskDoc;
+
+    return createdTaskData;
   }
 
   async update(
@@ -115,11 +140,10 @@ export class TaskService {
       attrs.dateOfCompletion = null;
     }
 
-    const updatedTask = await this.taskModel.findOneAndUpdate(
-      { _id: id, userId },
-      attrs,
-      { new: true },
-    );
+    const updatedTask = await this.taskModel
+      .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
+      .populate('categories')
+      .select(['-__v']);
     if (!updatedTask) throw new NotFoundException('Task not found');
 
     return updatedTask;

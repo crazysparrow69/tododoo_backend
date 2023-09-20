@@ -4,14 +4,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Types } from 'mongoose';
+import { Model, Types, Document } from 'mongoose';
 
 import { Category } from './category.schema';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { QueryCategoryDto } from './dtos/query-category.dto';
 import { User } from 'src/user/user.schema';
 import { Task } from 'src/task/task.schema';
+
+interface createdCategoryDoc {
+  __v: string;
+  title: string;
+  color: string;
+  userId: User;
+}
 
 @Injectable()
 export class CategoryService {
@@ -25,14 +31,16 @@ export class CategoryService {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid ObjectId');
 
-    const foundCategory = await this.categoryModel.findOne({ _id: id, userId });
+    const foundCategory = await this.categoryModel
+      .findOne({ _id: id, userId })
+      .select(['-__v']);
     if (!foundCategory) throw new NotFoundException('Category not found');
 
     return foundCategory;
   }
 
   find(userId: string, query: QueryCategoryDto): Promise<Category[]> {
-    return this.categoryModel.find({ userId, ...query });
+    return this.categoryModel.find({ userId, ...query }).select('-__v');
   }
 
   async create(
@@ -48,7 +56,10 @@ export class CategoryService {
       $push: { categories: createdCategory._id },
     });
 
-    return createdCategory;
+    const { __v, ...createdCategoryData } =
+      createdCategory.toObject() as createdCategoryDoc;
+
+    return createdCategoryData;
   }
 
   async update(
@@ -59,11 +70,9 @@ export class CategoryService {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid ObjectId');
 
-    const updatedCategory = await this.categoryModel.findOneAndUpdate(
-      { _id: id, userId },
-      attrs,
-      { new: true },
-    );
+    const updatedCategory = await this.categoryModel
+      .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
+      .select(['-__v']);
     if (!updatedCategory) throw new NotFoundException('Category not found');
 
     return updatedCategory;

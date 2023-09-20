@@ -35,12 +35,14 @@ export class UserService {
           path: 'categories',
         },
       })
-      .populate('categories')
+      .populate('categories', 'avatar')
       .exec();
   }
 
   find(query: QueryUserDto): Promise<User[]> {
-    return this.userModel.find(query).select(['-categories', '-tasks', '-__v']);
+    return this.userModel
+      .find(query)
+      .select(['-password', '-email', '-categories', '-tasks', '-__v']);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -61,9 +63,11 @@ export class UserService {
   }
 
   async update(id: string, attrs: Partial<User>): Promise<User> {
-    const updatedUser = await this.userModel.findByIdAndUpdate(id, attrs, {
-      new: true,
-    });
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, attrs, {
+        new: true,
+      })
+      .select(['-password', '-tasks', '-categories', '-__v']);
 
     if (!updatedUser) throw new NotFoundException('User not found');
 
@@ -83,7 +87,8 @@ export class UserService {
 
   async changePassword(id: string, passwords: ChangePasswordDto) {
     const { oldPassword, newPassword } = passwords;
-    if (oldPassword === newPassword) throw new BadRequestException("Passwords cannot be the same");
+    if (oldPassword === newPassword)
+      throw new BadRequestException('Passwords cannot be the same');
 
     const foundUser = await this.userModel.findById(id);
 
@@ -91,11 +96,11 @@ export class UserService {
 
     const isOldPasswordValid = await this.comparePasswords(
       foundUser.password,
-      oldPassword
+      oldPassword,
     );
 
     if (!isOldPasswordValid)
-      throw new BadRequestException('Password is invalid');
+      throw new BadRequestException('Old password is invalid');
 
     foundUser.password = await this.hashPassword(newPassword);
     foundUser.save();
