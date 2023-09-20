@@ -36,7 +36,6 @@ export class UserController {
     return this.userService.findOne(req.user.sub);
   }
 
-  //Make this route to show only basic info about users
   @Get('/')
   @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
@@ -72,6 +71,7 @@ export class UserController {
 
   @Post('/password')
   @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto,
