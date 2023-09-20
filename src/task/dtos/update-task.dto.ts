@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsDate,
   IsArray,
+  Length,
 } from 'class-validator';
 
 import { Category } from 'src/category/category.schema';
@@ -12,10 +13,12 @@ import { Category } from 'src/category/category.schema';
 export class UpdateTaskDto {
   @IsString()
   @IsOptional()
+  @Length(3, 50)
   title: string;
 
   @IsString()
   @IsOptional()
+  @Length(3, 1000)
   description: string;
 
   @IsArray()
@@ -27,6 +30,8 @@ export class UpdateTaskDto {
   isCompleted: boolean;
 
   @IsArray()
+  @IsOptional()
+  @Length(1, 10)
   links: Array<string>;
 
   @IsDate()
