@@ -53,7 +53,10 @@ export class TaskService {
     return foundTask;
   }
 
-  async find(userId: string, query: QueryTaskDto): Promise<Task[]> {
+  async find(
+    userId: string,
+    query: QueryTaskDto,
+  ): Promise<{ tasks: Task[]; currentPage: number; totalPages: number }> {
     const {
       page = 1,
       limit = 10,
@@ -108,14 +111,14 @@ export class TaskService {
       }
     }
 
-    let response;
+    let foundTasks;
 
     const count = await this.taskModel.countDocuments(queryParams);
 
     const totalPages = Math.ceil(count / limit);
-    if (page > totalPages) response = [];
+    if (page > totalPages) foundTasks = [];
 
-    response = await this.taskModel
+    foundTasks = await this.taskModel
       .find(queryParams)
       .populate('categories')
       .limit(limit * 1)
@@ -123,7 +126,7 @@ export class TaskService {
       .select(['-__v'])
       .exec();
 
-    return response;
+    return { tasks: foundTasks, currentPage: page, totalPages };
   }
 
   async create(userId: string, createTaskDto: CreateTaskDto): Promise<Task> {
