@@ -6,7 +6,7 @@ const cors = require('cors');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.use(cors);
+  app.use(cors());
   await app.listen(5000);
 }
 bootstrap();
