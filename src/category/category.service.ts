@@ -39,8 +39,33 @@ export class CategoryService {
     return foundCategory;
   }
 
-  find(userId: string, query: QueryCategoryDto): Promise<Category[]> {
-    return this.categoryModel.find({ userId, ...query }).select('-__v');
+  async find(
+    userId: string,
+    query: QueryCategoryDto,
+  ): Promise<{
+    categories: Category[];
+    currentPage: number;
+    totalPages: number;
+  }> {
+    const { page = 1, limit = 10, ...params } = query;
+
+    const queryParams = {
+      userId,
+      ...params,
+    };
+
+    const count = await this.categoryModel.countDocuments(queryParams);
+
+    const totalPages = Math.ceil(count / limit);
+
+    const foundCategories = await this.categoryModel
+      .find(queryParams)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .select(['-__v'])
+      .exec();
+
+    return { categories: foundCategories, currentPage: page, totalPages };
   }
 
   async create(
