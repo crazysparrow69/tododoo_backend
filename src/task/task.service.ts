@@ -111,14 +111,11 @@ export class TaskService {
       }
     }
 
-    let foundTasks;
-
     const count = await this.taskModel.countDocuments(queryParams);
 
     const totalPages = Math.ceil(count / limit);
-    if (page > totalPages) foundTasks = [];
 
-    foundTasks = await this.taskModel
+    const foundTasks = await this.taskModel
       .find(queryParams)
       .populate('categories')
       .limit(limit * 1)
