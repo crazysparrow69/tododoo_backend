@@ -33,7 +33,6 @@ export class UpdateTaskDto {
 
   @IsArray()
   @IsOptional()
-  @ArrayMinSize(1)
   @ArrayMaxSize(10)
   links: Array<string>;
 
