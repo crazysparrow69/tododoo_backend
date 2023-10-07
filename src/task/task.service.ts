@@ -53,11 +53,18 @@ export class TaskService {
     return foundTask;
   }
 
-  find(userId: string, query: QueryTaskDto): Promise<Task[]> {
+  async find(userId: string, query: QueryTaskDto): Promise<Task[]> {
+    const {
+      page = 1,
+      limit = 10,
+      isCompleted = null,
+      categories = null,
+      deadline = null,
+    } = query;
+
     let queryParams: queryParams = {
       userId: userId,
     };
-    const { isCompleted = null, categories = null, deadline = null } = query;
 
     if (isCompleted) {
       queryParams.isCompleted = JSON.parse(isCompleted);
@@ -101,10 +108,22 @@ export class TaskService {
       }
     }
 
-    return this.taskModel
+    let response;
+
+    const count = await this.taskModel.countDocuments(queryParams);
+
+    const totalPages = Math.ceil(count / limit);
+    if (page > totalPages) response = [];
+
+    response = await this.taskModel
       .find(queryParams)
       .populate('categories')
-      .select(['-__v']);
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .select(['-__v'])
+      .exec();
+
+    return response;
   }
 
   async create(userId: string, createTaskDto: CreateTaskDto): Promise<Task> {
