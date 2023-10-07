@@ -42,7 +42,7 @@ export class UserService {
   find(query: QueryUserDto): Promise<User[]> {
     return this.userModel
       .find(query)
-      .select(['-password', '-email', '-categories', '-tasks', '-__v']);
+      .select(['-email', '-categories', '-tasks', '-__v']);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
