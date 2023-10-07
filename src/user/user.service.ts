@@ -26,17 +26,15 @@ export class UserService {
   ) {}
 
   findOne(id: string): Promise<User> {
-    return this.userModel
-      .findById(id)
-      .select('-__v')
-      .populate({
-        path: 'tasks',
-        populate: {
-          path: 'categories',
-        },
-      })
-      .populate('categories', 'avatar')
-      .exec();
+    return this.userModel.findById(id).select('-__v');
+    // .populate({
+    //   path: 'tasks',
+    //   populate: {
+    //     path: 'categories',
+    //   },
+    // })
+    // .populate('categories', 'avatar')
+    // .exec();
   }
 
   find(query: QueryUserDto): Promise<User[]> {
