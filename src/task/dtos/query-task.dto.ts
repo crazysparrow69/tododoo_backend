@@ -12,4 +12,12 @@ export class QueryTaskDto {
   @IsString()
   @IsOptional()
   deadline: string;
+
+  @IsString()
+  @IsOptional()
+  page: number;
+
+  @IsString()
+  @IsOptional()
+  limit: number;
 }
