@@ -4,6 +4,7 @@ import { HydratedDocument } from 'mongoose';
 
 import { Category } from 'src/category/category.schema';
 import { Task } from 'src/task/task.schema';
+import { Avatar } from 'src/image/avatar.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -33,8 +34,12 @@ export class User {
   })
   categories: Category[];
 
-  @Prop({ default: 'noavatar' })
-  avatar: string;
+  @Prop({
+    default: null,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Avatar',
+  })
+  avatar: Avatar;
 
   @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
   createdAt: Date;

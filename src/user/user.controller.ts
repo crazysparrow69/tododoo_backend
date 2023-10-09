@@ -5,11 +5,11 @@ import {
   Patch,
   Delete,
   Body,
-  Param,
   Query,
   UseGuards,
   Request,
-  Response,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
@@ -18,8 +18,10 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 import { UpdateUserPipe } from './pipes/update-user.pipe';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -34,13 +36,14 @@ export class UserController {
     return this.userService.findOne(req.user.sub);
   }
 
-  //Make this route to show only basic info about users
   @Get('/')
+  @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
     return this.userService.find(query);
   }
 
   @Post('/signup')
+  @HttpCode(HttpStatus.CREATED)
   createUser(@Body() body: CreateUserDto) {
     return this.authService.signup(body);
   }
@@ -52,15 +55,27 @@ export class UserController {
 
   @Patch('/')
   @UseGuards(AuthGuard)
-  updateUser(@Request() req, @Body(UpdateUserPipe) body: UpdateUserDto) {
-    return this.userService.update(req.user.sub, body);
+  updateUser(
+    @CurrentUser() userId: string,
+    @Body(UpdateUserPipe) body: UpdateUserDto,
+  ) {
+    return this.userService.update(userId, body);
   }
 
   @Delete('/')
   @UseGuards(AuthGuard)
-  removeUser(@Request() req, @Response() res) {
-    this.userService.remove(req.user.sub);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeUser(@CurrentUser() userId: string) {
+    return this.userService.remove(userId);
+  }
 
-    return res.sendStatus(204);
+  @Post('/password')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  changePassword(
+    @CurrentUser() userId: string,
+    @Body() passwords: ChangePasswordDto,
+  ) {
+    return this.userService.changePassword(userId, passwords);
   }
 }

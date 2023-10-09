@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { Task, TaskSchema } from './task.schema';
 import { User, UserSchema } from 'src/user/user.schema';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -12,8 +14,9 @@ import { User, UserSchema } from 'src/user/user.schema';
       { name: Task.name, schema: TaskSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    AuthModule,
   ],
-  providers: [TaskService],
+  providers: [TaskService, AuthGuard],
   controllers: [TaskController],
 })
 export class TaskModule {}

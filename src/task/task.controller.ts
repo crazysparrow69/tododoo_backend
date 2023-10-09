@@ -8,16 +8,17 @@ import {
   Param,
   Query,
   UseGuards,
-  Request,
-  Response
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { UpdateTaskPipe } from './pipes/update-task.pipe';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @Controller('task')
 @UseGuards(AuthGuard)
@@ -25,33 +26,38 @@ export class TaskController {
   constructor(private taskService: TaskService) {}
 
   @Get('/:id')
-  getTask(@Request() req, @Param('id') id: string) {
-    return this.taskService.findOne(req.user.sub, id);
+  getTask(@CurrentUser() userId: string, @Param('id') id: string) {
+    return this.taskService.findOne(userId, id);
   }
 
   @Get('/')
-  getTasks(@Request() req, @Query() query: QueryTaskDto) {
-    return this.taskService.find(req.user.sub, query);
+  getTasks(@CurrentUser() userId: string, @Query() query: QueryTaskDto) {
+    return this.taskService.find(userId, query);
   }
 
   @Post('/')
-  createTask(@Request() req, @Body() body: CreateTaskDto) {
-    return this.taskService.create(req.user.sub, body);
+  @HttpCode(HttpStatus.CREATED)
+  createTask(@CurrentUser() userId: string, @Body() body: CreateTaskDto) {
+    return this.taskService.create(userId, body);
   }
 
   @Patch('/:id')
   updateTask(
-    @Request() req,
+    @CurrentUser() userId: string,
     @Param('id') id: string,
     @Body(UpdateTaskPipe) body: UpdateTaskDto,
   ) {
-    return this.taskService.update(req.user.sub, id, body);
+    return this.taskService.update(userId, id, body);
   }
 
   @Delete('/:id')
-  removeTask(@Request() req, @Response() res, @Param('id') id: string) {
-    this.taskService.remove(req.user.sub, id);
-    
-    return res.sendStatus(204);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
+    return this.taskService.remove(userId, id);
+  }
+
+  @Post('/stats')
+  getStats(@CurrentUser() userId: string) {
+    return this.taskService.getStats(userId);
   }
 }

@@ -1,11 +1,13 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, Length } from 'class-validator';
 
 export class UpdateCategoryDto {
   @IsString()
+  @Length(3, 20)
   @IsOptional()
   title: string;
 
   @IsString()
+  @Length(3, 20)
   @IsOptional()
   color: string;
 }

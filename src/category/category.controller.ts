@@ -7,17 +7,18 @@ import {
   Body,
   Param,
   Query,
-  Request,
-  Response,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category.dto';
 import { QueryCategoryDto } from './dtos/query-category.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { UpdateCategoryPipe } from './pipes/update-category.pipe';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @Controller('category')
 @UseGuards(AuthGuard)
@@ -25,33 +26,39 @@ export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   @Get('/:id')
-  getCategory(@Request() req, @Param('id') id: string) {
-    return this.categoryService.findOne(req.user.sub, id);
+  getCategory(@CurrentUser() userId: string, @Param('id') id: string) {
+    return this.categoryService.findOne(userId, id);
   }
 
   @Get('/')
-  getCategories(@Request() req, @Query() query: QueryCategoryDto) {
-    return this.categoryService.find(req.user.sub, query);
+  getCategories(
+    @CurrentUser() userId: string,
+    @Query() query: QueryCategoryDto,
+  ) {
+    return this.categoryService.find(userId, query);
   }
 
   @Post('/')
-  createCategory(@Request() req, @Body() body: CreateCategoryDto) {
-    return this.categoryService.create(req.user.sub, body);
+  @HttpCode(HttpStatus.CREATED)
+  createCategory(
+    @CurrentUser() userId: string,
+    @Body() body: CreateCategoryDto,
+  ) {
+    return this.categoryService.create(userId, body);
   }
 
   @Patch('/:id')
   updateCategory(
-    @Request() req,
+    @CurrentUser() userId: string,
     @Param('id') id: string,
     @Body(UpdateCategoryPipe) body: UpdateCategoryDto,
   ) {
-    return this.categoryService.update(req.user.sub, id, body);
+    return this.categoryService.update(userId, id, body);
   }
 
   @Delete('/:id')
-  removeCategory(@Request() req, @Response() res, @Param('id') id: string) {
-    this.categoryService.remove(req.user.sub, id);
-
-    return res.sendStatus(204);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeCategory(@CurrentUser() userId: string, @Param('id') id: string) {
+    return this.categoryService.remove(userId, id);
   }
 }

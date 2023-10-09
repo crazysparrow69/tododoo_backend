@@ -8,4 +8,12 @@ export class QueryCategoryDto {
   @IsString()
   @IsOptional()
   color: string;
+
+  @IsString()
+  @IsOptional()
+  page: number;
+
+  @IsString()
+  @IsOptional()
+  limit: number;
 }
