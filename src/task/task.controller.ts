@@ -17,7 +17,6 @@ import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { UpdateTaskPipe } from './pipes/update-task.pipe';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @Controller('task')
@@ -45,7 +44,7 @@ export class TaskController {
   updateTask(
     @CurrentUser() userId: string,
     @Param('id') id: string,
-    @Body(UpdateTaskPipe) body: UpdateTaskDto,
+    @Body() body: UpdateTaskDto,
   ) {
     return this.taskService.update(userId, id, body);
   }
