@@ -17,7 +17,6 @@ import { CreateCategoryDto } from './dtos/create-category.dto';
 import { UpdateCategoryDto } from './dtos/update-category.dto';
 import { QueryCategoryDto } from './dtos/query-category.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { UpdateCategoryPipe } from './pipes/update-category.pipe';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @Controller('category')
@@ -51,7 +50,7 @@ export class CategoryController {
   updateCategory(
     @CurrentUser() userId: string,
     @Param('id') id: string,
-    @Body(UpdateCategoryPipe) body: UpdateCategoryDto,
+    @Body() body: UpdateCategoryDto,
   ) {
     return this.categoryService.update(userId, id, body);
   }
