@@ -159,10 +159,11 @@ export class TaskService {
     if (attrs.categories) {
       const count = await this.categoryModel.countDocuments({
         _id: { $in: attrs.categories },
+        userId,
       });
       if (count !== attrs.categories.length)
         throw new BadRequestException(
-          'There are not some categories that were listed in categories array',
+          "Some categories listed in categories array don't exist or belong to user",
         );
     }
 
