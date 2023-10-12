@@ -19,7 +19,6 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { UpdateUserPipe } from './pipes/update-user.pipe';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 
@@ -55,10 +54,7 @@ export class UserController {
 
   @Patch('/')
   @UseGuards(AuthGuard)
-  updateUser(
-    @CurrentUser() userId: string,
-    @Body(UpdateUserPipe) body: UpdateUserDto,
-  ) {
+  updateUser(@CurrentUser() userId: string, @Body() body: UpdateUserDto) {
     return this.userService.update(userId, body);
   }
 
