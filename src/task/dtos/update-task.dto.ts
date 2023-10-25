@@ -3,12 +3,12 @@ import {
   IsString,
   IsOptional,
   IsBoolean,
-  IsDate,
   IsArray,
   Length,
-  ArrayMinSize,
   ArrayMaxSize,
 } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+import { Types } from 'mongoose';
 
 import { Category } from 'src/category/category.schema';
 
@@ -24,7 +24,17 @@ export class UpdateTaskDto {
   description: string;
 
   @IsArray()
+  @ArrayMaxSize(5)
   @IsOptional()
+  @Transform(({ value }) => {
+    for (const id of value) {
+      if (typeof id !== 'string' || !Types.ObjectId.isValid(id))
+        throw new BadRequestException(
+          'categories must be an array of ObjectId',
+        );
+    }
+    return value;
+  })
   categories: Category[];
 
   @IsBoolean()
@@ -34,10 +44,19 @@ export class UpdateTaskDto {
   @IsArray()
   @IsOptional()
   @ArrayMaxSize(10)
-  links: Array<string>;
+  links: string[];
 
-  @IsDate()
   @IsOptional()
-  @Transform(({ value }) => new Date(value))
-  deadline: Date;
+  @Transform(({ value }) => {
+    if (value === null) {
+      return null;
+    }
+    const date = new Date(value);
+    if (typeof value !== 'string' || isNaN(date.getTime())) {
+      throw new BadRequestException('Invalid date format for deadline');
+    }
+
+    return date;
+  })
+  deadline: null | Date;
 }

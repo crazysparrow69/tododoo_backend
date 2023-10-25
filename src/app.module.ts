@@ -12,9 +12,15 @@ import { ImageModule } from './image/image.module';
 
 require('dotenv').config();
 
+const DATABASE_URI = process.env.MODE
+  ? process.env.MODE.trim() === 'development'
+    ? process.env.DATABASE_URI_DEV
+    : process.env.DATABASE_URI_TEST
+  : process.env.DATABASE_URI_PROD;
+
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.DATABASE_URI),
+    MongooseModule.forRoot(DATABASE_URI),
     JwtModule.register({
       global: true,
       secret: process.env.ACCESS_TOKEN_SECRET,

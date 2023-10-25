@@ -6,6 +6,7 @@ import {
   IsDate,
   IsArray,
   Length,
+  ArrayMaxSize
 } from 'class-validator';
 
 import { Category } from 'src/category/category.schema';
@@ -20,6 +21,7 @@ export class CreateTaskDto {
   description: string;
 
   @IsArray()
+  @ArrayMaxSize(5)
   @IsOptional()
   categories: Category[];
 
@@ -28,8 +30,8 @@ export class CreateTaskDto {
   isCompleted: boolean;
 
   @IsArray()
+  @ArrayMaxSize(10)
   @IsOptional()
-  @Length(1, 10)
   links: Array<string>;
 
   @IsDate()

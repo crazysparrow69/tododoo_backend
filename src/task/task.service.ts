@@ -39,6 +39,7 @@ export class TaskService {
   constructor(
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Category.name) private categoryModel: Model<Category>,
   ) {}
 
   async findOne(userId: string, id: string): Promise<Task> {
@@ -70,11 +71,13 @@ export class TaskService {
     };
 
     if (isCompleted) {
-      queryParams.isCompleted = JSON.parse(isCompleted);
+      queryParams.isCompleted = isCompleted;
     }
+
     if (categories) {
-      queryParams.categories = { $all: JSON.parse(categories) };
+      queryParams.categories = { $all: categories };
     }
+
     if (deadline) {
       const date = new Date();
       const year = date.getFullYear();
@@ -152,6 +155,17 @@ export class TaskService {
   ): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid ObjectId');
+
+    if (attrs.categories) {
+      const count = await this.categoryModel.countDocuments({
+        _id: { $in: attrs.categories },
+        userId,
+      });
+      if (count !== attrs.categories.length)
+        throw new BadRequestException(
+          "Some categories listed in categories array don't exist or belong to user",
+        );
+    }
 
     if (attrs.isCompleted === true) {
       attrs.dateOfCompletion = new Date();

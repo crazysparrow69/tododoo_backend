@@ -22,13 +22,13 @@ export class Task {
   isCompleted: boolean;
 
   @Prop({ default: null })
-  dateOfCompletion: Date;
+  dateOfCompletion: null | Date;
 
   @Prop({ default: null })
   links: Array<string>;
 
   @Prop({ default: null })
-  deadline: Date;
+  deadline: null | Date;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   userId: User;
