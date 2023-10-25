@@ -11,7 +11,6 @@ import { Types, Model } from 'mongoose';
 import { User } from './user.schema';
 import { Task } from 'src/task/task.schema';
 import { Category } from 'src/category/category.schema';
-import { Avatar } from 'src/image/avatar.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
@@ -24,7 +23,6 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
-    @InjectModel(Avatar.name) private avatarModel: Model<Avatar>,
   ) {}
 
   findOne(id: string): Promise<User> {
@@ -80,7 +78,6 @@ export class UserService {
     if (deletedUser) {
       await this.taskModel.deleteMany({ userId: deletedUser._id });
       await this.categoryModel.deleteMany({ userId: deletedUser._id });
-      await this.avatarModel.deleteOne({ userId: deletedUser._id });
     }
 
     return;
