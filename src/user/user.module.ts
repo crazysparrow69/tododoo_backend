@@ -6,7 +6,6 @@ import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './user.schema';
 import { Task, TaskSchema } from 'src/task/task.schema';
-import { Avatar, AvatarSchema } from 'src/image/avatar.schema';
 import { Category, CategorySchema } from 'src/category/category.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
@@ -17,7 +16,6 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
       { name: User.name, schema: UserSchema },
       { name: Task.name, schema: TaskSchema },
       { name: Category.name, schema: CategorySchema },
-      { name: Avatar.name, schema: AvatarSchema },
     ]),
     AuthModule,
   ],
