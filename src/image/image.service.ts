@@ -1,54 +1,80 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
+import * as cloudinary from 'cloudinary';
+import * as fs from 'fs';
+import * as path from 'path';
+import { BadRequestException } from '@nestjs/common';
 
-import { Avatar } from './avatar.schema';
 import { User } from 'src/user/user.schema';
-
-interface CreatedAvatarDoc {
-  __v: string;
-  _id: string;
-  image: string;
-  userId: User;
-}
 
 @Injectable()
 export class ImageService {
-  constructor(
-    @InjectModel(Avatar.name) private avatarModel: Model<Avatar>,
-    @InjectModel(User.name) private userModel: Model<User>,
-  ) {}
-
-  async findOneAvatar(userId: string) {
-    let foundImage: Document<Avatar> = await this.avatarModel
-      .findOne({ userId })
-      .select(['-__v']);
-
-    if (!foundImage) {
-      foundImage = await this.avatarModel
-        .findOne({ _id: 'dsadsadsadsa' })
-        .select(['-__v']);
-    }
-
-    return foundImage;
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {
+    cloudinary.v2.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
   }
 
-  async createAvatar(userId: string, image: string) {
-    const foundAvatar = await this.avatarModel.findOne({ userId });
-
-    if (foundAvatar) {
-      await this.avatarModel.deleteOne({ userId });
+  async uploadAvatar(userId: string, file: any) {
+    if (!['image/jpeg', 'image/png'].includes(file.mimetype)) {
+      throw new BadRequestException('Invalid file mimetype');
     }
 
-    const createdAvatar = await this.avatarModel.create({ userId, image });
+    const filename = `${Date.now()}-avatar`;
+    const destinationPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      '/uploads',
+      filename,
+    );
 
-    await this.userModel.findByIdAndUpdate(userId, {
-      avatar: createdAvatar._id,
+    const foundUser = await this.userModel.findById(userId);
+
+    if (foundUser.avatar) {
+      await cloudinary.v2.uploader.destroy(foundUser.avatar.public_id);
+    }
+
+    try {
+      this.saveFileLocal(file.buffer, destinationPath);
+      const result = await cloudinary.v2.uploader.upload(destinationPath, {
+        use_filename: true,
+        unique_filename: false,
+        overwrite: true,
+      });
+      this.deleteFileLocal(destinationPath);
+
+      await this.userModel.findByIdAndUpdate(userId, {
+        avatar: {
+          url: result.secure_url,
+          public_id: result.public_id,
+        },
+      });
+
+      return { url: result.secure_url, public_id: result.public_id };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  saveFileLocal(fileData: any, filePath: string) {
+    try {
+      fs.writeFileSync(filePath, fileData);
+      return filePath;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  deleteFileLocal(filePath: string) {
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.log(err);
+        throw err;
+      }
     });
-
-    const { __v, ...createdAvatarData } =
-      createdAvatar.toObject() as CreatedAvatarDoc;
-
-    return createdAvatarData;
   }
 }
