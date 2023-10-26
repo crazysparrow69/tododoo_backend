@@ -18,7 +18,13 @@ export class ImageService {
     });
   }
 
-  async uploadAvatar(userId: string, file: any) {
+  async uploadAvatar(
+    userId: string,
+    file: any,
+  ): Promise<{
+    url: string;
+    public_id: string;
+  }> {
     if (!['image/jpeg', 'image/png'].includes(file.mimetype)) {
       throw new BadRequestException('Invalid file mimetype');
     }
@@ -33,9 +39,10 @@ export class ImageService {
     );
 
     const foundUser = await this.userModel.findById(userId);
+    const publicId = foundUser.avatar?.public_id;
 
-    if (foundUser.avatar) {
-      await cloudinary.v2.uploader.destroy(foundUser.avatar.public_id);
+    if (publicId) {
+      this.deleteAvatar(publicId);
     }
 
     try {
@@ -60,7 +67,11 @@ export class ImageService {
     }
   }
 
-  saveFileLocal(fileData: any, filePath: string) {
+  deleteAvatar(publicId: string): Promise<void> {
+    return cloudinary.v2.uploader.destroy(publicId);
+  }
+
+  saveFileLocal(fileData: any, filePath: string): string {
     try {
       fs.writeFileSync(filePath, fileData);
       return filePath;
@@ -69,10 +80,9 @@ export class ImageService {
     }
   }
 
-  deleteFileLocal(filePath: string) {
+  deleteFileLocal(filePath: string): void {
     fs.unlink(filePath, (err) => {
       if (err) {
-        console.log(err);
         throw err;
       }
     });
