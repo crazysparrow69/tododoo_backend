@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { AuthService } from './auth.service';
+import { ImageService } from 'src/image/image.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './user.schema';
 import { Task, TaskSchema } from 'src/task/task.schema';
@@ -19,7 +20,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
     ]),
     AuthModule,
   ],
-  providers: [UserService, AuthService, AuthGuard],
+  providers: [UserService, AuthService, ImageService, AuthGuard],
   controllers: [UserController],
 })
 export class UserModule {}
