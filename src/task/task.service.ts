@@ -70,7 +70,7 @@ export class TaskService {
       userId: userId,
     };
 
-    if (isCompleted) {
+    if (isCompleted !== null) {
       queryParams.isCompleted = isCompleted;
     }
 
@@ -113,6 +113,8 @@ export class TaskService {
         };
       }
     }
+
+    console.log(queryParams);
 
     const count = await this.taskModel.countDocuments(queryParams);
 
