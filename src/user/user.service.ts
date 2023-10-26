@@ -14,6 +14,7 @@ import { Category } from 'src/category/category.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
+import { ImageService } from 'src/image/image.service';
 
 const scrypt = promisify(_scrypt);
 
@@ -23,6 +24,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
+    private imageService: ImageService,
   ) {}
 
   findOne(id: string): Promise<User> {
@@ -74,10 +76,12 @@ export class UserService {
 
   async remove(id: string) {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
+    const avatarPublicId = deletedUser.avatar?.public_id;
 
     if (deletedUser) {
       await this.taskModel.deleteMany({ userId: deletedUser._id });
       await this.categoryModel.deleteMany({ userId: deletedUser._id });
+      if (avatarPublicId) this.imageService.deleteAvatar(avatarPublicId);
     }
 
     return;
