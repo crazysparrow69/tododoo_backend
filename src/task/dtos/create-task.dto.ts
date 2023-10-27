@@ -6,10 +6,10 @@ import {
   IsDate,
   IsArray,
   Length,
-  ArrayMaxSize
+  ArrayMaxSize,
 } from 'class-validator';
 
-import { Category } from 'src/category/category.schema';
+import { Category } from '../../category/category.schema';
 
 export class CreateTaskDto {
   @IsString()

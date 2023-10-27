@@ -16,8 +16,8 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('task')
 @UseGuards(AuthGuard)

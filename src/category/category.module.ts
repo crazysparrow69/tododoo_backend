@@ -4,10 +4,10 @@ import { Module } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
 import { Category, CategorySchema } from './category.schema';
-import { User, UserSchema } from 'src/user/user.schema';
-import { Task, TaskSchema } from 'src/task/task.schema';
-import { AuthModule } from 'src/auth/auth.module';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { User, UserSchema } from '../user/user.schema';
+import { Task, TaskSchema } from '../task/task.schema';
+import { AuthModule } from '../auth/auth.module';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Module({
   imports: [

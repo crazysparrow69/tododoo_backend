@@ -9,12 +9,12 @@ import { promisify } from 'util';
 import { Types, Model } from 'mongoose';
 
 import { User } from './user.schema';
-import { Task } from 'src/task/task.schema';
-import { Category } from 'src/category/category.schema';
+import { Task } from '../task/task.schema';
+import { Category } from '../category/category.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ImageService } from 'src/image/image.service';
+import { ImageService } from '../image/image.service';
 
 const scrypt = promisify(_scrypt);
 

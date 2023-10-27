@@ -9,8 +9,8 @@ import { Model, Types, Document } from 'mongoose';
 import { Category } from './category.schema';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { QueryCategoryDto } from './dtos/query-category.dto';
-import { User } from 'src/user/user.schema';
-import { Task } from 'src/task/task.schema';
+import { User } from '../user/user.schema';
+import { Task } from '../task/task.schema';
 
 interface createdCategoryDoc {
   __v: string;

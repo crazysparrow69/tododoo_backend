@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BadRequestException } from '@nestjs/common';
 
-import { User } from 'src/user/user.schema';
+import { User } from '../user/user.schema';
 
 @Injectable()
 export class ImageService {

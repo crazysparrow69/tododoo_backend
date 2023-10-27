@@ -8,8 +8,8 @@ import {
 import { Types } from 'mongoose';
 
 import { Task } from './task.schema';
-import { User } from 'src/user/user.schema';
-import { Category } from 'src/category/category.schema';
+import { User } from '../user/user.schema';
+import { Category } from '../category/category.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 

@@ -3,7 +3,7 @@ import { ImageService } from './image.service';
 import { ImageController } from './image.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { User, UserSchema } from 'src/user/user.schema';
+import { User, UserSchema } from '../user/user.schema';
 
 @Module({
   imports: [

@@ -10,7 +10,7 @@ import {
 import { BadRequestException } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-import { Category } from 'src/category/category.schema';
+import { Category } from '../../category/category.schema';
 
 export class UpdateTaskDto {
   @IsString()

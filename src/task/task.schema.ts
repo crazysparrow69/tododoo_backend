@@ -2,8 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import mongoose from 'mongoose';
 
-import { User } from 'src/user/user.schema';
-import { Category } from 'src/category/category.schema';
+import { User } from '../user/user.schema';
+import { Category } from '../category/category.schema';
 
 export type TaskDocument = HydratedDocument<Task>;
 

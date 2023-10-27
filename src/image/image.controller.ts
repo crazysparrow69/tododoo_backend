@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 
 import { ImageService } from './image.service';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard)
