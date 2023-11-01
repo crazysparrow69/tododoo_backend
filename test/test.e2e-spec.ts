@@ -25,11 +25,11 @@ interface Task {
   updatedAt: Date;
 }
 
-describe('UserController (e2e)', () => {
+describe('Controllers (e2e)', () => {
   let app: INestApplication;
   const userData = {
     username: 'clown',
-    email: 'clown@gmail.com',
+    email: 'clown@circus.com',
     password: '123456',
   };
   let token: string;
@@ -230,7 +230,7 @@ describe('UserController (e2e)', () => {
     it('should update user data and return updated user', async () => {
       const updatedData = {
         username: 'updated',
-        email: 'updated@gmail.com',
+        email: 'updated@circus.com',
       };
 
       const response = await request(app.getHttpServer())
@@ -238,8 +238,9 @@ describe('UserController (e2e)', () => {
         .send(updatedData)
         .set('Authorization', `Bearer ${token}`);
 
-      expect(response.body.username).toEqual(updatedData.username);
-      expect(response.body.email).toEqual(updatedData.email);
+      for (const key in updatedData) {
+        expect(response.body[key]).toEqual(updatedData[key]);
+      }
     });
 
     datasets.forEach((dataset) => {
@@ -324,8 +325,9 @@ describe('UserController (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.statusCode).toBe(201);
-      expect(response.body.title).toEqual(categoryData.title);
-      expect(response.body.color).toEqual(categoryData.color);
+      for (const key in categoryData) {
+        expect(response.body[key]).toEqual(categoryData[key]);
+      }
       category = response.body;
     });
 
@@ -468,8 +470,9 @@ describe('UserController (e2e)', () => {
         .send(updatedCategory)
         .set('Authorization', `Bearer ${token}`);
 
-      expect(response.body.title).toEqual(updatedCategory.title);
-      expect(response.body.color).toEqual(updatedCategory.color);
+      for (const key in updatedCategory) {
+        expect(response.body[key]).toEqual(updatedCategory[key]);
+      }
     });
 
     dataset.forEach((dataset) => {
@@ -494,140 +497,140 @@ describe('UserController (e2e)', () => {
     });
   });
 
-  describe('/task (POST)', () => {
-    const dataset = [
-      {
-        message: 'empty title',
-        data: {
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+  const taskDataset = [
+    {
+      message: 'empty title',
+      data: {
+        description: 'description',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'too short title',
-        data: {
-          title: 'a',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'too short title',
+      data: {
+        title: 'a',
+        description: 'description',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'too long title',
-        data: {
-          title: 'sportsportsportsportsportsportsportsportsportsport!',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'too long title',
+      data: {
+        title: 'sportsportsportsportsportsportsportsportsportsport!',
+        description: 'description',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'invalid type of title',
-        data: {
-          title: 123,
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'invalid type of title',
+      data: {
+        title: 123,
+        description: 'description',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'empty description',
-        data: {
-          title: 'task',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'empty description',
+      data: {
+        title: 'task',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'too short description',
-        data: {
-          title: 'task',
-          description: 'a',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'too short description',
+      data: {
+        title: 'task',
+        description: 'a',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'invalid type of description',
-        data: {
-          title: 'task',
-          description: 123,
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'invalid type of description',
+      data: {
+        title: 'task',
+        description: 123,
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'invalid type of categories',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: 'niggers',
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'invalid type of categories',
+      data: {
+        title: 'task',
+        description: 'description',
+        categories: 'niggers',
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'invalid type of isCompleted',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: [],
-          isCompleted: 'yes',
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
+    },
+    {
+      message: 'invalid type of isCompleted',
+      data: {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: 'yes',
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
       },
-      {
-        message: 'invalid type of links',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: 'https://www.instagram.com/ivan_anenko/',
-          deadline: null,
-        },
+    },
+    {
+      message: 'invalid type of links',
+      data: {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: 'https://www.instagram.com/ivan_anenko/',
+        deadline: null,
       },
-      {
-        message: 'invalid type of deadline',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: 'yesterday',
-        },
+    },
+    {
+      message: 'invalid type of deadline',
+      data: {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: true,
+        dateOfCompletion: null,
+        links: [],
+        deadline: 'yesterday',
       },
-    ];
+    },
+  ];
 
+  describe('/task (POST)', () => {
     it('should create a task and return it with 201 status code', async () => {
       const taskData = {
         title: 'task',
@@ -643,17 +646,13 @@ describe('UserController (e2e)', () => {
         .send(taskData)
         .set('Authorization', `Bearer ${token}`);
 
-      expect(response.statusCode).toBe(201);
-      expect(response.body.title).toEqual(taskData.title);
-      expect(response.body.description).toEqual(taskData.description);
-      expect(response.body.categories).toEqual(taskData.categories);
-      expect(response.body.isCompleted).toEqual(taskData.isCompleted);
-      expect(response.body.dateOfCompletion).toEqual(taskData.dateOfCompletion);
-      expect(response.body.links).toEqual(taskData.links);
+      for (const key in taskData) {
+        expect(response.body[key]).toEqual(taskData[key]);
+      }
       task = response.body;
     });
 
-    dataset.forEach((dataset) => {
+    taskDataset.forEach((dataset) => {
       it(`should return an error if request is provided with ${dataset.message}`, async () => {
         const response = await request(app.getHttpServer())
           .post('/task')
@@ -719,139 +718,6 @@ describe('UserController (e2e)', () => {
   });
 
   describe('/task/:id (PATCH)', () => {
-    const dataset = [
-      {
-        message: 'empty title',
-        data: {
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'too short title',
-        data: {
-          title: 'a',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'too long title',
-        data: {
-          title: 'sportsportsportsportsportsportsportsportsportsport!',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'invalid type of title',
-        data: {
-          title: 123,
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'empty description',
-        data: {
-          title: 'task',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'too short description',
-        data: {
-          title: 'task',
-          description: 'a',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'invalid type of description',
-        data: {
-          title: 'task',
-          description: 123,
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'invalid type of categories',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: 'niggers',
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'invalid type of isCompleted',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: [],
-          isCompleted: 'yes',
-          dateOfCompletion: null,
-          links: [],
-          deadline: null,
-        },
-      },
-      {
-        message: 'invalid type of links',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: 'https://www.instagram.com/ivan_anenko/',
-          deadline: null,
-        },
-      },
-      {
-        message: 'invalid type of deadline',
-        data: {
-          title: 'task',
-          description: 'description',
-          categories: [],
-          isCompleted: true,
-          dateOfCompletion: null,
-          links: [],
-          deadline: 'yesterday',
-        },
-      },
-    ];
-
     it('should update task data and return updated task', async () => {
       const updatedTask = {
         title: 'task',
@@ -867,17 +733,13 @@ describe('UserController (e2e)', () => {
         .send(updatedTask)
         .set('Authorization', `Bearer ${token}`);
 
-      expect(response.body.title).toEqual(updatedTask.title);
-      expect(response.body.description).toEqual(updatedTask.description);
-      expect(response.body.categories).toEqual(updatedTask.categories);
-      expect(response.body.isCompleted).toEqual(updatedTask.isCompleted);
-      expect(response.body.dateOfCompletion).toEqual(
-        updatedTask.dateOfCompletion,
-      );
+      for (const key in updatedTask) {
+        expect(response.body[key]).toEqual(updatedTask[key]);
+      }
       expect(response.body.links).toEqual(updatedTask.links);
     });
 
-    dataset.forEach((dataset) => {
+    taskDataset.forEach((dataset) => {
       it(`should return an error if request is provided with ${dataset.message}`, async () => {
         const response = await request(app.getHttpServer())
           .patch('/task')
