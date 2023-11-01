@@ -11,6 +11,20 @@ interface Category {
   userId: Types.ObjectId;
 }
 
+interface Task {
+  _id: Types.ObjectId;
+  title: string;
+  description: string;
+  categories: Category[];
+  isCompleted: boolean;
+  dateOfCompletion: null | Date;
+  links: Array<string>;
+  deadline: null | Date;
+  userId: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 describe('UserController (e2e)', () => {
   let app: INestApplication;
   const userData = {
@@ -20,6 +34,7 @@ describe('UserController (e2e)', () => {
   };
   let token: string;
   let category: Category;
+  let task: Task;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -479,6 +494,421 @@ describe('UserController (e2e)', () => {
     });
   });
 
+  describe('/task (POST)', () => {
+    const dataset = [
+      {
+        message: 'empty title',
+        data: {
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'too short title',
+        data: {
+          title: 'a',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'too long title',
+        data: {
+          title: 'sportsportsportsportsportsportsportsportsportsport!',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of title',
+        data: {
+          title: 123,
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'empty description',
+        data: {
+          title: 'task',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'too short description',
+        data: {
+          title: 'task',
+          description: 'a',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of description',
+        data: {
+          title: 'task',
+          description: 123,
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of categories',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: 'niggers',
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of isCompleted',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: [],
+          isCompleted: 'yes',
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of links',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: 'https://www.instagram.com/ivan_anenko/',
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of deadline',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: 'yesterday',
+        },
+      },
+    ];
+
+    it('should create a task and return it with 201 status code', async () => {
+      const taskData = {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/task')
+        .send(taskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(201);
+      expect(response.body.title).toEqual(taskData.title);
+      expect(response.body.description).toEqual(taskData.description);
+      expect(response.body.categories).toEqual(taskData.categories);
+      expect(response.body.isCompleted).toEqual(taskData.isCompleted);
+      expect(response.body.dateOfCompletion).toEqual(taskData.dateOfCompletion);
+      expect(response.body.links).toEqual(taskData.links);
+      task = response.body;
+    });
+
+    dataset.forEach((dataset) => {
+      it(`should return an error if request is provided with ${dataset.message}`, async () => {
+        const response = await request(app.getHttpServer())
+          .post('/task')
+          .send(dataset.data)
+          .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBeGreaterThanOrEqual(400);
+      });
+    });
+  });
+
+  describe('/task/:id (GET)', () => {
+    it('should return task with the given id', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/task/${task._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body).toEqual(task);
+    });
+
+    it('should return an error with 400 status code when request url provided with invalid taskId', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/task/taskId')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return an error with 404 status code when request url provided with non-existing taskId', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/task/652461519fd85ce71a666e77')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  describe('/task (GET)', () => {
+    it('should return 401 Bad Request if "page" is not a number', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/task')
+        .query({ page: 'invalid' });
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should return 401 Bad Request if "limit" is not a number', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/task')
+        .query({ limit: 'invalid' });
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should return 200 OK if all query parameters are valid', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/task')
+        .query({ title: 'valid', page: 1, limit: 10 })
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('/task/:id (PATCH)', () => {
+    const dataset = [
+      {
+        message: 'empty title',
+        data: {
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'too short title',
+        data: {
+          title: 'a',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'too long title',
+        data: {
+          title: 'sportsportsportsportsportsportsportsportsportsport!',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of title',
+        data: {
+          title: 123,
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'empty description',
+        data: {
+          title: 'task',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'too short description',
+        data: {
+          title: 'task',
+          description: 'a',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of description',
+        data: {
+          title: 'task',
+          description: 123,
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of categories',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: 'niggers',
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of isCompleted',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: [],
+          isCompleted: 'yes',
+          dateOfCompletion: null,
+          links: [],
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of links',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: 'https://www.instagram.com/ivan_anenko/',
+          deadline: null,
+        },
+      },
+      {
+        message: 'invalid type of deadline',
+        data: {
+          title: 'task',
+          description: 'description',
+          categories: [],
+          isCompleted: true,
+          dateOfCompletion: null,
+          links: [],
+          deadline: 'yesterday',
+        },
+      },
+    ];
+
+    it('should update task data and return updated task', async () => {
+      const updatedTask = {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/task/${task._id}`)
+        .send(updatedTask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body.title).toEqual(updatedTask.title);
+      expect(response.body.description).toEqual(updatedTask.description);
+      expect(response.body.categories).toEqual(updatedTask.categories);
+      expect(response.body.isCompleted).toEqual(updatedTask.isCompleted);
+      expect(response.body.dateOfCompletion).toEqual(
+        updatedTask.dateOfCompletion,
+      );
+      expect(response.body.links).toEqual(updatedTask.links);
+    });
+
+    dataset.forEach((dataset) => {
+      it(`should return an error if request is provided with ${dataset.message}`, async () => {
+        const response = await request(app.getHttpServer())
+          .patch('/task')
+          .send(dataset.data)
+          .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBeGreaterThanOrEqual(400);
+      });
+    });
+  });
+
+  describe('/task/stats (POST)', () => {
+    it('should return stats', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/task/stats')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(201);
+    });
+  });
+
+  describe('/task/:id (DELETE)', () => {
+    it('should delete a task and return 204 status code', async () => {
+      const response = await request(app.getHttpServer())
+        .delete(`/task/${task._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(204);
+    });
+  });
+
   describe('/user (DELETE)', () => {
     it('should delete user with 204 status code', async () => {
       const response = await request(app.getHttpServer())
@@ -487,5 +917,9 @@ describe('UserController (e2e)', () => {
 
       expect(response.statusCode).toBe(204);
     });
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });
