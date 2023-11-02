@@ -315,12 +315,14 @@ describe('Controllers (e2e)', () => {
     ];
 
     it('should update user password and return updated user', async () => {
+      const pastData = {
+        oldPassword: userData.password,
+        newPassword: '1234567',
+      };
+
       const response = await request(app.getHttpServer())
         .post('/user/password')
-        .send({
-          oldPassword: userData.password,
-          newPassword: '1234567',
-        })
+        .send(pastData)
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.statusCode).toBe(200);
