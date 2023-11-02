@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Types } from 'mongoose';
+//import * as fs from 'fs';
 
 interface Category {
   _id: Types.ObjectId;
@@ -252,6 +253,88 @@ describe('Controllers (e2e)', () => {
 
         expect(response.statusCode).toBeGreaterThanOrEqual(400);
       }, 10000);
+    });
+  });
+
+  describe('/user/password (POST)', () => {
+    const datasets = [
+      {
+        message: 'empty old password',
+        data: {
+          newPassword: '1234567',
+        },
+      },
+      {
+        message: 'empty new password',
+        data: {
+          oldPassword: '123456',
+        },
+      },
+      {
+        message: 'too short old password',
+        data: {
+          oldPassword: '12345',
+          newPassword: '1234567',
+        },
+      },
+      {
+        message: 'too long old password',
+        data: {
+          oldPassword: '123456789012345678901',
+          newPassword: '1234567',
+        },
+      },
+      {
+        message: 'invalid type of old password',
+        data: {
+          oldPassword: null,
+          newPassword: '1234567',
+        },
+      },
+      {
+        message: 'too short new password',
+        data: {
+          oldPassword: '123456',
+          newPassword: '12345',
+        },
+      },
+      {
+        message: 'too long new password',
+        data: {
+          oldPassword: '123456',
+          newPassword: '123456789012345678901',
+        },
+      },
+      {
+        message: 'invalid type of new password',
+        data: {
+          oldPassword: '123456',
+          newPassword: null,
+        },
+      },
+    ];
+
+    it('should update user password and return updated user', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/user/password')
+        .send({
+          oldPassword: userData.password,
+          newPassword: '1234567',
+        })
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    datasets.forEach((dataset) => {
+      it(`should return an error if request is provided with ${dataset.message}`, async () => {
+        const response = await request(app.getHttpServer())
+          .patch('/user/password')
+          .send(dataset.data)
+          .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBeGreaterThanOrEqual(400);
+      });
     });
   });
 
@@ -768,6 +851,46 @@ describe('Controllers (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.statusCode).toBe(204);
+    });
+  });
+
+  describe('/image/avatar (POST)', () => {
+    const dataset = [
+      {
+        message: 'empty image',
+        data: {},
+      },
+      {
+        message: 'invalid type of image',
+        data: {
+          image: 'dick pic',
+        },
+      },
+    ];
+
+    /*it('should upload an image and return 201 status code', async () => {
+      const formData = new FormData();
+      const file = fs.readFileSync('./test/test.jpg', 'utf8');
+
+      formData.append('image', file);
+
+      const response = await request(app.getHttpServer())
+        .post('/image/avatar')
+        .send({ image: formData })
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(201);
+    });*/
+
+    dataset.forEach((dataset) => {
+      it(`should return an error if request is provided with ${dataset.message}`, async () => {
+        const response = await request(app.getHttpServer())
+          .post('/image/avatar')
+          .send(dataset.data)
+          .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBeGreaterThanOrEqual(400);
+      });
     });
   });
 
