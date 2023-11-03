@@ -134,6 +134,16 @@ describe('User controller (e2e)', () => {
     });
   });
 
+  describe('/user/me (GET)', () => {
+    it("should return authorized user's data", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/user/me')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body.email).toEqual(userData.email);
+    });
+  });
+
   describe('/user/signin (POST)', () => {
     const datasets = [
       {
