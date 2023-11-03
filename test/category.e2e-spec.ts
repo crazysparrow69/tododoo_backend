@@ -2,14 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { Types } from 'mongoose';
-
-interface Category {
-  _id: Types.ObjectId;
-  title: string;
-  color: string;
-  userId: Types.ObjectId;
-}
+import { Category } from '../test/interfaces';
 
 describe('Category controller (e2e)', () => {
   let app: INestApplication;
