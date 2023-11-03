@@ -114,8 +114,6 @@ export class TaskService {
       }
     }
 
-    console.log(queryParams);
-
     const count = await this.taskModel.countDocuments(queryParams);
 
     const totalPages = Math.ceil(count / limit);
