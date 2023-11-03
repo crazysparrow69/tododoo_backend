@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-//import * as fs from 'fs';
+import * as path from 'path';
 
 describe('Image controller (e2e)', () => {
   let app: INestApplication;
@@ -33,38 +33,22 @@ describe('Image controller (e2e)', () => {
   });
 
   describe('/image/avatar (POST)', () => {
-    const dataset = [
-      {
-        message: 'empty image',
-        data: {},
-      },
-      {
-        message: 'invalid type of image',
-        data: {
-          image: 'dick pic',
-        },
-      },
-    ];
-    /* MAKE MY WORK!!!(((
-    
     it('should upload an image and return 201 status code', async () => {
-      const formData = new FormData();
-      const file = fs.readFileSync('./test/test.jpg', 'utf8');
-
-      formData.append('image', file);
-
       const response = await request(app.getHttpServer())
         .post('/image/avatar')
-        .send({ image: formData })
+        .attach('image', path.join(__dirname, 'test.jpg'))
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.statusCode).toBe(201);
     });
-    
-    DELETE TEMPORARY TEST!!!
-    */
-    it('temporary test', () => {
-      expect('cat').toBe('cat');
+
+    it('should return an error if request is provided with invalid file', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/image/avatar')
+        .attach('image', path.join(__dirname, 'pis.pdf'))
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBeGreaterThanOrEqual(400);
     });
   });
 
