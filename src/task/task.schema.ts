@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 import { User } from '../user/user.schema';
 import { Category } from '../category/category.schema';
+import { Subtask } from './subtask.schema';
 
 export type TaskDocument = HydratedDocument<Task>;
 
@@ -29,6 +30,9 @@ export class Task {
 
   @Prop({ default: null })
   deadline: null | Date;
+
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subtask' }] })
+  subtasks: Subtask[];
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   userId: User;
