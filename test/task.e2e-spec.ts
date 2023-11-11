@@ -287,6 +287,18 @@ describe('Task ontroller (e2e)', () => {
       expect(response.statusCode).toBe(400);
     });
 
+    it('should return an error when request url provided with non-existing categoryId', async () => {
+      const updatedTask = {
+        categories: ['ghjghjghj'],
+      };
+      const response = await request(app.getHttpServer())
+        .patch(`/task/652461519fd85ce71a666e77`)
+        .send(updatedTask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(400);
+    });
+
     taskDataset.forEach((dataset) => {
       it(`should return an error if request is provided with ${dataset.message}`, async () => {
         const response = await request(app.getHttpServer())
