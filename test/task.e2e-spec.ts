@@ -370,7 +370,12 @@ describe('Task ontroller (e2e)', () => {
         .delete(`/task/${task._id}`)
         .set('Authorization', `Bearer ${token}`);
 
+      const deletedTask = await request(app.getHttpServer())
+        .get(`/task/${task._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
       expect(response.statusCode).toBe(204);
+      expect(deletedTask.statusCode).toBe(404);
     });
   });
 
