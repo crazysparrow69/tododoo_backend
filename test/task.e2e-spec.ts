@@ -287,6 +287,32 @@ describe('Task ontroller (e2e)', () => {
       expect(response.statusCode).toBe(400);
     });
 
+    it('should add to the task category correctly', async () => {
+      const categoryData = {
+        title: 'test',
+        color: 'red',
+      };
+
+      const createCategoryResponce = await request(app.getHttpServer())
+        .post('/category')
+        .send(categoryData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const updateTaskResponse = await request(app.getHttpServer())
+        .patch(`/task/${task._id}`)
+        .send({
+          categories: [createCategoryResponce.body._id],
+        })
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(createCategoryResponce.statusCode).toBe(201);
+      expect(updateTaskResponse.statusCode).toBe(200);
+      expect(updateTaskResponse.body.categories[0]).toEqual({
+        ...createCategoryResponce.body,
+        __v: 0,
+      });
+    });
+
     it('should return an error when request url provided with non-existing categoryId', async () => {
       const updatedTask = {
         categories: ['ghjghjghj'],
