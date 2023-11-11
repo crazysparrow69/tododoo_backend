@@ -253,6 +253,8 @@ describe('Task ontroller (e2e)', () => {
   });
 
   describe('/task/:id (PATCH)', () => {
+    let categoryId: string;
+
     it('should update task data and return updated task', async () => {
       const updatedTask = {
         title: 'task',
@@ -298,6 +300,8 @@ describe('Task ontroller (e2e)', () => {
         .send(categoryData)
         .set('Authorization', `Bearer ${token}`);
 
+      categoryId = createCategoryResponce.body._id;
+
       const updateTaskResponse = await request(app.getHttpServer())
         .patch(`/task/${task._id}`)
         .send({
@@ -311,6 +315,19 @@ describe('Task ontroller (e2e)', () => {
         ...createCategoryResponce.body,
         __v: 0,
       });
+    });
+
+    it('after category deleting should delete it from task', async () => {
+      const deletecategoryResponse = await request(app.getHttpServer())
+        .delete(`/category/${categoryId}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      const getTaskResponse = await request(app.getHttpServer())
+        .get(`/task/${task._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(getTaskResponse.body.categories.length).toBe(0);
+      expect(deletecategoryResponse.statusCode).toBe(204);
     });
 
     it('should return an error when request url provided with non-existing categoryId', async () => {
