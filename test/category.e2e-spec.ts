@@ -271,7 +271,12 @@ describe('Category controller (e2e)', () => {
         .delete(`/category/${category._id}`)
         .set('Authorization', `Bearer ${token}`);
 
+      const deletedCategory = await request(app.getHttpServer())
+        .get(`/category/${category._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
       expect(response.statusCode).toBe(204);
+      expect(deletedCategory.statusCode).toBe(404);
     });
   });
 
