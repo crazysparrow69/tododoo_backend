@@ -146,6 +146,31 @@ describe('Task ontroller (e2e)', () => {
     },
   ];
 
+  const WRONG_QUERY_DATA = [
+    {
+      page: 'ddfgd',
+      limit: 10,
+    },
+    {
+      page: undefined,
+      limit: 10,
+    },
+    {
+      page: 1,
+      limit: 'dfgdfg',
+    },
+    {
+      page: 1,
+      limit: undefined,
+    },
+    {
+      page: 1,
+      limit: 10,
+      deadline: 'kdlbcbnb',
+      isCompleted: 'true',
+    },
+  ];
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -234,12 +259,14 @@ describe('Task ontroller (e2e)', () => {
       expect(response.status).toBe(401);
     });
 
-    it('should return 401 Bad Request if "limit" is not a number', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/task')
-        .query({ limit: 'invalid' });
+    WRONG_QUERY_DATA.forEach((dataset, i) => {
+      it(`should return 401 Bad Request if request is provided with wrong query params #${i}`, async () => {
+        const response = await request(app.getHttpServer())
+          .get('/task')
+          .query(dataset);
 
-      expect(response.status).toBe(401);
+        expect(response.status).toBe(401);
+      });
     });
 
     it('should return 200 OK if all query parameters are valid', async () => {
@@ -249,6 +276,117 @@ describe('Task ontroller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.status).toBe(200);
+    });
+
+    it('should return return all data correctly', async () => {
+      const createdCategory = await request(app.getHttpServer())
+        .post('/category')
+        .send({
+          title: 'simpleTasks',
+          color: 'green',
+        })
+        .set('Authorization', `Bearer ${token}`);
+
+      const createdCategoryId = createdCategory.body._id;
+
+      const CREATED_TASKS_IDS = [];
+
+      const DATASET_FOR_TASKS_CREATING = [
+        {
+          title: 'task1',
+          description: 'description1',
+          categories: [createdCategoryId],
+          isCompleted: false,
+          dateOfCompletion: null,
+          links: [],
+          deadline: Date.now(),
+        },
+        {
+          title: 'task2',
+          description: 'description2',
+          categories: [],
+          isCompleted: false,
+          dateOfCompletion: null,
+          links: [
+            'https://github.com/crazysparrow69/tododoo_backend/wiki/Task#post-task',
+          ],
+        },
+        {
+          title: 'task3',
+          description: 'description3',
+          categories: [createdCategoryId],
+          isCompleted: true,
+          dateOfCompletion: Date.now(),
+          links: [],
+        },
+      ];
+
+      const DATASET_FOR_FILTERS_CHECKING = [
+        {
+          inputParams: {
+            isCompleted: false,
+            // categories: [createdCategoryId]
+          },
+          objectIndex: 0,
+        },
+        {
+          inputParams: {
+            isCompleted: true,
+          },
+          objectIndex: 2,
+        },
+        // {
+        //   inputParams: {
+        //     isCompleted: true,
+        //     deadline: 'nodeadline',
+        //   },
+        //   objectIndex: 2,
+        // },
+        // {
+        //   inputParams: {
+        //     isCompleted: false,
+        //     deadline: 'day',
+        //   },
+        //   objectIndex: 0,
+        // },
+      ];
+      for (const taskData of DATASET_FOR_TASKS_CREATING) {
+        const creatingTasksData = await request(app.getHttpServer())
+          .post('/task')
+          .send(taskData)
+          .set('Authorization', `Bearer ${token}`);
+
+        CREATED_TASKS_IDS.push(creatingTasksData.body._id);
+      }
+
+      DATASET_FOR_FILTERS_CHECKING.forEach(async (dataset) => {
+        const response = await request(app.getHttpServer())
+          .get('/task')
+          .query(dataset.inputParams)
+          .set('Authorization', `Bearer ${token}`);
+
+        expect(
+          response.body.tasks.some(
+            (el) =>
+              el.title ===
+              DATASET_FOR_TASKS_CREATING[dataset.objectIndex].title,
+          ),
+        ).toEqual(true);
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/category/${createdCategoryId}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      CREATED_TASKS_IDS.forEach(async (el) => {
+        await request(app.getHttpServer())
+          .delete(`/task/${el}`)
+          .set('Authorization', `Bearer ${token}`);
+      });
+
+      const response = await request(app.getHttpServer())
+        .get('/task')
+        .set('Authorization', `Bearer ${token}`);
     });
   });
 
