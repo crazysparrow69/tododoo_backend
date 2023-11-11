@@ -276,6 +276,32 @@ describe('Task ontroller (e2e)', () => {
       expect(response.body.links).toEqual(updatedTask.links);
     });
 
+    it('should set dateOfCompletion if isCompleted is true', async () => {
+      const updatedTask = {
+        isCompleted: true,
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/task/${task._id}`)
+        .send(updatedTask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body.dateOfCompletion).toBeDefined();
+    });
+
+    it('should set dateOfCompletion to null if isCompleted is false', async () => {
+      const updatedTask = {
+        isCompleted: false,
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/task/${task._id}`)
+        .send(updatedTask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body.dateOfCompletion).toBeNull();
+    });
+
     it('should return an error with 400 status code when request url provided with invalid taskId', async () => {
       const updatedTask = {
         title: 'task',
@@ -295,24 +321,24 @@ describe('Task ontroller (e2e)', () => {
         color: 'red',
       };
 
-      const createCategoryResponce = await request(app.getHttpServer())
+      const createCategoryResponse = await request(app.getHttpServer())
         .post('/category')
         .send(categoryData)
         .set('Authorization', `Bearer ${token}`);
 
-      categoryId = createCategoryResponce.body._id;
+      categoryId = createCategoryResponse.body._id;
 
       const updateTaskResponse = await request(app.getHttpServer())
         .patch(`/task/${task._id}`)
         .send({
-          categories: [createCategoryResponce.body._id],
+          categories: [createCategoryResponse.body._id],
         })
         .set('Authorization', `Bearer ${token}`);
 
-      expect(createCategoryResponce.statusCode).toBe(201);
+      expect(createCategoryResponse.statusCode).toBe(201);
       expect(updateTaskResponse.statusCode).toBe(200);
       expect(updateTaskResponse.body.categories[0]).toEqual({
-        ...createCategoryResponce.body,
+        ...createCategoryResponse.body,
         __v: 0,
       });
     });
