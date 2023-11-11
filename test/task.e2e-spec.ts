@@ -274,6 +274,19 @@ describe('Task ontroller (e2e)', () => {
       expect(response.body.links).toEqual(updatedTask.links);
     });
 
+    it('should return an error with 400 status code when request url provided with invalid taskId', async () => {
+      const updatedTask = {
+        title: 'task',
+        description: 'description',
+      };
+      const response = await request(app.getHttpServer())
+        .patch(`/task/undefined`)
+        .send(updatedTask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(400);
+    });
+
     taskDataset.forEach((dataset) => {
       it(`should return an error if request is provided with ${dataset.message}`, async () => {
         const response = await request(app.getHttpServer())
