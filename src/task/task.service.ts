@@ -369,51 +369,46 @@ export class TaskService {
     id: string,
     attrs: Partial<Subtask>,
   ): Promise<Subtask> {
-    if (!Types.ObjectId.isValid(id))
+    if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ObjectId');
-
-    const foundSubtask = await this.subtaskModel.findById(id);
-    let dataToUpdate: Partial<Subtask> = {};
-    const {isCompleted = null, links = null, ...restData} = attrs;
-
-    dataToUpdate.isCompleted = isCompleted ?? dataToUpdate.isCompleted;
-    dataToUpdate.links = links ?? dataToUpdate.links;
-
-    if (userId === foundSubtask.userId.toString()) {
-      if (userId === foundSubtask.assigneeId.toString()) {
-        dataToUpdate = {
-          ...dataToUpdate,
-          ...restData
-        }
-      } else {
-        
-      }
     }
 
-    if (attrs.categories) {
+    const { foundSubtask, status } = await this.checkStatusForSubtask(userId);
+
+    console.log(status);
+
+    if ('isCompleted' in attrs) {
+      foundSubtask.isCompleted = attrs.isCompleted;
+      foundSubtask.dateOfCompletion = attrs.isCompleted ? new Date() : null;
+    }
+
+    foundSubtask.links = attrs.links ?? foundSubtask.links;
+
+    const { categories = null, ...restData } = attrs;
+
+    if ((status === 'assignee' || status === 'gigachad') && categories) {
       const count = await this.categoryModel.countDocuments({
         _id: { $in: attrs.categories },
         userId,
       });
-      if (count !== attrs.categories.length)
+
+      if (count !== attrs.categories.length) {
         throw new BadRequestException(
-          "Some categories listed in categories array don't exist or belong to user",
+          "Some categories listed in categories array don't exist or belong to the user",
         );
+      }
+
+      foundSubtask.categories = attrs.categories;
     }
 
-    if (attrs.isCompleted === true) {
-      attrs.dateOfCompletion = new Date();
-    } else if (attrs.isCompleted === false) {
-      attrs.dateOfCompletion = null;
+    if (status === 'owner' || status === 'gigachad') {
+      Object.assign(foundSubtask, restData);
+      console.log('shit');
     }
 
-    const updatedSubtask = await this.subtaskModel
-      .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
-      .populate('categories')
-      .select(['-__v']);
-    if (!updatedSubtask) throw new NotFoundException('Task not found');
+    await foundSubtask.save();
 
-    return updatedSubtask;
+    return foundSubtask;
   }
 
   async removeSubtask(userId: string, subtaskId: string) {
@@ -424,7 +419,7 @@ export class TaskService {
 
     if (removedSubtask) {
       await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
-        $pull: { subtasks: { _id: removedSubtask._id } },
+        $pull: { subtasks: removedSubtask._id },
       });
     }
 
@@ -480,5 +475,29 @@ export class TaskService {
     stats.reverse();
 
     return stats;
+  }
+
+  private async checkStatusForSubtask(userId: string) {
+    let status: string;
+    const foundSubtask = await this.subtaskModel.findOne({
+      $or: [{ userId: userId }, { assigneeId: userId }],
+    });
+
+    if (!foundSubtask) throw new Error('Subtask not found');
+
+    const isOwner = foundSubtask.userId.toString() === userId.toString();
+    const isAssignee = foundSubtask.assigneeId.toString() === userId.toString();
+
+    if (isOwner) {
+      if (isAssignee) {
+        status = 'gigachad';
+      } else {
+        status = 'owner';
+      }
+    } else {
+      status = 'assignee';
+    }
+
+    return { foundSubtask, status };
   }
 }
