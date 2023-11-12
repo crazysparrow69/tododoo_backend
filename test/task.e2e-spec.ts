@@ -325,7 +325,6 @@ describe('Task ontroller (e2e)', () => {
         {
           inputParams: {
             isCompleted: false,
-            // categories: [createdCategoryId]
           },
           objectIndex: 0,
         },
@@ -335,20 +334,6 @@ describe('Task ontroller (e2e)', () => {
           },
           objectIndex: 2,
         },
-        // {
-        //   inputParams: {
-        //     isCompleted: true,
-        //     deadline: 'nodeadline',
-        //   },
-        //   objectIndex: 2,
-        // },
-        // {
-        //   inputParams: {
-        //     isCompleted: false,
-        //     deadline: 'day',
-        //   },
-        //   objectIndex: 0,
-        // },
       ];
       for (const taskData of DATASET_FOR_TASKS_CREATING) {
         const creatingTasksData = await request(app.getHttpServer())
@@ -374,6 +359,16 @@ describe('Task ontroller (e2e)', () => {
         ).toEqual(true);
       });
 
+      // testing querying by category
+      const res = await request(app.getHttpServer())
+        .get(`/task?isCompleted=false&categories=["${createdCategoryId}"]`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.body.tasks[0].title).toEqual(
+        DATASET_FOR_TASKS_CREATING[0].title,
+      );
+      //
+
       await request(app.getHttpServer())
         .delete(`/category/${createdCategoryId}`)
         .set('Authorization', `Bearer ${token}`);
@@ -383,10 +378,6 @@ describe('Task ontroller (e2e)', () => {
           .delete(`/task/${el}`)
           .set('Authorization', `Bearer ${token}`);
       });
-
-      const response = await request(app.getHttpServer())
-        .get('/task')
-        .set('Authorization', `Bearer ${token}`);
     });
   });
 
@@ -550,4 +541,4 @@ describe('Task ontroller (e2e)', () => {
 
     await app.close();
   });
-});
+}); 
