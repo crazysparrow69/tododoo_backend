@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
   HttpCode,
-  HttpStatus, 
+  HttpStatus,
 } from '@nestjs/common';
 
 import { TaskService } from './task.service';
@@ -99,6 +99,15 @@ export class TaskController {
     @Body() body: CreateSubtaskDto,
   ) {
     return this.taskService.addSubtask(userId, taskId, body);
+  }
+
+  @Patch('/subtask/:id')
+  updateSubtask(
+    @CurrentUser() userId: string,
+    @Param('id') id: string,
+    @Body() body: UpdateTaskDto,
+  ) {
+    return this.taskService.updateSubtask(userId, id, body);
   }
 
   @Delete('/subtask/:id')
