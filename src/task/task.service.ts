@@ -375,8 +375,6 @@ export class TaskService {
 
     const { foundSubtask, status } = await this.checkStatusForSubtask(userId);
 
-    console.log(status);
-
     if ('isCompleted' in attrs) {
       foundSubtask.isCompleted = attrs.isCompleted;
       foundSubtask.dateOfCompletion = attrs.isCompleted ? new Date() : null;
