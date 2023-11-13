@@ -9,8 +9,6 @@ import {
   ArrayMaxSize,
 } from 'class-validator';
 
-import { Category } from '../../category/category.schema';
-
 export class CreateSubtaskDto {
   @IsString()
   @Length(3, 50)
@@ -22,11 +20,6 @@ export class CreateSubtaskDto {
 
   @IsString()
   assigneeId: string;
-
-  @IsArray()
-  @ArrayMaxSize(5)
-  @IsOptional()
-  categories: Category[];
 
   @IsBoolean()
   @IsOptional()
