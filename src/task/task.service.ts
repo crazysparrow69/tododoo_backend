@@ -140,7 +140,7 @@ export class TaskService {
       },
       {
         path: 'subtasks',
-        select: 'title userId isCompleted deadline',
+        select: 'title userId isCompleted deadline rejected',
         populate: {
           path: 'userId',
           select: 'username avatar',
@@ -240,6 +240,9 @@ export class TaskService {
     if (deletedTask) {
       await this.userModel.findByIdAndUpdate(userId, {
         $pull: { tasks: deletedTask._id },
+      });
+      await this.subtaskModel.deleteMany({
+        _id: { $in: deletedTask.subtasks },
       });
     }
 
@@ -373,40 +376,50 @@ export class TaskService {
       throw new BadRequestException('Invalid ObjectId');
     }
 
-    const { foundSubtask, status } = await this.checkStatusForSubtask(userId);
-
-    if ('isCompleted' in attrs) {
-      foundSubtask.isCompleted = attrs.isCompleted;
-      foundSubtask.dateOfCompletion = attrs.isCompleted ? new Date() : null;
-    }
-
-    foundSubtask.links = attrs.links ?? foundSubtask.links;
-
-    const { categories = null, ...restData } = attrs;
-
-    if ((status === 'assignee' || status === 'gigachad') && categories) {
-      const count = await this.categoryModel.countDocuments({
-        _id: { $in: attrs.categories },
+    try {
+      const { foundSubtask, status } = await this.checkStatusForSubtask(
         userId,
-      });
+        id,
+      );
 
-      if (count !== attrs.categories.length) {
-        throw new BadRequestException(
-          "Some categories listed in categories array don't exist or belong to the user",
-        );
+      if ('isCompleted' in attrs) {
+        foundSubtask.isCompleted = attrs.isCompleted;
+        foundSubtask.dateOfCompletion = attrs.isCompleted ? new Date() : null;
       }
 
-      foundSubtask.categories = attrs.categories;
+      foundSubtask.links = attrs.links ?? foundSubtask.links;
+
+      const { categories = null, ...restData } = attrs;
+
+      if (status === 'assignee') {
+        foundSubtask.rejected = attrs.rejected ?? foundSubtask.rejected;
+      }
+
+      if ((status === 'assignee' || status === 'gigachad') && categories) {
+        const count = await this.categoryModel.countDocuments({
+          _id: { $in: attrs.categories },
+          userId,
+        });
+
+        if (count !== attrs.categories.length) {
+          throw new BadRequestException(
+            "Some categories listed in categories array don't exist or belong to the user",
+          );
+        }
+
+        foundSubtask.categories = attrs.categories;
+      }
+
+      if (status === 'owner' || status === 'gigachad') {
+        Object.assign(foundSubtask, restData);
+      }
+
+      await foundSubtask.save();
+
+      return foundSubtask;
+    } catch (err) {
+      throw new BadRequestException(err.message);
     }
-
-    if (status === 'owner' || status === 'gigachad') {
-      Object.assign(foundSubtask, restData);
-      console.log('shit');
-    }
-
-    await foundSubtask.save();
-
-    return foundSubtask;
   }
 
   async removeSubtask(userId: string, subtaskId: string) {
@@ -475,9 +488,10 @@ export class TaskService {
     return stats;
   }
 
-  private async checkStatusForSubtask(userId: string) {
+  private async checkStatusForSubtask(userId: string, id: string) {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
+      _id: id,
       $or: [{ userId: userId }, { assigneeId: userId }],
     });
 
