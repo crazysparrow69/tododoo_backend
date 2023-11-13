@@ -16,6 +16,12 @@ import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ImageService } from '../image/image.service';
 
+export interface findUsersByUsernameInterface {
+  foundUsers: User[];
+  page: number;
+  totalPages: number;
+}
+
 const scrypt = promisify(_scrypt);
 
 @Injectable()
@@ -29,20 +35,34 @@ export class UserService {
 
   findOne(id: string): Promise<User> {
     return this.userModel.findById(id).select('-__v');
-    // .populate({
-    //   path: 'tasks',
-    //   populate: {
-    //     path: 'categories',
-    //   },
-    // })
-    // .populate('categories', 'avatar')
-    // .exec();
   }
 
   find(query: QueryUserDto): Promise<User[]> {
     return this.userModel
       .find(query)
       .select(['-email', '-categories', '-tasks', '-__v']);
+  }
+
+  async findUsersByUsername({
+    username,
+    page = 1,
+    limit = 10,
+  }: QueryUserDto): Promise<findUsersByUsernameInterface> {
+    const regex = new RegExp(`^${username}`, 'i');
+    const count = await this.userModel.countDocuments({
+      username: { $regex: regex },
+    });
+    const totalPages = Math.ceil(count / limit);
+
+    const foundUsers = await this.userModel
+      .find({ username: { $regex: regex } })
+      .select(['username', 'avatar'])
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .sort('username')
+      .exec();
+
+    return { foundUsers, page, totalPages };
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
