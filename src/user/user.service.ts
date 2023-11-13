@@ -94,7 +94,7 @@ export class UserService {
     return updatedUser;
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
     const avatarPublicId = deletedUser.avatar?.public_id;
 
@@ -107,7 +107,10 @@ export class UserService {
     return;
   }
 
-  async changePassword(id: string, passwords: ChangePasswordDto) {
+  async changePassword(
+    id: string,
+    passwords: ChangePasswordDto,
+  ): Promise<void> {
     const { oldPassword, newPassword } = passwords;
     if (oldPassword === newPassword)
       throw new BadRequestException('Passwords cannot be the same');
