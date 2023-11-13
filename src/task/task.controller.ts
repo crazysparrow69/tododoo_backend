@@ -17,6 +17,7 @@ import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 import { CreateSubtaskDto } from './dtos/create-subtask.dto';
+import { UpdateSubtaskDto } from './dtos/update-subtask.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Task } from './task.schema';
@@ -105,7 +106,7 @@ export class TaskController {
   updateSubtask(
     @CurrentUser() userId: string,
     @Param('id') id: string,
-    @Body() body: UpdateTaskDto,
+    @Body() body: UpdateSubtaskDto,
   ) {
     return this.taskService.updateSubtask(userId, id, body);
   }
@@ -114,4 +115,4 @@ export class TaskController {
   removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
     return this.taskService.removeSubtask(userId, id);
   }
-}
+} 
