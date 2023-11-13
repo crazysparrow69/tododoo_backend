@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common/exceptions';
 import { Types } from 'mongoose';
 
-import { Task, TaskDocument } from './task.schema';
+import { Task } from './task.schema';
 import { User } from '../user/user.schema';
 import { Category } from '../category/category.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
@@ -15,21 +15,21 @@ import { QueryTaskDto } from './dtos/query-task.dto';
 import { CreateSubtaskDto } from './dtos/create-subtask.dto';
 import { Subtask, SubtaskDocument } from './subtask.schema';
 
-interface queryParamsTask {
+interface QueryParamsTask {
   userId: string;
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
 }
 
-interface queryParamsSubtask {
+interface QueryParamsSubtask {
   assigneeId: string;
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
 }
 
-interface createdTaskDoc {
+interface CreatedTaskDoc {
   __v: string;
   title: string;
   description: string;
@@ -43,6 +43,16 @@ interface createdTaskDoc {
   createdAt: Date;
   updatedAt: Date;
 }
+
+interface CheckStatusForSubtaskInterface {
+  foundSubtask: SubtaskDocument;
+  status: string;
+}
+
+type Stats = {
+  date: Date;
+  counter: number;
+}[];
 
 @Injectable()
 export class TaskService {
@@ -84,7 +94,7 @@ export class TaskService {
       deadline = null,
     } = query;
 
-    let queryParams: queryParamsTask = {
+    let queryParams: QueryParamsTask = {
       userId: userId,
     };
 
@@ -189,7 +199,7 @@ export class TaskService {
     await createdTask.populate('categories');
 
     const { __v, ...createdTaskData } =
-      createdTask.toObject() as createdTaskDoc;
+      createdTask.toObject() as CreatedTaskDoc;
 
     return createdTaskData;
   }
@@ -268,7 +278,7 @@ export class TaskService {
       deadline = null,
     } = query;
 
-    let queryParams: queryParamsSubtask = {
+    let queryParams: QueryParamsSubtask = {
       assigneeId,
     };
 
@@ -352,7 +362,7 @@ export class TaskService {
     userId: string,
     taskId: string,
     createSubtaskDto: CreateSubtaskDto,
-  ) {
+  ): Promise<void> {
     const createdSubtask = await this.subtaskModel.create({
       userId,
       taskId,
@@ -422,7 +432,7 @@ export class TaskService {
     }
   }
 
-  async removeSubtask(userId: string, subtaskId: string) {
+  async removeSubtask(userId: string, subtaskId: string): Promise<void> {
     const removedSubtask = await this.subtaskModel.findOneAndDelete({
       _id: subtaskId,
       userId,
@@ -437,7 +447,7 @@ export class TaskService {
     return;
   }
 
-  async getStats(userId: string) {
+  async getStats(userId: string): Promise<Stats> {
     const date = new Date();
     const year = date.getFullYear();
     const month =
@@ -488,7 +498,10 @@ export class TaskService {
     return stats;
   }
 
-  private async checkStatusForSubtask(userId: string, id: string) {
+  private async checkStatusForSubtask(
+    userId: string,
+    id: string,
+  ): Promise<CheckStatusForSubtaskInterface> {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
       _id: id,
