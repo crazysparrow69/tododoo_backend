@@ -4,12 +4,12 @@ import mongoose from 'mongoose';
 
 import { User } from '../user/user.schema';
 import { Category } from '../category/category.schema';
-import { Subtask } from './subtask.schema';
+import { Task } from './task.schema';
 
-export type TaskDocument = HydratedDocument<Task>;
+export type SubtaskDocument = HydratedDocument<Subtask>;
 
 @Schema()
-export class Task {
+export class Subtask {
   @Prop({ required: true })
   title: string;
 
@@ -31,11 +31,17 @@ export class Task {
   @Prop({ default: null })
   deadline: null | Date;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subtask' }] })
-  subtasks: Subtask[];
+  @Prop({ default: false })
+  rejected: boolean;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   userId: User;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Task' })
+  taskId: Task;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  assigneeId: User;
 
   @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
   createdAt: Date;
@@ -44,4 +50,4 @@ export class Task {
   updatedAt: Date;
 }
 
-export const TaskSchema = SchemaFactory.createForClass(Task);
+export const SubtaskSchema = SchemaFactory.createForClass(Subtask);

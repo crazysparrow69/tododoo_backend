@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Task } from '../test/interfaces';
 
-describe('Task ontroller (e2e)', () => {
+describe('Task controller (e2e)', () => {
   let app: INestApplication;
   const userData = {
     username: 'clownTask',

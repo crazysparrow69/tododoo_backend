@@ -10,6 +10,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
@@ -38,7 +39,7 @@ export class UserController {
   @Get('/')
   @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
-    return this.userService.find(query);
+    return this.userService.findUsersByUsername(query);
   }
 
   @Post('/signup')
