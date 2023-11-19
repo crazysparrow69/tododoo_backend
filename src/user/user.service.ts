@@ -9,12 +9,18 @@ import { promisify } from 'util';
 import { Types, Model } from 'mongoose';
 
 import { User } from './user.schema';
-import { Task } from 'src/task/task.schema';
-import { Category } from 'src/category/category.schema';
+import { Task } from '../task/task.schema';
+import { Category } from '../category/category.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ImageService } from 'src/image/image.service';
+import { ImageService } from '../image/image.service';
+
+export interface findUsersByUsernameInterface {
+  foundUsers: User[];
+  page: number;
+  totalPages: number;
+}
 
 const scrypt = promisify(_scrypt);
 
@@ -29,20 +35,34 @@ export class UserService {
 
   findOne(id: string): Promise<User> {
     return this.userModel.findById(id).select('-__v');
-    // .populate({
-    //   path: 'tasks',
-    //   populate: {
-    //     path: 'categories',
-    //   },
-    // })
-    // .populate('categories', 'avatar')
-    // .exec();
   }
 
   find(query: QueryUserDto): Promise<User[]> {
     return this.userModel
       .find(query)
       .select(['-email', '-categories', '-tasks', '-__v']);
+  }
+
+  async findUsersByUsername({
+    username,
+    page = 1,
+    limit = 10,
+  }: QueryUserDto): Promise<findUsersByUsernameInterface> {
+    const regex = new RegExp(`^${username}`, 'i');
+    const count = await this.userModel.countDocuments({
+      username: { $regex: regex },
+    });
+    const totalPages = Math.ceil(count / limit);
+
+    const foundUsers = await this.userModel
+      .find({ username: { $regex: regex } })
+      .select(['username', 'avatar'])
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .sort('username')
+      .exec();
+
+    return { foundUsers, page, totalPages };
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -74,7 +94,7 @@ export class UserService {
     return updatedUser;
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
     const avatarPublicId = deletedUser.avatar?.public_id;
 
@@ -87,7 +107,10 @@ export class UserService {
     return;
   }
 
-  async changePassword(id: string, passwords: ChangePasswordDto) {
+  async changePassword(
+    id: string,
+    passwords: ChangePasswordDto,
+  ): Promise<void> {
     const { oldPassword, newPassword } = passwords;
     if (oldPassword === newPassword)
       throw new BadRequestException('Passwords cannot be the same');

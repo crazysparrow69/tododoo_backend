@@ -12,7 +12,7 @@ import { Types } from 'mongoose';
 
 import { Category } from '../../category/category.schema';
 
-export class UpdateTaskDto {
+export class UpdateSubtaskDto {
   @IsString()
   @IsOptional()
   @Length(3, 50)
@@ -45,6 +45,10 @@ export class UpdateTaskDto {
   @IsOptional()
   @ArrayMaxSize(10)
   links: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  rejected: boolean;
 
   @IsOptional()
   @Transform(({ value }) => {

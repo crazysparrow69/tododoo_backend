@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Document } from 'mongoose';
+import { Model } from 'mongoose';
 import * as cloudinary from 'cloudinary';
 import * as fs from 'fs';
 import * as path from 'path';
 import { BadRequestException } from '@nestjs/common';
 
-import { User } from 'src/user/user.schema';
+import { User } from '../user/user.schema';
+
+export interface UploadAvatarInterface {
+  url: string;
+  public_id: string;
+}
 
 @Injectable()
 export class ImageService {
@@ -21,10 +26,7 @@ export class ImageService {
   async uploadAvatar(
     userId: string,
     file: any,
-  ): Promise<{
-    url: string;
-    public_id: string;
-  }> {
+  ): Promise<UploadAvatarInterface> {
     if (!['image/jpeg', 'image/png'].includes(file.mimetype)) {
       throw new BadRequestException('Invalid file mimetype');
     }

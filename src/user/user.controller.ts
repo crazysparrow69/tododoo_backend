@@ -10,6 +10,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
@@ -19,8 +20,8 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -38,7 +39,7 @@ export class UserController {
   @Get('/')
   @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
-    return this.userService.find(query);
+    return this.userService.findUsersByUsername(query);
   }
 
   @Post('/signup')

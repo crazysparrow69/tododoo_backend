@@ -1,0 +1,29 @@
+name: Test app
+
+on:
+  push:
+    branches: [master, develop, ci/cd]
+  pull_request:
+    branches: [master, develop, ci/cd]
+
+env:
+  DATABASE_URI_TEST: ${{ vars.DATABASE_URI_TEST }}
+  ACCESS_TOKEN_SECRET: ${{ vars.ACCESS_TOKEN_SECRET }}
+  CLOUDINARY_CLOUD_NAME: ${{ vars.CLOUDINARY_CLOUD_NAME }}
+  CLOUDINARY_API_KEY: ${{ vars.CLOUDINARY_API_KEY }}
+  CLOUDINARY_API_SECRET: ${{ vars.CLOUDINARY_API_SECRET }}
+  MODE: ${{ vars.MODE }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get repository code
+        uses: actions/checkout@v3
+
+      - name: Install dependancies
+        run: npm ci
+
+      - name: Test application
+        run: npm run test:e2e
