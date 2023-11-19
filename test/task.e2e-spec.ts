@@ -291,6 +291,9 @@ describe('Task controller (e2e)', () => {
 
       const CREATED_TASKS_IDS = [];
 
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
       const DATASET_FOR_TASKS_CREATING = [
         {
           title: 'task1',
@@ -299,7 +302,7 @@ describe('Task controller (e2e)', () => {
           isCompleted: false,
           dateOfCompletion: null,
           links: [],
-          deadline: Date.now(),
+          deadline: tomorrow,
         },
         {
           title: 'task2',
@@ -325,7 +328,7 @@ describe('Task controller (e2e)', () => {
         {
           inputParams: {
             isCompleted: false,
-            deadline: 'day',
+            deadline: 'week',
           },
           objectIndex: 0,
         },
@@ -346,21 +349,20 @@ describe('Task controller (e2e)', () => {
         CREATED_TASKS_IDS.push(creatingTasksData.body._id);
       }
 
-      // DATASET_FOR_FILTERS_CHECKING.forEach(async (dataset) => {
-      //   const response = await request(app.getHttpServer())
-      //     .get('/task')
-      //     .query(dataset.inputParams)
-      //     .set('Authorization', `Bearer ${token}`);
+      DATASET_FOR_FILTERS_CHECKING.forEach(async (dataset) => {
+        const response = await request(app.getHttpServer())
+          .get('/task')
+          .query(dataset.inputParams)
+          .set('Authorization', `Bearer ${token}`);
 
-      //   const title = DATASET_FOR_TASKS_CREATING[dataset.objectIndex].title;
-      //   console.log(title);
+        const title = DATASET_FOR_TASKS_CREATING[dataset.objectIndex].title;
 
-      //   expect(response.body.tasks.title).toEqual(title);
-      // });
+        expect(response.body.tasks[0].title).toEqual(title);
+      });
 
       // // testing querying by category
       // const res = await request(app.getHttpServer())
-      //   .get(`/task`)
+      //   .get(`/task?categories=["${createdCategoryId}"]`)
       //   .set('Authorization', `Bearer ${token}`);
 
       // console.log(res.body);
