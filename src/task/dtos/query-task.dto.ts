@@ -1,8 +1,4 @@
-import {
-  IsOptional,
-  IsArray,
-  IsNumber,
-} from 'class-validator';
+import { IsOptional, IsArray, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { BadRequestException } from '@nestjs/common';
 import { Types } from 'mongoose';
@@ -38,7 +34,15 @@ export class QueryTaskDto {
 
   @IsOptional()
   @Transform(({ value }) => {
-    const deadlines = ['day', 'week', 'month', 'year', 'outdated', 'all'];
+    const deadlines = [
+      'day',
+      'week',
+      'month',
+      'year',
+      'outdated',
+      'all',
+      'nodeadline',
+    ];
     for (const deadline of deadlines) {
       if (value === deadline) return value;
     }
