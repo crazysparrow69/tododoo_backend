@@ -139,6 +139,8 @@ export class TaskService {
         queryParams.deadline = {
           $lt: todayMidnight,
         };
+      } else if (deadline === 'nodeadline') {
+        queryParams.deadline = null;
       }
     }
 
@@ -323,6 +325,8 @@ export class TaskService {
         queryParams.deadline = {
           $lt: todayMidnight,
         };
+      } else if (deadline === 'nodeadline') {
+        queryParams.deadline = null;
       }
     }
 
