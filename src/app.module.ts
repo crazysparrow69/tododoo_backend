@@ -35,4 +35,5 @@ const DATABASE_URI = process.env.MODE
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule {}
