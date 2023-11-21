@@ -112,7 +112,8 @@ export class TaskController {
   }
 
   @Delete('/subtask/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
     return this.taskService.removeSubtask(userId, id);
   }
-} 
+}
