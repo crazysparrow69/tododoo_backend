@@ -94,6 +94,7 @@ export class TaskController {
   }
 
   @Post('/:taskId/subtask')
+  @HttpCode(HttpStatus.CREATED)
   createSubtask(
     @CurrentUser() userId: string,
     @Param('taskId') taskId: string,
