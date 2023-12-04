@@ -153,7 +153,7 @@ export class TaskService {
       },
       {
         path: 'subtasks',
-        select: 'title userId isCompleted deadline rejected',
+        select: '-_v -createdAt -updatedAt',
         populate: {
           path: 'userId',
           select: 'username avatar',
