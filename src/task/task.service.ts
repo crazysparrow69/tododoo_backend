@@ -153,7 +153,7 @@ export class TaskService {
       },
       {
         path: 'subtasks',
-        select: '-_v -createdAt -updatedAt',
+        select: '-_v -createdAt -updatedAt -categories',
         populate: {
           path: 'userId',
           select: 'username avatar',
