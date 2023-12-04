@@ -24,6 +24,7 @@ interface QueryParamsTask {
 
 interface QueryParamsSubtask {
   assigneeId: string;
+  rejected: boolean;
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
@@ -282,6 +283,7 @@ export class TaskService {
 
     let queryParams: QueryParamsSubtask = {
       assigneeId,
+      rejected: false,
     };
 
     if (isCompleted !== null) {
