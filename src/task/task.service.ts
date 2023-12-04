@@ -155,7 +155,7 @@ export class TaskService {
         path: 'subtasks',
         select: '-_v -createdAt -updatedAt -categories -links',
         populate: {
-          path: 'userId',
+          path: 'assigneeId',
           select: 'username avatar',
         },
       },
