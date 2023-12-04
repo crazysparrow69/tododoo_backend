@@ -8,6 +8,7 @@ import {
   Length,
   ArrayMaxSize,
 } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 
 export class CreateSubtaskDto {
   @IsString()
@@ -32,6 +33,16 @@ export class CreateSubtaskDto {
 
   @IsDate()
   @IsOptional()
-  @Transform(({ value }) => new Date(value))
+  @Transform(({ value }) => {
+    if (value === null) {
+      return null;
+    }
+    const date = new Date(value);
+    if (typeof value !== 'string' || isNaN(date.getTime())) {
+      throw new BadRequestException('Invalid date format for deadline');
+    }
+
+    return date;
+  })
   deadline: Date;
 }
