@@ -338,6 +338,10 @@ export class TaskService {
         path: 'categories',
         select: '-__v',
       },
+      {
+        path: 'userId',
+        select: 'username avatar',
+      },
     ];
 
     if (query.page || query.limit) {
