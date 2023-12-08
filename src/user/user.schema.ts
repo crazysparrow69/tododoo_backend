@@ -7,7 +7,7 @@ import { Task } from '../task/task.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
-interface Avatar {
+export interface Avatar {
   url: string;
   public_id: string;
 }

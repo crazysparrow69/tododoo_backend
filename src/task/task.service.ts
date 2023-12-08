@@ -372,7 +372,7 @@ export class TaskService {
     userId: string,
     taskId: string,
     createSubtaskDto: CreateSubtaskDto,
-  ): Promise<void> {
+  ): Promise<Subtask> {
     const createdSubtask = await this.subtaskModel.create({
       userId,
       taskId,
@@ -384,7 +384,7 @@ export class TaskService {
       $push: { subtasks: createdSubtask._id },
     });
 
-    return;
+    return createdSubtask;
   }
 
   async updateSubtask(

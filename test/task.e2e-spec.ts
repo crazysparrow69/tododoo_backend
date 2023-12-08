@@ -2,17 +2,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { Task } from '../test/interfaces';
+import { User, Task, Subtask } from '../test/interfaces';
 
 describe('Task controller (e2e)', () => {
   let app: INestApplication;
-  const userData = {
+  let userData: Partial<User> | Promise<User> = {
     username: 'clownTask',
     email: 'clownTask@circus.com',
     password: '123456',
   };
+  let userData2: Partial<User> | Promise<User> = {
+    username: 'clownTask2',
+    email: 'clownTask2@circus.com',
+    password: '123456',
+  };
   let token: string;
+  let token2: string;
+  let categoryId: string;
   let task: Task;
+  let subtask: Subtask;
   const taskDataset = [
     {
       message: 'empty title',
@@ -23,6 +31,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -35,6 +44,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -47,6 +57,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -59,6 +70,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -70,6 +82,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -82,6 +95,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -94,6 +108,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -106,6 +121,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -118,6 +134,20 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: null,
+        assigneeId: 123,
+      },
+    },
+    {
+      message: 'invalid type of assigneeId',
+      data: {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: 'yes',
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: '123',
       },
     },
     {
@@ -130,6 +160,7 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: 'https://www.instagram.com/ivan_anenko/',
         deadline: null,
+        assigneeId: 123,
       },
     },
     {
@@ -142,10 +173,10 @@ describe('Task controller (e2e)', () => {
         dateOfCompletion: null,
         links: [],
         deadline: 'yesterday',
+        assigneeId: 123,
       },
     },
   ];
-
   const WRONG_QUERY_DATA = [
     {
       page: 'ddfgd',
@@ -182,12 +213,29 @@ describe('Task controller (e2e)', () => {
     );
     await app.init();
 
-    const response = await request(app.getHttpServer())
+    const postResponse = await request(app.getHttpServer())
       .post('/user/signup')
       .send(userData);
 
-    token = response.body.token;
-    return token;
+    const postResponse2 = await request(app.getHttpServer())
+      .post('/user/signup')
+      .send(userData2);
+
+    token = postResponse.body.token;
+    token2 = postResponse2.body.token;
+
+    const getResonse = await request(app.getHttpServer())
+      .get('/user/me')
+      .set('Authorization', `Bearer ${token}`);
+
+    const getResonse2 = await request(app.getHttpServer())
+      .get('/user/me')
+      .set('Authorization', `Bearer ${token2}`);
+
+    userData = getResonse.body;
+    userData2 = getResonse2.body;
+
+    return [token, token2];
   });
 
   describe('/task (POST)', () => {
@@ -205,11 +253,12 @@ describe('Task controller (e2e)', () => {
         .post('/task')
         .send(taskData)
         .set('Authorization', `Bearer ${token}`);
+      task = response.body;
 
       for (const key in taskData) {
         expect(response.body[key]).toEqual(taskData[key]);
       }
-      task = response.body;
+      expect(response.statusCode).toBe(201);
     });
 
     taskDataset.forEach((dataset) => {
@@ -384,8 +433,6 @@ describe('Task controller (e2e)', () => {
   });
 
   describe('/task/:id (PATCH)', () => {
-    let categoryId: string;
-
     it('should update task data and return updated task', async () => {
       const updatedTask = {
         title: 'task',
@@ -489,7 +536,7 @@ describe('Task controller (e2e)', () => {
 
     it('should return an error when request url provided with non-existing categoryId', async () => {
       const updatedTask = {
-        categories: ['ghjghjghj'],
+        categories: ['aaaaaa'],
       };
       const response = await request(app.getHttpServer())
         .patch(`/task/652461519fd85ce71a666e77`)
@@ -536,10 +583,341 @@ describe('Task controller (e2e)', () => {
     });
   });
 
+  // subtasks tests
+
+  describe('/task/:taskId/subtask (POST)', () => {
+    it('should create a subtask and return it with 201 status code', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: task._id,
+      };
+
+      const response = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+      subtask = response.body;
+
+      for (const key in subtaskData) {
+        expect(response.body[key]).toEqual(subtaskData[key]);
+      }
+      expect(response.statusCode).toBe(201);
+    });
+
+    it('should create a subtask for other user and return it with 201 status code', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const response = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      for (const key in subtaskData) {
+        expect(response.body[key]).toEqual(subtaskData[key]);
+      }
+      expect(response.statusCode).toBe(201);
+    });
+
+    taskDataset.forEach((dataset) => {
+      it(`should return an error if request is provided with ${dataset.message}`, async () => {
+        const subtaskResponse = await request(app.getHttpServer())
+          .post(`/task/${task._id}/subtask`)
+          .send(dataset.data)
+          .set('Authorization', `Bearer ${token}`);
+
+        expect(subtaskResponse.statusCode).toBeGreaterThanOrEqual(400);
+      });
+    });
+  });
+
+  describe('/task//subtask/:id (PATCH)', () => {
+    it('should update subtask data and return updated subtask', async () => {
+      const updatedSubtask = {
+        title: 'subtaskNEW',
+        description: 'descriptionNEW',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: task._id,
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/task/subtask/${subtask._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token}`);
+
+      for (const key in updatedSubtask) {
+        expect(response.body[key]).toEqual(updatedSubtask[key]);
+      }
+    });
+
+    it('should set dateOfCompletion if isCompleted is true', async () => {
+      const updatedSubtask = {
+        isCompleted: true,
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/task/subtask/${subtask._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body.dateOfCompletion).toBeDefined();
+    });
+
+    it('should set dateOfCompletion to null if isCompleted is false', async () => {
+      const updatedSubtask = {
+        isCompleted: false,
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/task/subtask/${subtask._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.body.dateOfCompletion).toBeNull();
+    });
+
+    it('should return an error with 400 status code when request url provided with invalid subtaskId', async () => {
+      const updatedSubtask = {
+        title: 'task',
+        description: 'description',
+      };
+      const response = await request(app.getHttpServer())
+        .patch(`/task/subtask/undefined`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token}`);
+      expect(response.statusCode).toBe(400);
+    });
+
+    // tests with other user
+
+    it('should work correctly, when user, who give task, do not want to change categories, links and ID', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const postResponse = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const updatedSubtask = {
+        title: 'subtaskNEW',
+        description: 'descriptionNEW',
+        isCompleted: true,
+      };
+
+      const patchResponse = await request(app.getHttpServer())
+        .patch(`/task/subtask/${postResponse.body._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token}`);
+
+      for (const key in updatedSubtask) {
+        expect(patchResponse.body[key]).toEqual(updatedSubtask[key]);
+      }
+    });
+
+    it('should return no changed subtask, who give task, want to change categories, links and ID', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const postResponse = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const categoryData = {
+        title: 'test',
+        color: 'red',
+      };
+
+      const createCategoryResponse = await request(app.getHttpServer())
+        .post('/category')
+        .send(categoryData)
+        .set('Authorization', `Bearer ${token}`);
+
+      categoryId = createCategoryResponse.body._id;
+
+      const updatedSubtask = {
+        categories: [createCategoryResponse.body._id],
+        linsk: ['https://www.instagram.com/ivan_anenko/'],
+        assigneeId: '123',
+      };
+
+      const patchResponse = await request(app.getHttpServer())
+        .patch(`/task/subtask/${postResponse.body._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token}`);
+
+      for (const key in updatedSubtask) {
+        expect(patchResponse.body[key]).toEqual(subtaskData[key]);
+      }
+    });
+
+    it('should work correctly, when user, who take task, want to change categories, isComplited and links', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const postResponse = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const categoryData = {
+        title: 'test',
+        color: 'red',
+      };
+
+      const createCategoryResponse = await request(app.getHttpServer())
+        .post('/category')
+        .send(categoryData)
+        .set('Authorization', `Bearer ${token2}`);
+
+      categoryId = createCategoryResponse.body._id;
+
+      const updatedSubtask = {
+        categories: [createCategoryResponse.body._id],
+        isCompleted: true,
+        links: ['https://www.instagram.com/ivan_anenko/'],
+      };
+
+      const patchResponse = await request(app.getHttpServer())
+        .patch(`/task/subtask/${postResponse.body._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token2}`);
+
+      for (const key in updatedSubtask) {
+        expect(patchResponse.body[key]).toEqual(updatedSubtask[key]);
+      }
+    });
+
+    it('should return no changed subtask, when user, who take task, want to change subtask', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const postResponse = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const updatedSubtask = {
+        title: 'subtaskNEW',
+        description: 'descriptionNEW',
+      };
+
+      const patchResponse = await request(app.getHttpServer())
+        .patch(`/task/subtask/${postResponse.body._id}`)
+        .send(updatedSubtask)
+        .set('Authorization', `Bearer ${token2}`);
+
+      for (const key in updatedSubtask) {
+        expect(patchResponse.body[key]).toEqual(subtaskData[key]);
+      }
+    });
+  });
+
+  describe('/task/subtask/:id (DELETE)', () => {
+    it('should delete a subtask and return 204 status code', async () => {
+      const response = await request(app.getHttpServer())
+        .delete(`/task/subtask/${subtask._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      const deletedSubtask = await request(app.getHttpServer())
+        .get(`/task/subtask/${subtask._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(204);
+      expect(deletedSubtask.statusCode).toBe(404);
+    });
+
+    it('should delete a subtask, when user, who give task, want to delete subtask', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const postResponse = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const response = await request(app.getHttpServer())
+        .delete(`/task/subtask/${postResponse.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      const deletedSubtask = await request(app.getHttpServer())
+        .get(`/task/subtask/${postResponse.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(204);
+      expect(deletedSubtask.statusCode).toBe(404);
+    });
+
+    // tests with take task I NEED TO FIX AND MAKE IT WORK
+  });
+
   afterAll(async () => {
     await request(app.getHttpServer())
       .delete('/user')
       .set('Authorization', `Bearer ${token}`);
+
+    await request(app.getHttpServer())
+      .delete('/user')
+      .set('Authorization', `Bearer ${token2}`);
 
     await app.close();
   });
