@@ -9,6 +9,8 @@ import { TaskModule } from './task/task.module';
 import { CategoryModule } from './category/category.module';
 import { AuthModule } from './auth/auth.module';
 import { ImageModule } from './image/image.module';
+import { NotificationModule } from './notification/notification.module';
+import { ConfirmationModule } from './confirmation/confirmation.module';
 
 require('dotenv').config();
 
@@ -31,6 +33,8 @@ const DATABASE_URI = process.env.MODE
     CategoryModule,
     AuthModule,
     ImageModule,
+    NotificationModule,
+    ConfirmationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
