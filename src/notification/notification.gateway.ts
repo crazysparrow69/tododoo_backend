@@ -4,10 +4,14 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
-import { WebsocketGuard } from 'src/auth/guards/websocket.guard';
+import { Namespace, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+import { Types } from 'mongoose';
+import { User } from 'src/user/user.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 interface FindAndDeleteUserConnection {
   userId: string;
@@ -23,32 +27,70 @@ interface FindAndDeleteUserConnection {
 export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor() {}
+  constructor(
+    private jwtService: JwtService,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
 
-  @WebSocketServer() wss: Server;
+  @WebSocketServer() io: Namespace;
 
   private connections = [];
 
-  @UseGuards(WebsocketGuard)
-  handleConnection(client: any) {
-    const { userId } = client.handshake.query;
-    this.connections.push({
-      userId,
-      socketId: client.id,
-    });
-    console.log(`User ${userId} connected to notifications`);
-  }
+  // handleConnection(client: any) {
+  //   try {
+  //     const { token } = client.handshake.query;
+  //     if (!token) {
+  //       throw new WsException('Unauthorized');
+  //     }
+  //     const userId = this.validateToken(token);
+  //     this.connections.push({
+  //       userId,
+  //       socketId: client.id,
+  //     });
+  //     console.log(`User ${userId} connected to notifications`);
+  //   } catch (err) {
+  //     client.emit('error', err.message);
+  //     return false;
+  //   }
+  // }
 
-  handleDisconnect(client: any) {
-    const { userId } = this.findAndDeleteUserConnection(client.id);
-    if (userId) {
-      console.log(`User ${userId} disconnected from notifications`);
+  async handleConnection(client: Socket) {
+    try {
+      const token = client.handshake.headers['token'];
+      if (!token) {
+        throw new WsException('Unauthorized');
+      }
+      const userId = await this.validateToken(token as string);
+
+      const sockets = this.io.sockets;
+      this.io.emit('hello', client.id);
+
+      console.log(`User with id ${userId} connected`);
+      console.log(`Number of connected sockets: ${sockets.size}`);
+    } catch (err) {
+      client.emit('errorServer', err.message);
+      client.disconnect();
     }
   }
 
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
+  handleDisconnect(client: any) {
+    const sockets = this.io.sockets;
+
+    console.log(`User with id ${client.id} disconnected`);
+    console.log(`Number of connected sockets: ${sockets.size}`);
+  }
+
+  // handleDisconnect(client: any) {
+  //   const connection = this.findAndDeleteUserConnection(client.id);
+  //   if (connection) {
+  //     console.log(`User ${connection.userId} disconnected from notifications`);
+  //   }
+  // }
+
+  @SubscribeMessage('test')
+  async handleMessage() {
+    console.log('shit');
+    new WsException('shit');
   }
 
   private findAndDeleteUserConnection(
@@ -63,7 +105,23 @@ export class NotificationGateway
     } else {
       const connection = this.connections[connectionIndex];
       this.connections.splice(connectionIndex, 1);
+      console.log(connection);
       return connection;
     }
+  }
+
+  private async validateToken(token: string): Promise<Types.ObjectId> {
+    if (!token) throw new WsException('Unauthorized');
+
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: process.env.ACCESS_TOKEN_SECRET,
+    });
+
+    payload.sub = new Types.ObjectId(payload.sub);
+
+    const foundUser = await this.userModel.findById(payload.sub);
+    if (!foundUser) throw new WsException('Unauthorized');
+
+    return foundUser._id;
   }
 }
