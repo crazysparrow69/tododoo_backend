@@ -10,6 +10,9 @@ export type SubtaskDocument = HydratedDocument<Subtask>;
 
 @Schema()
 export class Subtask {
+  @Prop()
+  _id: mongoose.Types.ObjectId;
+
   @Prop({ required: true })
   title: string;
 
@@ -42,6 +45,9 @@ export class Subtask {
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   assigneeId: User;
+
+  @Prop({ required: true })
+  isConfirmed: boolean;
 
   @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
   createdAt: Date;
