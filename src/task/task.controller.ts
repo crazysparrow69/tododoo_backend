@@ -22,11 +22,15 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Task } from './task.schema';
 import { Subtask } from './subtask.schema';
+import { NotificationGateway } from 'src/notification/notification.gateway';
 
 @Controller('task')
 @UseGuards(AuthGuard)
 export class TaskController {
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private notificationGateway: NotificationGateway,
+  ) {}
 
   @Get('/:id')
   getTask(@CurrentUser() userId: string, @Param('id') id: string) {
@@ -95,12 +99,25 @@ export class TaskController {
 
   @Post('/:taskId/subtask')
   @HttpCode(HttpStatus.CREATED)
-  createSubtask(
+  async createSubtask(
     @CurrentUser() userId: string,
     @Param('taskId') taskId: string,
     @Body() body: CreateSubtaskDto,
   ) {
-    return this.taskService.addSubtask(userId, taskId, body);
+    const createdSubtask = await this.taskService.addSubtask(
+      userId,
+      taskId,
+      body,
+    );
+
+    if (userId.toString() !== body.assigneeId.toString()) {
+      await this.notificationGateway.handleCreateSubtaskConf(
+        { assigneeId: body.assigneeId, subtaskId: createdSubtask._id },
+        userId,
+      );
+    }
+
+    return createdSubtask;
   }
 
   @Patch('/subtask/:id')
@@ -114,7 +131,8 @@ export class TaskController {
 
   @Delete('/subtask/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
+  async removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
+    await this.notificationGateway.handleDeleteSubtaskConf(userId, id);
     return this.taskService.removeSubtask(userId, id);
   }
 }
