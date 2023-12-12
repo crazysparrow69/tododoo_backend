@@ -14,5 +14,6 @@ import { User, UserSchema } from 'src/user/user.schema';
     AuthModule,
   ],
   providers: [NotificationGateway],
+  exports: [NotificationGateway],
 })
 export class NotificationModule {}
