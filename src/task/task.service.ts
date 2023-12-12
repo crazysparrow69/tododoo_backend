@@ -25,6 +25,7 @@ interface QueryParamsTask {
 interface QueryParamsSubtask {
   assigneeId: string;
   rejected: boolean;
+  isConfirmed: boolean;
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
@@ -284,6 +285,7 @@ export class TaskService {
     let queryParams: QueryParamsSubtask = {
       assigneeId,
       rejected: false,
+      isConfirmed: true,
     };
 
     if (isCompleted !== null) {
@@ -374,9 +376,11 @@ export class TaskService {
     createSubtaskDto: CreateSubtaskDto,
   ): Promise<Subtask> {
     const createdSubtask = await this.subtaskModel.create({
+      _id: new Types.ObjectId(),
       userId,
       taskId,
       dateOfCompletion: createSubtaskDto.isCompleted ? new Date() : null,
+      isConfirmed: userId === createSubtaskDto.assigneeId ? true : false,
       ...createSubtaskDto,
     });
 
@@ -401,6 +405,9 @@ export class TaskService {
         userId,
         id,
       );
+      if (status === 'assignee' && foundSubtask.isConfirmed === false) {
+        throw new Error('Could not update subtask');
+      }
 
       if ('isCompleted' in attrs) {
         foundSubtask.isCompleted = attrs.isCompleted;
@@ -444,7 +451,7 @@ export class TaskService {
 
   async removeSubtask(userId: string, subtaskId: string): Promise<void> {
     const removedSubtask = await this.subtaskModel.findOneAndDelete({
-      _id: subtaskId,
+      _id: new Types.ObjectId(subtaskId),
       userId,
     });
 
