@@ -7,11 +7,11 @@ export class CreateSubtaskConfirmationDto {
   @IsString()
   @Transform(({ value }) => {
     if (!Types.ObjectId.isValid(value)) {
-      throw new BadRequestException('Invalid addresseeId');
+      throw new BadRequestException('assigneeId');
     }
     return value;
   })
-  addresseeId: string;
+  assigneeId: string;
 
   @IsString()
   @Transform(({ value }) => {
@@ -20,5 +20,5 @@ export class CreateSubtaskConfirmationDto {
     }
     return value;
   })
-  subtaskId: string;
+  subtaskId: Types.ObjectId;
 }
