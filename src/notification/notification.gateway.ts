@@ -13,8 +13,11 @@ import { User } from 'src/user/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-interface FindAndDeleteUserConnection {
-  userId: string;
+import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
+import { CreateSubtaskConfirmationDto } from 'src/confirmation/dtos/create-subtask-confirmation.dto';
+
+interface UserConnection {
+  userId: Types.ObjectId;
   socketId: string;
 }
 
@@ -28,31 +31,14 @@ export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
-    private jwtService: JwtService,
     @InjectModel(User.name) private userModel: Model<User>,
+    private jwtService: JwtService,
+    private subtaskConfirmService: SubtaskConfirmService,
   ) {}
 
   @WebSocketServer() io: Namespace;
 
   private connections = [];
-
-  // handleConnection(client: any) {
-  //   try {
-  //     const { token } = client.handshake.query;
-  //     if (!token) {
-  //       throw new WsException('Unauthorized');
-  //     }
-  //     const userId = this.validateToken(token);
-  //     this.connections.push({
-  //       userId,
-  //       socketId: client.id,
-  //     });
-  //     console.log(`User ${userId} connected to notifications`);
-  //   } catch (err) {
-  //     client.emit('error', err.message);
-  //     return false;
-  //   }
-  // }
 
   async handleConnection(client: Socket) {
     try {
@@ -61,41 +47,79 @@ export class NotificationGateway
         throw new WsException('Unauthorized');
       }
       const userId = await this.validateToken(token as string);
+      this.addUserConnection(userId, client.id);
 
       const sockets = this.io.sockets;
-      this.io.emit('hello', client.id);
-
       console.log(`User with id ${userId} connected`);
       console.log(`Number of connected sockets: ${sockets.size}`);
+      console.log(this.connections);
     } catch (err) {
       client.emit('errorServer', err.message);
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: any) {
+  handleDisconnect(client: Socket) {
+    const conn = this.findAndDeleteUserConnection(client.id);
     const sockets = this.io.sockets;
 
-    console.log(`User with id ${client.id} disconnected`);
+    console.log(`User with id ${conn.userId} disconnected`);
     console.log(`Number of connected sockets: ${sockets.size}`);
+    console.log(this.connections);
   }
 
-  // handleDisconnect(client: any) {
-  //   const connection = this.findAndDeleteUserConnection(client.id);
-  //   if (connection) {
-  //     console.log(`User ${connection.userId} disconnected from notifications`);
-  //   }
-  // }
+  async handleCreateSubtaskConf(
+    dto: CreateSubtaskConfirmationDto,
+    userId: string,
+  ) {
+    const createdSubtConf =
+      await this.subtaskConfirmService.createSubtaskConfirmation(userId, dto);
 
-  @SubscribeMessage('test')
-  async handleMessage() {
-    console.log('shit');
-    new WsException('shit');
+    const socketId = this.findConnectionByUserId(dto.assigneeId);
+    if (socketId) {
+      this.io.to(socketId).emit('newSubtaskConfirmation', createdSubtConf);
+    }
   }
 
-  private findAndDeleteUserConnection(
+  async handleDeleteSubtaskConf(userId: string, subtaskId: string) {
+    const deletedSubtConf =
+      await this.subtaskConfirmService.removeSubtaskConfirmation(
+        userId,
+        subtaskId,
+      );
+
+    const socketId = this.findConnectionByUserId(
+      deletedSubtConf.assigneeId.toString(),
+    );
+    if (socketId) {
+      this.io.to(socketId).emit('delSubtaskConfirmation', deletedSubtConf._id);
+    }
+  }
+
+  private addUserConnection(
+    userId: Types.ObjectId,
     socketId: string,
-  ): FindAndDeleteUserConnection | null {
+  ): UserConnection | null {
+    if (this.connections.some((el) => el.userId === userId)) {
+      return null;
+    } else {
+      const conn = {
+        userId,
+        socketId,
+      };
+      this.connections.push(conn);
+      return conn;
+    }
+  }
+
+  private findConnectionByUserId(userId: string): string | null {
+    const conn = this.connections.find(
+      (el) => el.userId.toString() === userId.toString(),
+    );
+    return conn ? conn.socketId : null;
+  }
+
+  private findAndDeleteUserConnection(socketId: string): UserConnection | null {
     const connectionIndex = this.connections.findIndex(
       (el) => el.socketId === socketId,
     );
@@ -105,7 +129,6 @@ export class NotificationGateway
     } else {
       const connection = this.connections[connectionIndex];
       this.connections.splice(connectionIndex, 1);
-      console.log(connection);
       return connection;
     }
   }
