@@ -9,6 +9,7 @@ import { Category, CategorySchema } from '../category/category.schema';
 import { Subtask, SubtaskSchema } from './subtask.schema';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from '../auth/auth.module';
       { name: Subtask.name, schema: SubtaskSchema },
     ]),
     AuthModule,
+    NotificationModule
   ],
   providers: [TaskService, AuthGuard],
   controllers: [TaskController],
