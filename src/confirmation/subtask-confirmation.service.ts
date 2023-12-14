@@ -21,21 +21,41 @@ export class SubtaskConfirmService {
       userId,
       ...dto,
     });
-    const populateParams = {
-      path: 'subtaskId',
-      select: 'userId title description deadline',
-    };
+    const populateParams = [
+      {
+        path: 'subtaskId',
+        select: 'title description deadline',
+      },
+      {
+        path: 'userId',
+        select: 'username avatar',
+      },
+    ];
 
     return createdSubtConf.populate(populateParams);
   }
 
-  removeSubtaskConfirmation(
-    userId: string,
-    subtaskId: string,
-  ): Promise<SubtaskConfirmation> {
+  getSubtaskConfirmations(userId: string) {
+    return this.subtaskConfirmationModel
+      .find({
+        assigneeId: userId.toString(),
+      })
+      .select(['-__v', '-updatedAt'])
+      .populate([
+        {
+          path: 'subtaskId',
+          select: 'title description deadline',
+        },
+        {
+          path: 'userId',
+          select: 'username avatar',
+        },
+      ]);
+  }
+
+  removeSubtaskConfirmation(subtaskId: string): Promise<SubtaskConfirmation> {
     return this.subtaskConfirmationModel.findOneAndDelete({
       subtaskId: new Types.ObjectId(subtaskId),
-      userId,
     });
   }
 }
