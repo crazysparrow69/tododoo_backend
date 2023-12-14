@@ -14,7 +14,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
-import { CreateSubtaskConfirmationDto } from 'src/confirmation/dtos/create-subtask-confirmation.dto';
+import { TaskService } from 'src/task/task.service';
 
 interface UserConnection {
   userId: Types.ObjectId;
@@ -33,8 +33,11 @@ export class NotificationGateway
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
-    private subtaskConfirmService: SubtaskConfirmService,
-  ) {}
+    private subtConfService: SubtaskConfirmService,
+    private taskService: TaskService,
+  ) {
+    console.log('Socket created');
+  }
 
   @WebSocketServer() io: Namespace;
 
@@ -68,32 +71,18 @@ export class NotificationGateway
     console.log(this.connections);
   }
 
-  async handleCreateSubtaskConf(
-    dto: CreateSubtaskConfirmationDto,
-    userId: string,
-  ) {
-    const createdSubtConf =
-      await this.subtaskConfirmService.createSubtaskConfirmation(userId, dto);
-
-    const socketId = this.findConnectionByUserId(dto.assigneeId);
-    if (socketId) {
-      this.io.to(socketId).emit('newSubtaskConfirmation', createdSubtConf);
-    }
+  @SubscribeMessage('subtask:confirm')
+  async handleSubtaskConfirmation(client: Socket, subtaskId: string) {
+    const userId = this.findUserIdByConnection(client.id);
+    await this.subtConfService.removeSubtaskConfirmation(subtaskId);
+    await this.taskService.updateSubtaskIsConf(userId, subtaskId, true);
   }
 
-  async handleDeleteSubtaskConf(userId: string, subtaskId: string) {
-    const deletedSubtConf =
-      await this.subtaskConfirmService.removeSubtaskConfirmation(
-        userId,
-        subtaskId,
-      );
-
-    const socketId = this.findConnectionByUserId(
-      deletedSubtConf.assigneeId.toString(),
-    );
-    if (socketId) {
-      this.io.to(socketId).emit('delSubtaskConfirmation', deletedSubtConf._id);
-    }
+  @SubscribeMessage('subtask:reject')
+  async handleSubtaskRejection(client: Socket, subtaskId: string) {
+    const userId = this.findUserIdByConnection(client.id);
+    await this.subtConfService.removeSubtaskConfirmation(subtaskId);
+    await this.taskService.updateSubtaskIsConf(userId, subtaskId, false);
   }
 
   private addUserConnection(
@@ -112,11 +101,16 @@ export class NotificationGateway
     }
   }
 
-  private findConnectionByUserId(userId: string): string | null {
+  public findConnectionByUserId(userId: string): string | null {
     const conn = this.connections.find(
       (el) => el.userId.toString() === userId.toString(),
     );
     return conn ? conn.socketId : null;
+  }
+
+  private findUserIdByConnection(socketId: string) {
+    const conn = this.connections.find((el) => el.socketId === socketId);
+    return conn ? conn.userId : null;
   }
 
   private findAndDeleteUserConnection(socketId: string): UserConnection | null {
