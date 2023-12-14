@@ -22,14 +22,14 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Task } from './task.schema';
 import { Subtask } from './subtask.schema';
-import { NotificationGateway } from 'src/notification/notification.gateway';
+import { NotificationService } from './../notification/notification.service';
 
 @Controller('task')
 @UseGuards(AuthGuard)
 export class TaskController {
   constructor(
     private taskService: TaskService,
-    private notificationGateway: NotificationGateway,
+    private notificationService: NotificationService,
   ) {}
 
   @Get('/:id')
@@ -111,7 +111,7 @@ export class TaskController {
     );
 
     if (userId.toString() !== body.assigneeId.toString()) {
-      await this.notificationGateway.handleCreateSubtaskConf(
+      await this.notificationService.createSubtaskConf(
         { assigneeId: body.assigneeId, subtaskId: createdSubtask._id },
         userId,
       );
@@ -132,7 +132,11 @@ export class TaskController {
   @Delete('/subtask/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
-    await this.notificationGateway.handleDeleteSubtaskConf(userId, id);
-    return this.taskService.removeSubtask(userId, id);
+    const removedSubtask = await this.taskService.removeSubtask(userId, id);
+    const assigneeId = removedSubtask.assigneeId.toString();
+    if (userId !== assigneeId && !removedSubtask.isConfirmed) {
+      await this.notificationService.deleteSubtaskConf(userId, id);
+    }
+    return removedSubtask;
   }
 }
