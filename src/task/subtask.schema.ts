@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
 import { User } from '../user/user.schema';
 import { Category } from '../category/category.schema';
@@ -44,7 +45,7 @@ export class Subtask {
   taskId: Task;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  assigneeId: User;
+  assigneeId: User | Types.ObjectId;
 
   @Prop({ required: true })
   isConfirmed: boolean;
