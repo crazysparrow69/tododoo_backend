@@ -380,7 +380,10 @@ export class TaskService {
       userId,
       taskId,
       dateOfCompletion: createSubtaskDto.isCompleted ? new Date() : null,
-      isConfirmed: userId === createSubtaskDto.assigneeId ? true : false,
+      isConfirmed:
+        userId.toString() === createSubtaskDto.assigneeId.toString()
+          ? true
+          : false,
       ...createSubtaskDto,
     });
 
@@ -449,7 +452,23 @@ export class TaskService {
     }
   }
 
-  async removeSubtask(userId: string, subtaskId: string): Promise<void> {
+  async updateSubtaskIsConf(userId: string, subtaskId: string, value: boolean) {
+    const foundSubtask = await this.subtaskModel.findById(
+      new Types.ObjectId(subtaskId),
+    );
+    if (foundSubtask) {
+      const assigneeId = foundSubtask.assigneeId.toString();
+      if (userId === assigneeId) {
+        foundSubtask.isConfirmed = value;
+        if (value === false) foundSubtask.rejected = true;
+        console.log(foundSubtask);
+        await foundSubtask.save();
+      }
+    }
+    return;
+  }
+
+  async removeSubtask(userId: string, subtaskId: string): Promise<Subtask> {
     const removedSubtask = await this.subtaskModel.findOneAndDelete({
       _id: new Types.ObjectId(subtaskId),
       userId,
@@ -461,7 +480,7 @@ export class TaskService {
       });
     }
 
-    return;
+    return removedSubtask;
   }
 
   async getStats(userId: string): Promise<Stats> {
