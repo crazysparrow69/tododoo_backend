@@ -9,7 +9,7 @@ export class CreateSubtaskConfirmationDto {
     if (!Types.ObjectId.isValid(value)) {
       throw new BadRequestException('assigneeId');
     }
-    return value;
+    return new Types.ObjectId(value);
   })
   assigneeId: string;
 
