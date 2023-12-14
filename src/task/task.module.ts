@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { TaskController } from './task.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -20,9 +20,10 @@ import { NotificationModule } from 'src/notification/notification.module';
       { name: Subtask.name, schema: SubtaskSchema },
     ]),
     AuthModule,
-    NotificationModule
+    forwardRef(() => NotificationModule),
   ],
   providers: [TaskService, AuthGuard],
+  exports: [TaskService],
   controllers: [TaskController],
 })
 export class TaskModule {}
