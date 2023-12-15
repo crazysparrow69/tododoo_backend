@@ -20,6 +20,7 @@ export class SubtaskConfirmService {
       _id: new Types.ObjectId(),
       userId,
       ...dto,
+      assigneeId: new Types.ObjectId(dto.assigneeId),
     });
     const populateParams = [
       {
@@ -35,10 +36,10 @@ export class SubtaskConfirmService {
     return createdSubtConf.populate(populateParams);
   }
 
-  getSubtaskConfirmations(userId: string) {
+  getSubtaskConfirmations(userId: Types.ObjectId) {
     return this.subtaskConfirmationModel
       .find({
-        assigneeId: userId.toString(),
+        assigneeId: userId,
       })
       .select(['-__v', '-updatedAt'])
       .populate([
