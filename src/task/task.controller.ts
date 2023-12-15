@@ -143,7 +143,7 @@ export class TaskController {
       !removedSubtask.isConfirmed &&
       !removedSubtask.rejected
     ) {
-      await this.notificationService.deleteSubtaskConf(userId, id);
+      await this.notificationService.deleteSubtaskConf(id);
     }
     return removedSubtask;
   }
