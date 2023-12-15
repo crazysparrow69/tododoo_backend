@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { SubtaskConfirmService } from './subtask-confirmation.service';
 import {
   SubtaskConfirmation,
   SubtaskConfirmationSchema,
 } from 'src/confirmation/subtask-confirmation.schema';
-import { SubtaskConfirmService } from './subtask-confirmation.service';
 
 @Module({
   imports: [

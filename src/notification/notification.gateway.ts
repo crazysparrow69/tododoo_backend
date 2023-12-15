@@ -8,13 +8,12 @@ import {
 } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Types } from 'mongoose';
-import { User } from 'src/user/user.schema';
+import { Types, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
 import { TaskService } from 'src/task/task.service';
+import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
+import { User } from 'src/user/user.schema';
 
 interface UserConnection {
   userId: Types.ObjectId;

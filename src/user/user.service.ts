@@ -8,13 +8,13 @@ import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { Types, Model } from 'mongoose';
 
+import { ImageService } from '../image/image.service';
 import { User } from './user.schema';
-import { Task } from '../task/task.schema';
 import { Category } from '../category/category.schema';
+import { Task } from '../task/task.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ImageService } from '../image/image.service';
 
 export interface findUsersByUsernameInterface {
   foundUsers: User[];

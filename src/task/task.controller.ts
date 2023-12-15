@@ -11,19 +11,19 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { TaskService } from './task.service';
+import { NotificationService } from './../notification/notification.service';
+import { Task } from './task.schema';
+import { Subtask } from './subtask.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 import { CreateSubtaskDto } from './dtos/create-subtask.dto';
 import { UpdateSubtaskDto } from './dtos/update-subtask.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
-import { Task } from './task.schema';
-import { Subtask } from './subtask.schema';
-import { NotificationService } from './../notification/notification.service';
-import { ObjectId, Types } from 'mongoose';
 
 @Controller('task')
 @UseGuards(AuthGuard)
@@ -132,7 +132,10 @@ export class TaskController {
 
   @Delete('/subtask/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeSubtask(@CurrentUser() userId: Types.ObjectId, @Param('id') id: string) {
+  async removeSubtask(
+    @CurrentUser() userId: Types.ObjectId,
+    @Param('id') id: string,
+  ) {
     const removedSubtask = await this.taskService.removeSubtask(userId, id);
     const assigneeId = removedSubtask.assigneeId;
     if (
