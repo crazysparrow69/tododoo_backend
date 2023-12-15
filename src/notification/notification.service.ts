@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
 import { CreateSubtaskConfirmationDto } from 'src/confirmation/dtos/create-subtask-confirmation.dto';
 import { NotificationGateway } from './notification.gateway';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class NotificationService {
@@ -25,7 +26,7 @@ export class NotificationService {
     }
   }
 
-  async getAllNotifications(userId: string) {
+  async getAllNotifications(userId: Types.ObjectId) {
     const foundSubtaskConf =
       await this.subtaskConfirmService.getSubtaskConfirmations(userId);
 
@@ -43,7 +44,7 @@ export class NotificationService {
     return notifications;
   }
 
-  async deleteSubtaskConf(userId: string, subtaskId: string) {
+  async deleteSubtaskConf(userId: Types.ObjectId, subtaskId: string) {
     const deletedSubtConf =
       await this.subtaskConfirmService.removeSubtaskConfirmation(subtaskId);
 
