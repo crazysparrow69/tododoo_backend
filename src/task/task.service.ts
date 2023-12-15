@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import {
   NotFoundException,
   BadRequestException,
@@ -458,17 +458,19 @@ export class TaskService {
     );
     if (foundSubtask) {
       const assigneeId = foundSubtask.assigneeId.toString();
-      if (userId === assigneeId) {
+      if (userId.toString() === assigneeId) {
         foundSubtask.isConfirmed = value;
         if (value === false) foundSubtask.rejected = true;
-        console.log(foundSubtask);
         await foundSubtask.save();
       }
     }
     return;
   }
 
-  async removeSubtask(userId: string, subtaskId: string): Promise<Subtask> {
+  async removeSubtask(
+    userId: Types.ObjectId,
+    subtaskId: string,
+  ): Promise<Subtask> {
     const removedSubtask = await this.subtaskModel.findOneAndDelete({
       _id: new Types.ObjectId(subtaskId),
       userId,
