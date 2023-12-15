@@ -4,6 +4,7 @@ import { Types } from 'mongoose';
 import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
 import { NotificationGateway } from './notification.gateway';
 import { CreateSubtaskConfirmationDto } from 'src/confirmation/dtos/create-subtask-confirmation.dto';
+import { SubtaskConfirmation } from 'src/confirmation/subtask-confirmation.schema';
 
 @Injectable()
 export class NotificationService {
@@ -12,7 +13,10 @@ export class NotificationService {
     private notificationGateway: NotificationGateway,
   ) {}
 
-  async createSubtaskConf(dto: CreateSubtaskConfirmationDto, userId: string) {
+  async createSubtaskConf(
+    dto: CreateSubtaskConfirmationDto,
+    userId: string,
+  ): Promise<void> {
     const createdSubtConf =
       await this.subtaskConfirmService.createSubtaskConfirmation(userId, dto);
 
@@ -26,7 +30,9 @@ export class NotificationService {
     }
   }
 
-  async getAllNotifications(userId: Types.ObjectId) {
+  async getAllNotifications(
+    userId: Types.ObjectId,
+  ): Promise<SubtaskConfirmation[]> {
     const foundSubtaskConf =
       await this.subtaskConfirmService.getSubtaskConfirmations(userId);
 
@@ -44,7 +50,7 @@ export class NotificationService {
     return notifications;
   }
 
-  async deleteSubtaskConf(userId: Types.ObjectId, subtaskId: string) {
+  async deleteSubtaskConf(subtaskId: string): Promise<void> {
     const deletedSubtConf =
       await this.subtaskConfirmService.removeSubtaskConfirmation(subtaskId);
 
