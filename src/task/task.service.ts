@@ -452,7 +452,11 @@ export class TaskService {
     }
   }
 
-  async updateSubtaskIsConf(userId: string, subtaskId: string, value: boolean) {
+  async updateSubtaskIsConf(
+    userId: Types.ObjectId,
+    subtaskId: string,
+    value: boolean,
+  ): Promise<void> {
     const foundSubtask = await this.subtaskModel.findById(
       new Types.ObjectId(subtaskId),
     );
