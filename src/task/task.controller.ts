@@ -23,6 +23,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { Task } from './task.schema';
 import { Subtask } from './subtask.schema';
 import { NotificationService } from './../notification/notification.service';
+import { ObjectId, Types } from 'mongoose';
 
 @Controller('task')
 @UseGuards(AuthGuard)
@@ -131,10 +132,14 @@ export class TaskController {
 
   @Delete('/subtask/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
+  async removeSubtask(@CurrentUser() userId: Types.ObjectId, @Param('id') id: string) {
     const removedSubtask = await this.taskService.removeSubtask(userId, id);
-    const assigneeId = removedSubtask.assigneeId.toString();
-    if (userId !== assigneeId && !removedSubtask.isConfirmed) {
+    const assigneeId = removedSubtask.assigneeId;
+    if (
+      userId !== assigneeId &&
+      !removedSubtask.isConfirmed &&
+      !removedSubtask.rejected
+    ) {
       await this.notificationService.deleteSubtaskConf(userId, id);
     }
     return removedSubtask;
