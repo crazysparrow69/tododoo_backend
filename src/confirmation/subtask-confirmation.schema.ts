@@ -20,6 +20,9 @@ export class SubtaskConfirmation {
   @Prop({ required: true, type: Types.ObjectId, ref: 'Subtask' })
   subtaskId: Subtask | Types.ObjectId;
 
+  @Prop({ default: 'subtask-confirmation' })
+  type: string;
+
   @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
   createdAt: Date;
 
