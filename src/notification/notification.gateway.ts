@@ -42,7 +42,7 @@ export class NotificationGateway
 
   private connections = [];
 
-  async handleConnection(client: Socket) {
+  async handleConnection(client: Socket): Promise<void> {
     try {
       const token = client.handshake.headers['token'];
       if (!token) {
@@ -61,7 +61,7 @@ export class NotificationGateway
     }
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: Socket): void {
     const conn = this.findAndDeleteUserConnection(client.id);
     const sockets = this.io.sockets;
 
@@ -71,14 +71,14 @@ export class NotificationGateway
   }
 
   @SubscribeMessage('subtask:confirm')
-  async handleSubtaskConfirmation(client: Socket, subtaskId: string) {
+  async handleSubtaskConfirmation(client: Socket, subtaskId: string): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.taskService.updateSubtaskIsConf(userId, subtaskId, true);
   }
 
   @SubscribeMessage('subtask:reject')
-  async handleSubtaskRejection(client: Socket, subtaskId: string) {
+  async handleSubtaskRejection(client: Socket, subtaskId: string): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.taskService.updateSubtaskIsConf(userId, subtaskId, false);
@@ -109,7 +109,7 @@ export class NotificationGateway
     return conn ? conn.socketId : null;
   }
 
-  private findUserIdByConnection(socketId: string) {
+  private findUserIdByConnection(socketId: string): Types.ObjectId | null {
     const conn = this.connections.find((el) => el.socketId === socketId);
     return conn ? conn.userId : null;
   }

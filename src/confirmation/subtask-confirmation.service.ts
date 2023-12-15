@@ -15,7 +15,7 @@ export class SubtaskConfirmService {
   async createSubtaskConfirmation(
     userId: string,
     dto: CreateSubtaskConfirmationDto,
-  ) {
+  ): Promise<SubtaskConfirmation> {
     const createdSubtConf = await this.subtaskConfirmationModel.create({
       _id: new Types.ObjectId(),
       userId,
@@ -36,7 +36,9 @@ export class SubtaskConfirmService {
     return createdSubtConf.populate(populateParams);
   }
 
-  getSubtaskConfirmations(userId: Types.ObjectId) {
+  getSubtaskConfirmations(
+    userId: Types.ObjectId,
+  ): Promise<SubtaskConfirmation[]> {
     return this.subtaskConfirmationModel
       .find({
         assigneeId: userId,
