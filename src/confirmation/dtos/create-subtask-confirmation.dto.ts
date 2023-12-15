@@ -5,12 +5,6 @@ import { Types } from 'mongoose';
 
 export class CreateSubtaskConfirmationDto {
   @IsString()
-  @Transform(({ value }) => {
-    if (!Types.ObjectId.isValid(value)) {
-      throw new BadRequestException('assigneeId');
-    }
-    return new Types.ObjectId(value);
-  })
   assigneeId: string;
 
   @IsString()
