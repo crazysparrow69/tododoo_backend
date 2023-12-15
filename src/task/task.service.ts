@@ -542,7 +542,7 @@ export class TaskService {
   ): Promise<CheckStatusForSubtaskInterface> {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
-      _id: id,
+      _id: new Types.ObjectId(id),
       $or: [{ userId: userId }, { assigneeId: userId }],
     });
 
