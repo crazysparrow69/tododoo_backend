@@ -101,7 +101,9 @@ export class NotificationGateway
     }
   }
 
-  public findConnectionByUserId(userId: string): string | null {
+  public findConnectionByUserId(
+    userId: string | Types.ObjectId,
+  ): string | null {
     const conn = this.connections.find(
       (el) => el.userId.toString() === userId.toString(),
     );
