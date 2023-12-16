@@ -64,7 +64,7 @@ export class TaskService {
     @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
   ) {}
 
-  async getDeadlineFilter(deadline: string): Promise<object | null> {
+  private getDeadlineFilter(deadline: string): object | null {
     const date = new Date();
     const year = date.getFullYear();
     const month =
