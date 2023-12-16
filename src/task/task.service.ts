@@ -64,6 +64,43 @@ export class TaskService {
     @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
   ) {}
 
+  async getDeadlineFilter(deadline: string): Promise<object | null> {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month =
+      date.getMonth() + 1 < 10
+        ? `0${date.getMonth() + 1}`
+        : date.getMonth() + 1;
+    const day = date.getDate();
+    const todayMidnight = new Date(`${year}-${month}-${day}`);
+
+    switch (deadline) {
+      case 'day':
+        return { $gte: todayMidnight };
+      case 'week':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(date.setDate(date.getDate() + 7)),
+        };
+      case 'month':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(date.setMonth(date.getMonth() + 1)),
+        };
+      case 'year':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(`${year + 1}-${month}-${day}`),
+        };
+      case 'outdated':
+        return { $lt: todayMidnight };
+      case 'nodeadline':
+        return null;
+      default:
+        throw new BadRequestException('Invalid deadline value');
+    }
+  }
+
   async findOne(userId: string, id: string): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid ObjectId');
@@ -108,41 +145,7 @@ export class TaskService {
     }
 
     if (deadline) {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month =
-        date.getMonth() + 1 < 10
-          ? `0${date.getMonth() + 1}`
-          : date.getMonth() + 1;
-      const day = date.getDate();
-      const todayMidnight = new Date(`${year}-${month}-${day}`);
-
-      if (deadline === 'day') {
-        queryParams.deadline = todayMidnight;
-      } else if (deadline == 'week') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setDate(today.getDate() + 7)),
-        };
-      } else if (deadline === 'month') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setMonth(today.getMonth() + 1)),
-        };
-      } else if (deadline === 'year') {
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(`${year + 1}-${month}-${day}`),
-        };
-      } else if (deadline === 'outdated') {
-        queryParams.deadline = {
-          $lt: todayMidnight,
-        };
-      } else if (deadline === 'nodeadline') {
-        queryParams.deadline = null;
-      }
+      queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
     let foundTasks: Task[];
@@ -295,41 +298,7 @@ export class TaskService {
     }
 
     if (deadline) {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month =
-        date.getMonth() + 1 < 10
-          ? `0${date.getMonth() + 1}`
-          : date.getMonth() + 1;
-      const day = date.getDate();
-      const todayMidnight = new Date(`${year}-${month}-${day}`);
-
-      if (deadline === 'day') {
-        queryParams.deadline = todayMidnight;
-      } else if (deadline == 'week') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setDate(today.getDate() + 7)),
-        };
-      } else if (deadline === 'month') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setMonth(today.getMonth() + 1)),
-        };
-      } else if (deadline === 'year') {
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(`${year + 1}-${month}-${day}`),
-        };
-      } else if (deadline === 'outdated') {
-        queryParams.deadline = {
-          $lt: todayMidnight,
-        };
-      } else if (deadline === 'nodeadline') {
-        queryParams.deadline = null;
-      }
+      queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
     let foundSubtasks: Subtask[];
