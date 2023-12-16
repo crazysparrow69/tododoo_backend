@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { User, Task, Subtask } from '../test/interfaces';
+import exp from 'constants';
 
 describe('Task controller (e2e)', () => {
   let app: INestApplication;
@@ -907,7 +908,29 @@ describe('Task controller (e2e)', () => {
       expect(deletedSubtask.statusCode).toBe(404);
     });
 
-    // tests with take task I NEED TO FIX AND MAKE IT WORK
+    it('should return an error with 400 status code when user, who take task, want to delete subtask', async () => {
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: (await userData2)._id,
+      };
+
+      const postResponse = await request(app.getHttpServer())
+        .post(`/task/${task._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const response = await request(app.getHttpServer())
+        .delete(`/task/subtask/${postResponse.body._id}`)
+        .set('Authorization', `Bearer ${token2}`);
+
+      expect(response.statusCode).toBe(400);
+    });
   });
 
   afterAll(async () => {

@@ -443,18 +443,24 @@ export class TaskService {
   }
 
   async removeSubtask(userId: string, subtaskId: string): Promise<void> {
-    const removedSubtask = await this.subtaskModel.findOneAndDelete({
-      _id: subtaskId,
-      userId,
-    });
+    const { status } = await this.checkStatusForSubtask(userId, subtaskId);
 
-    if (removedSubtask) {
-      await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
-        $pull: { subtasks: removedSubtask._id },
+    if (status === 'gigachad' || status === 'owner') {
+      const removedSubtask = await this.subtaskModel.findOneAndDelete({
+        _id: subtaskId,
+        userId,
       });
-    }
 
-    return;
+      if (removedSubtask) {
+        await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
+          $pull: { subtasks: removedSubtask._id },
+        });
+      }
+    } else if (status === 'assignee') {
+      throw new BadRequestException(
+        'You are not allowed to remove this subtask',
+      );
+    }
   }
 
   async getStats(userId: string): Promise<Stats> {
