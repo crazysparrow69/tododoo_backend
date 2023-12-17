@@ -64,43 +64,6 @@ export class TaskService {
     @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
   ) {}
 
-  private getDeadlineFilter(deadline: string): object | null {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month =
-      date.getMonth() + 1 < 10
-        ? `0${date.getMonth() + 1}`
-        : date.getMonth() + 1;
-    const day = date.getDate();
-    const todayMidnight = new Date(`${year}-${month}-${day}`);
-
-    switch (deadline) {
-      case 'day':
-        return { $gte: todayMidnight };
-      case 'week':
-        return {
-          $gte: todayMidnight,
-          $lte: new Date(date.setDate(date.getDate() + 7)),
-        };
-      case 'month':
-        return {
-          $gte: todayMidnight,
-          $lte: new Date(date.setMonth(date.getMonth() + 1)),
-        };
-      case 'year':
-        return {
-          $gte: todayMidnight,
-          $lte: new Date(`${year + 1}-${month}-${day}`),
-        };
-      case 'outdated':
-        return { $lt: todayMidnight };
-      case 'nodeadline':
-        return null;
-      default:
-        throw new BadRequestException('Invalid deadline value');
-    }
-  }
-
   async findOne(userId: string, id: string): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('Invalid ObjectId');
@@ -481,6 +444,41 @@ export class TaskService {
     stats.reverse();
 
     return stats;
+  }
+
+  private getDeadlineFilter(deadline: string): object | null {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month =
+      date.getMonth() + 1 < 10
+        ? `0${date.getMonth() + 1}`
+        : date.getMonth() + 1;
+    const day = date.getDate();
+    const todayMidnight = new Date(`${year}-${month}-${day}`);
+
+    switch (deadline) {
+      case 'day':
+        return todayMidnight;
+      case 'week':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(date.setDate(date.getDate() + 7)),
+        };
+      case 'month':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(date.setMonth(date.getMonth() + 1)),
+        };
+      case 'year':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(`${year + 1}-${month}-${day}`),
+        };
+      case 'outdated':
+        return { $lt: todayMidnight };
+      case 'nodeadline':
+        return null;
+    }
   }
 
   private async checkStatusForSubtask(
