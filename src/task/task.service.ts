@@ -107,7 +107,7 @@ export class TaskService {
       queryParams.categories = { $all: categories };
     }
 
-    if (deadline) {
+    if (deadline && deadline !== 'all') {
       queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
@@ -260,7 +260,7 @@ export class TaskService {
       queryParams.categories = { $all: categories };
     }
 
-    if (deadline) {
+    if (deadline && deadline !== 'all') {
       queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
@@ -446,7 +446,7 @@ export class TaskService {
     return stats;
   }
 
-  private getDeadlineFilter(deadline: string): object | null {
+  private getDeadlineFilter(deadline: string = 'all'): object | null {
     const date = new Date();
     const year = date.getFullYear();
     const month =
