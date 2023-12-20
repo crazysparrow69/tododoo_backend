@@ -102,7 +102,7 @@ describe('Task controller (e2e)', () => {
   });
 
   describe('/task/:id (GET)', () => {
-    it('should return task with the given id', async () => {
+    it('should return task with the given ID', async () => {
       const taskGetIdResponse = await request(app.getHttpServer())
         .get(`/task/${task._id}`)
         .set('Authorization', `Bearer ${token}`);

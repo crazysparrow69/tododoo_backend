@@ -147,6 +147,53 @@ describe('Subtask (Task) controller (e2e)', () => {
 
   // GET TESTS IN TASK CONTROLLER!
 
+  describe('/task/subtask/:id (GET)', () => {
+    it('should return a subtask ID', async () => {
+      const taskData = {
+        title: 'task',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+      };
+
+      const taskPostResponse = await request(app.getHttpServer())
+        .post('/task')
+        .send(taskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const subtaskData = {
+        title: 'subtask',
+        description: 'description',
+        categories: [],
+        isCompleted: false,
+        dateOfCompletion: null,
+        links: [],
+        deadline: null,
+        assigneeId: taskPostResponse.body._id,
+      };
+
+      const subtaskPostResponse = await request(app.getHttpServer())
+        .post(`/task/${taskPostResponse.body._id}/subtask`)
+        .send(subtaskData)
+        .set('Authorization', `Bearer ${token}`);
+
+      const taskGetResponse = await request(app.getHttpServer())
+        .get(`/task/${taskPostResponse.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(taskGetResponse.body.subtasks.toString()).toEqual(
+        subtaskPostResponse.body._id,
+      );
+
+      await request(app.getHttpServer())
+        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
+    });
+  });
+
   describe('/task//subtask/:id (PATCH)', () => {
     it('should update subtask data and return updated subtask', async () => {
       const updatedSubtask = {

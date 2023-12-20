@@ -121,7 +121,7 @@ describe('Category controller (e2e)', () => {
   });
 
   describe('/category/:id (GET)', () => {
-    it('should return category with the given id', async () => {
+    it('should return category with the given ID', async () => {
       const categoryGetIdResponse = await request(app.getHttpServer())
         .get(`/category/${category._id}`)
         .set('Authorization', `Bearer ${token}`);
