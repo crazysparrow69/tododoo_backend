@@ -145,8 +145,6 @@ describe('Subtask (Task) controller (e2e)', () => {
     });
   });
 
-  // GET TESTS IN TASK CONTROLLER!
-
   describe('/task/subtask/:id (GET)', () => {
     it('should return a subtask ID', async () => {
       const taskData = {
