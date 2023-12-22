@@ -260,7 +260,7 @@ export class TaskService {
       });
     }
 
-    return;
+    return deletedTask;
   }
 
   async findSubtasksByQuery(
