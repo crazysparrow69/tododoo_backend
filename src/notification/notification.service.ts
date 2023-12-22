@@ -20,13 +20,15 @@ export class NotificationService {
     const createdSubtConf =
       await this.subtaskConfirmService.createSubtaskConfirmation(userId, dto);
 
-    const socketId = this.notificationGateway.findConnectionByUserId(
-      dto.assigneeId,
-    );
-    if (socketId) {
-      this.notificationGateway.io
-        .to(socketId)
-        .emit('newSubtaskConfirmation', createdSubtConf);
+    if (createdSubtConf) {
+      const socketId = this.notificationGateway.findConnectionByUserId(
+        dto.assigneeId,
+      );
+      if (socketId) {
+        this.notificationGateway.io
+          .to(socketId)
+          .emit('newSubtaskConfirmation', createdSubtConf);
+      }
     }
   }
 
@@ -66,13 +68,15 @@ export class NotificationService {
     const deletedSubtConf =
       await this.subtaskConfirmService.removeSubtaskConfirmation(subtaskId);
 
-    const socketId = this.notificationGateway.findConnectionByUserId(
-      deletedSubtConf.assigneeId.toString(),
-    );
-    if (socketId) {
-      this.notificationGateway.io
-        .to(socketId)
-        .emit('delSubtaskConfirmation', deletedSubtConf._id);
+    if (deletedSubtConf) {
+      const socketId = this.notificationGateway.findConnectionByUserId(
+        deletedSubtConf.assigneeId.toString(),
+      );
+      if (socketId) {
+        this.notificationGateway.io
+          .to(socketId)
+          .emit('delSubtaskConfirmation', deletedSubtConf._id);
+      }
     }
   }
 }
