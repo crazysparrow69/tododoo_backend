@@ -89,8 +89,12 @@ export class TaskController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
-    return this.taskService.removeTask(userId, id);
+  async removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
+    const removedTask = await this.taskService.removeTask(userId, id);
+    removedTask.subtasks.forEach((el) =>
+      this.notificationService.deleteSubtaskConf(el._id.toString()),
+    );
+    return removedTask;
   }
 
   @Post('/stats')
