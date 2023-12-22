@@ -71,14 +71,20 @@ export class NotificationGateway
   }
 
   @SubscribeMessage('subtask:confirm')
-  async handleSubtaskConfirmation(client: Socket, subtaskId: string): Promise<void> {
+  async handleSubtaskConfirmation(
+    client: Socket,
+    subtaskId: string,
+  ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.taskService.updateSubtaskIsConf(userId, subtaskId, true);
   }
 
   @SubscribeMessage('subtask:reject')
-  async handleSubtaskRejection(client: Socket, subtaskId: string): Promise<void> {
+  async handleSubtaskRejection(
+    client: Socket,
+    subtaskId: string,
+  ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.taskService.updateSubtaskIsConf(userId, subtaskId, false);
