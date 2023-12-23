@@ -53,7 +53,7 @@ export class NotificationService {
           ? new Date(b.createdAt).getTime()
           : Infinity;
 
-        return createdAtA - createdAtB;
+        return createdAtB - createdAtA;
       })
       .slice((page - 1) * limit, page * limit);
 
