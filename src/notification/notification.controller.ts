@@ -18,9 +18,9 @@ export class NotificationController {
     const { page = 1, limit = 10, skip = 0 } = query;
     return this.notificationService.getAllNotifications(
       userId,
-      page,
-      limit,
-      parseInt(skip),
+      +page,
+      +limit,
+      +skip,
     );
   }
 }
