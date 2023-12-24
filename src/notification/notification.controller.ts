@@ -11,8 +11,16 @@ export class NotificationController {
   constructor(private notificationService: NotificationService) {}
 
   @Get('/')
-  getAllNotifications(@CurrentUser() userId: Types.ObjectId, @Query() query: any) {
+  getAllNotifications(
+    @CurrentUser() userId: Types.ObjectId,
+    @Query() query: any,
+  ) {
     const { page = 1, limit = 10, skip = 0 } = query;
-    return this.notificationService.getAllNotifications(userId, page, limit, skip);
+    return this.notificationService.getAllNotifications(
+      userId,
+      page,
+      limit,
+      parseInt(skip),
+    );
   }
 }
