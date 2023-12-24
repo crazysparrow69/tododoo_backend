@@ -36,6 +36,7 @@ export class NotificationService {
     userId: Types.ObjectId,
     page: number,
     limit: number,
+    skip: number
   ): Promise<{
     notifications: Array<SubtaskConfirmation>;
     currentPage: number;
@@ -55,7 +56,7 @@ export class NotificationService {
 
         return createdAtB - createdAtA;
       })
-      .slice((page - 1) * limit, page * limit);
+      .slice(((page - 1) * limit) + skip, (page * limit) + skip);
 
     const totalPages = Math.ceil(
       (notifications.length + notifications.length) / limit,
