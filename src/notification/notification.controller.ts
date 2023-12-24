@@ -12,7 +12,7 @@ export class NotificationController {
 
   @Get('/')
   getAllNotifications(@CurrentUser() userId: Types.ObjectId, @Query() query: any) {
-    const { page = 1, limit = 10 } = query;
-    return this.notificationService.getAllNotifications(userId, page, limit);
+    const { page = 1, limit = 10, skip = 0 } = query;
+    return this.notificationService.getAllNotifications(userId, page, limit, skip);
   }
 }
