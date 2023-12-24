@@ -36,7 +36,7 @@ export class NotificationService {
     userId: Types.ObjectId,
     page: number,
     limit: number,
-    skip: number
+    skip: number,
   ): Promise<{
     notifications: Array<SubtaskConfirmation>;
     currentPage: number;
@@ -45,24 +45,25 @@ export class NotificationService {
     const foundSubtaskConf =
       await this.subtaskConfirmService.getSubtaskConfirmations(userId);
 
-    const notifications = [...foundSubtaskConf]
-      .sort((a, b) => {
-        const createdAtA = a.createdAt
-          ? new Date(a.createdAt).getTime()
-          : Infinity;
-        const createdAtB = b.createdAt
-          ? new Date(b.createdAt).getTime()
-          : Infinity;
+    const notifications = [...foundSubtaskConf].sort((a, b) => {
+      const createdAtA = a.createdAt
+        ? new Date(a.createdAt).getTime()
+        : Infinity;
+      const createdAtB = b.createdAt
+        ? new Date(b.createdAt).getTime()
+        : Infinity;
 
-        return createdAtB - createdAtA;
-      })
-      .slice(((page - 1) * limit) + skip, (page * limit) + skip);
+      return createdAtB - createdAtA;
+    });
 
-    const totalPages = Math.ceil(
-      (notifications.length + notifications.length) / limit,
+    const totalPages = Math.ceil(notifications.length / limit);
+
+    const notificationsSlice = notifications.slice(
+      (page - 1) * limit + skip,
+      page * limit + skip,
     );
 
-    return { notifications, currentPage: page, totalPages };
+    return { notifications: notificationsSlice, currentPage: page, totalPages };
   }
 
   async deleteSubtaskConf(subtaskId: string): Promise<void> {
