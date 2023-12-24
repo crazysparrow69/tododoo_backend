@@ -5,7 +5,7 @@ import { SubtaskConfirmService } from './subtask-confirmation.service';
 import {
   SubtaskConfirmation,
   SubtaskConfirmationSchema,
-} from 'src/confirmation/subtask-confirmation.schema';
+} from '../confirmation/subtask-confirmation.schema';
 
 @Module({
   imports: [
@@ -14,6 +14,6 @@ import {
     ]),
   ],
   providers: [SubtaskConfirmService],
-  exports: [SubtaskConfirmService]
+  exports: [SubtaskConfirmService],
 })
 export class ConfirmationModule {}

@@ -2,12 +2,12 @@ import { Module, forwardRef } from '@nestjs/common';
 import { NotificationGateway } from './notification.gateway';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AuthModule } from 'src/auth/auth.module';
-import { TaskModule } from 'src/task/task.module';
+import { AuthModule } from '../auth/auth.module';
+import { TaskModule } from '../task/task.module';
 import { ConfirmationModule } from './../confirmation/confirmation.module';
 import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
-import { User, UserSchema } from 'src/user/user.schema';
+import { User, UserSchema } from '../user/user.schema';
 
 @Module({
   imports: [

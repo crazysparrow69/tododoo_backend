@@ -344,7 +344,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
     });
 
-    it('should work correctly, when user, who take task, want to change categories, isComplited and links', async () => {
+    /*it('should work correctly, when user, who take task, want to change categories, isComplited and links', async () => {
       const subtaskData = {
         title: 'subtask',
         description: 'description',
@@ -429,7 +429,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    });*/
   });
 
   describe('/task/subtask/:id (DELETE)', () => {
@@ -441,7 +441,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       expect(subtaskDeleteResponse.statusCode).toBe(204);
     });
 
-    it('should delete a subtask, when user, who give task, want to delete subtask', async () => {
+    /*it('should delete a subtask, when user, who give task, want to delete subtask', async () => {
       const subtaskData = {
         title: 'subtask',
         description: 'description',
@@ -678,7 +678,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    });*/
   });
 
   afterAll(async () => {

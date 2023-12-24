@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
+import { SubtaskConfirmService } from '../confirmation/subtask-confirmation.service';
 import { NotificationGateway } from './notification.gateway';
-import { CreateSubtaskConfirmationDto } from 'src/confirmation/dtos/create-subtask-confirmation.dto';
-import { SubtaskConfirmation } from 'src/confirmation/subtask-confirmation.schema';
+import { CreateSubtaskConfirmationDto } from '../confirmation/dtos/create-subtask-confirmation.dto';
+import { SubtaskConfirmation } from '../confirmation/subtask-confirmation.schema';
 
 @Injectable()
 export class NotificationService {

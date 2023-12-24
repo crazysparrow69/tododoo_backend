@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { NotificationModule } from 'src/notification/notification.module';
+import { NotificationModule } from '../notification/notification.module';
 import { TaskService } from './task.service';
 import { TaskController } from './task.controller';
 import { User, UserSchema } from '../user/user.schema';

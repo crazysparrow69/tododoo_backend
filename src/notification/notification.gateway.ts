@@ -11,9 +11,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Types, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { TaskService } from 'src/task/task.service';
-import { SubtaskConfirmService } from 'src/confirmation/subtask-confirmation.service';
-import { User } from 'src/user/user.schema';
+import { TaskService } from '../task/task.service';
+import { SubtaskConfirmService } from '../confirmation/subtask-confirmation.service';
+import { User } from '../user/user.schema';
 
 interface UserConnection {
   userId: Types.ObjectId;
