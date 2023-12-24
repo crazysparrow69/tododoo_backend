@@ -5,11 +5,11 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
-
-import { ImageService } from './image.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../decorators/current-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { ImageService } from './image.service';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('image')

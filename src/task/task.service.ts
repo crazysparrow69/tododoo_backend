@@ -25,6 +25,7 @@ interface QueryParamsTask {
 interface QueryParamsSubtask {
   assigneeId: string;
   rejected: boolean;
+  isConfirmed: boolean;
   isCompleted?: boolean;
   categories?: object;
   deadline?: object;
@@ -225,7 +226,7 @@ export class TaskService {
       });
     }
 
-    return;
+    return deletedTask;
   }
 
   async findSubtasksByQuery(
@@ -250,6 +251,7 @@ export class TaskService {
     let queryParams: QueryParamsSubtask = {
       assigneeId,
       rejected: false,
+      isConfirmed: true,
     };
 
     if (isCompleted !== null) {
@@ -306,9 +308,14 @@ export class TaskService {
     createSubtaskDto: CreateSubtaskDto,
   ): Promise<Subtask> {
     const createdSubtask = await this.subtaskModel.create({
+      _id: new Types.ObjectId(),
       userId,
       taskId,
       dateOfCompletion: createSubtaskDto.isCompleted ? new Date() : null,
+      isConfirmed:
+        userId.toString() === createSubtaskDto.assigneeId.toString()
+          ? true
+          : false,
       ...createSubtaskDto,
     });
 
@@ -333,6 +340,9 @@ export class TaskService {
         userId,
         id,
       );
+      if (status === 'assignee' && foundSubtask.isConfirmed === false) {
+        throw new Error('Could not update subtask');
+      }
 
       if ('isCompleted' in attrs) {
         foundSubtask.isCompleted = attrs.isCompleted;
@@ -373,6 +383,34 @@ export class TaskService {
       throw new BadRequestException(err.message);
     }
   }
+
+  async updateSubtaskIsConf(
+    userId: Types.ObjectId,
+    subtaskId: string,
+    value: boolean,
+  ): Promise<void> {
+    const foundSubtask = await this.subtaskModel.findById(
+      new Types.ObjectId(subtaskId),
+    );
+    if (foundSubtask) {
+      const assigneeId = foundSubtask.assigneeId.toString();
+      if (userId.toString() === assigneeId) {
+        foundSubtask.isConfirmed = value;
+        if (value === false) foundSubtask.rejected = true;
+        await foundSubtask.save();
+      }
+    }
+    return;
+  }
+
+  async removeSubtask(
+    userId: Types.ObjectId,
+    subtaskId: string,
+  ): Promise<Subtask> {
+    const removedSubtask = await this.subtaskModel.findOneAndDelete({
+      _id: new Types.ObjectId(subtaskId),
+      userId,
+    });
 
   async removeSubtask(userId: string, subtaskId: string): Promise<void> {
     const { status } = await this.checkStatusForSubtask(userId, subtaskId);
@@ -487,7 +525,7 @@ export class TaskService {
   ): Promise<CheckStatusForSubtaskInterface> {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
-      _id: id,
+      _id: new Types.ObjectId(id),
       $or: [{ userId: userId }, { assigneeId: userId }],
     });
 

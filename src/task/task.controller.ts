@@ -11,22 +11,27 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { TaskService } from './task.service';
+import { NotificationService } from './../notification/notification.service';
+import { Task } from './task.schema';
+import { Subtask } from './subtask.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 import { CreateSubtaskDto } from './dtos/create-subtask.dto';
 import { UpdateSubtaskDto } from './dtos/update-subtask.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
-import { Task } from './task.schema';
-import { Subtask } from './subtask.schema';
 
 @Controller('task')
 @UseGuards(AuthGuard)
 export class TaskController {
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private notificationService: NotificationService,
+  ) {}
 
   @Get('/:id')
   getTask(@CurrentUser() userId: string, @Param('id') id: string) {
@@ -84,8 +89,12 @@ export class TaskController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
-    return this.taskService.removeTask(userId, id);
+  async removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
+    const removedTask = await this.taskService.removeTask(userId, id);
+    removedTask.subtasks.forEach((el) =>
+      this.notificationService.deleteSubtaskConf(el._id.toString()),
+    );
+    return removedTask;
   }
 
   @Post('/stats')
@@ -95,12 +104,25 @@ export class TaskController {
 
   @Post('/:taskId/subtask')
   @HttpCode(HttpStatus.CREATED)
-  createSubtask(
+  async createSubtask(
     @CurrentUser() userId: string,
     @Param('taskId') taskId: string,
     @Body() body: CreateSubtaskDto,
   ) {
-    return this.taskService.addSubtask(userId, taskId, body);
+    const createdSubtask = await this.taskService.addSubtask(
+      userId,
+      taskId,
+      body,
+    );
+
+    if (userId.toString() !== body.assigneeId.toString()) {
+      await this.notificationService.createSubtaskConf(
+        { assigneeId: body.assigneeId, subtaskId: createdSubtask._id },
+        userId,
+      );
+    }
+
+    return createdSubtask;
   }
 
   @Patch('/subtask/:id')
@@ -114,7 +136,19 @@ export class TaskController {
 
   @Delete('/subtask/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeSubtask(@CurrentUser() userId: string, @Param('id') id: string) {
-    return this.taskService.removeSubtask(userId, id);
+  async removeSubtask(
+    @CurrentUser() userId: Types.ObjectId,
+    @Param('id') id: string,
+  ) {
+    const removedSubtask = await this.taskService.removeSubtask(userId, id);
+    const assigneeId = removedSubtask.assigneeId;
+    if (
+      userId !== assigneeId &&
+      !removedSubtask.isConfirmed &&
+      !removedSubtask.rejected
+    ) {
+      await this.notificationService.deleteSubtaskConf(id);
+    }
+    return removedSubtask;
   }
 }

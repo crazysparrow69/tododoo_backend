@@ -13,14 +13,14 @@ import {
   Param,
 } from '@nestjs/common';
 
-import { UserService } from './user.service';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { AuthService } from './auth.service';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { SigninUserDto } from './dtos/signin-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('user')
