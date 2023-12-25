@@ -344,92 +344,92 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
     });
 
-    /*it('should work correctly, when user, who take task, want to change categories, isComplited and links', async () => {
-      const subtaskData = {
-        title: 'subtask',
-        description: 'description',
-        categories: [],
-        isCompleted: false,
-        dateOfCompletion: null,
-        links: [],
-        deadline: null,
-        assigneeId: (await userData2)._id,
-      };
+    // it('should work correctly, when user, who take task, want to change categories, isComplited and links', async () => {
+    //   const subtaskData = {
+    //     title: 'subtask',
+    //     description: 'description',
+    //     categories: [],
+    //     isCompleted: false,
+    //     dateOfCompletion: null,
+    //     links: [],
+    //     deadline: null,
+    //     assigneeId: (await userData2)._id,
+    //   };
 
-      const subtaskPostResponse = await request(app.getHttpServer())
-        .post(`/task/${task._id}/subtask`)
-        .send(subtaskData)
-        .set('Authorization', `Bearer ${token}`);
+    //   const subtaskPostResponse = await request(app.getHttpServer())
+    //     .post(`/task/${task._id}/subtask`)
+    //     .send(subtaskData)
+    //     .set('Authorization', `Bearer ${token}`);
 
-      const categoryData = {
-        title: 'test',
-        color: 'red',
-      };
+    //   const categoryData = {
+    //     title: 'test',
+    //     color: 'red',
+    //   };
 
-      const subtaskCreateCategoryResponse = await request(app.getHttpServer())
-        .post('/category')
-        .send(categoryData)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskCreateCategoryResponse = await request(app.getHttpServer())
+    //     .post('/category')
+    //     .send(categoryData)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      categoryId = subtaskCreateCategoryResponse.body._id;
+    //   categoryId = subtaskCreateCategoryResponse.body._id;
 
-      const updatedSubtask = {
-        categories: [subtaskCreateCategoryResponse.body._id],
-        isCompleted: true,
-        links: ['https://www.instagram.com/ivan_anenko/'],
-      };
+    //   const updatedSubtask = {
+    //     categories: [subtaskCreateCategoryResponse.body._id],
+    //     isCompleted: true,
+    //     links: ['https://www.instagram.com/ivan_anenko/'],
+    //   };
 
-      const subtaskPatchResponse = await request(app.getHttpServer())
-        .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .send(updatedSubtask)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskPatchResponse = await request(app.getHttpServer())
+    //     .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .send(updatedSubtask)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      for (const key in updatedSubtask) {
-        expect(subtaskPatchResponse.body[key]).toEqual(updatedSubtask[key]);
-      }
-      expect(subtaskPatchResponse.statusCode).toBe(200);
+    //   for (const key in updatedSubtask) {
+    //     expect(subtaskPatchResponse.body[key]).toEqual(updatedSubtask[key]);
+    //   }
+    //   expect(subtaskPatchResponse.statusCode).toBe(200);
 
-      await request(app.getHttpServer())
-        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token}`);
-    });
+    //   await request(app.getHttpServer())
+    //     .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .set('Authorization', `Bearer ${token}`);
+    // });
 
-    it('should return no changed subtask, when user, who take task, want to change subtask', async () => {
-      const subtaskData = {
-        title: 'subtask',
-        description: 'description',
-        categories: [],
-        isCompleted: false,
-        dateOfCompletion: null,
-        links: [],
-        deadline: null,
-        assigneeId: (await userData2)._id,
-      };
+    // it('should return no changed subtask, when user, who take task, want to change subtask', async () => {
+    //   const subtaskData = {
+    //     title: 'subtask',
+    //     description: 'description',
+    //     categories: [],
+    //     isCompleted: false,
+    //     dateOfCompletion: null,
+    //     links: [],
+    //     deadline: null,
+    //     assigneeId: (await userData2)._id,
+    //   };
 
-      const subtaskPostResponse = await request(app.getHttpServer())
-        .post(`/task/${task._id}/subtask`)
-        .send(subtaskData)
-        .set('Authorization', `Bearer ${token}`);
+    //   const subtaskPostResponse = await request(app.getHttpServer())
+    //     .post(`/task/${task._id}/subtask`)
+    //     .send(subtaskData)
+    //     .set('Authorization', `Bearer ${token}`);
 
-      const updatedSubtask = {
-        title: 'subtaskNEW',
-        description: 'descriptionNEW',
-      };
+    //   const updatedSubtask = {
+    //     title: 'subtaskNEW',
+    //     description: 'descriptionNEW',
+    //   };
 
-      const subtaskPatchResponse = await request(app.getHttpServer())
-        .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .send(updatedSubtask)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskPatchResponse = await request(app.getHttpServer())
+    //     .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .send(updatedSubtask)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      for (const key in updatedSubtask) {
-        expect(subtaskPatchResponse.body[key]).toEqual(subtaskData[key]);
-      }
-      expect(subtaskPatchResponse.statusCode).toBe(200);
+    //   for (const key in updatedSubtask) {
+    //     expect(subtaskPatchResponse.body[key]).toEqual(subtaskData[key]);
+    //   }
+    //   expect(subtaskPatchResponse.statusCode).toBe(200);
 
-      await request(app.getHttpServer())
-        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token}`);
-    });*/
+    //   await request(app.getHttpServer())
+    //     .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .set('Authorization', `Bearer ${token}`);
+    // });
   });
 
   describe('/task/subtask/:id (DELETE)', () => {
@@ -441,7 +441,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       expect(subtaskDeleteResponse.statusCode).toBe(204);
     });
 
-    /*it('should delete a subtask, when user, who give task, want to delete subtask', async () => {
+    it('should delete a subtask, when user, who give task, want to delete subtask', async () => {
       const subtaskData = {
         title: 'subtask',
         description: 'description',
@@ -583,102 +583,102 @@ describe('Subtask (Task) controller (e2e)', () => {
       expect(subtaskDeleteResponse.statusCode).toBe(204);
     });
 
-    it('should return an error with 400 status code when user, who take task, want to update (NO PREMISSION DATA) and after that delete subtask', async () => {
-      const subtaskData = {
-        title: 'subtask',
-        description: 'description',
-        categories: [],
-        isCompleted: false,
-        dateOfCompletion: null,
-        links: [],
-        deadline: null,
-        assigneeId: (await userData2)._id,
-      };
+    // it('should return an error with 400 status code when user, who take task, want to update (NO PREMISSION DATA) and after that delete subtask', async () => {
+    //   const subtaskData = {
+    //     title: 'subtask',
+    //     description: 'description',
+    //     categories: [],
+    //     isCompleted: false,
+    //     dateOfCompletion: null,
+    //     links: [],
+    //     deadline: null,
+    //     assigneeId: (await userData2)._id,
+    //   };
 
-      const subtaskPostResponse = await request(app.getHttpServer())
-        .post(`/task/${task._id}/subtask`)
-        .send(subtaskData)
-        .set('Authorization', `Bearer ${token}`);
+    //   const subtaskPostResponse = await request(app.getHttpServer())
+    //     .post(`/task/${task._id}/subtask`)
+    //     .send(subtaskData)
+    //     .set('Authorization', `Bearer ${token}`);
 
-      const updatedSubtask = {
-        title: 'subtaskNEW',
-        description: 'descriptionNEW',
-      };
+    //   const updatedSubtask = {
+    //     title: 'subtaskNEW',
+    //     description: 'descriptionNEW',
+    //   };
 
-      const subtaskPatchResponse = await request(app.getHttpServer())
-        .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .send(updatedSubtask)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskPatchResponse = await request(app.getHttpServer())
+    //     .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .send(updatedSubtask)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      const subtaskDeleteResponse = await request(app.getHttpServer())
-        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskDeleteResponse = await request(app.getHttpServer())
+    //     .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      for (const key in updatedSubtask) {
-        expect(subtaskPatchResponse.body[key]).toEqual(subtaskData[key]);
-      }
-      expect(subtaskPatchResponse.statusCode).toBe(200);
-      expect(subtaskDeleteResponse.statusCode).toBe(400);
+    //   for (const key in updatedSubtask) {
+    //     expect(subtaskPatchResponse.body[key]).toEqual(subtaskData[key]);
+    //   }
+    //   expect(subtaskPatchResponse.statusCode).toBe(200);
+    //   expect(subtaskDeleteResponse.statusCode).toBe(400);
 
-      await request(app.getHttpServer())
-        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token}`);
-    });
+    //   await request(app.getHttpServer())
+    //     .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .set('Authorization', `Bearer ${token}`);
+    // });
 
-    it('should return an error with 400 status code when user, who take task, want to update and after that delete subtask', async () => {
-      const subtaskData = {
-        title: 'subtask',
-        description: 'description',
-        categories: [],
-        isCompleted: false,
-        dateOfCompletion: null,
-        links: [],
-        deadline: null,
-        assigneeId: (await userData2)._id,
-      };
+    // it('should return an error with 400 status code when user, who take task, want to update and after that delete subtask', async () => {
+    //   const subtaskData = {
+    //     title: 'subtask',
+    //     description: 'description',
+    //     categories: [],
+    //     isCompleted: false,
+    //     dateOfCompletion: null,
+    //     links: [],
+    //     deadline: null,
+    //     assigneeId: (await userData2)._id,
+    //   };
 
-      const subtaskPostResponse = await request(app.getHttpServer())
-        .post(`/task/${task._id}/subtask`)
-        .send(subtaskData)
-        .set('Authorization', `Bearer ${token}`);
+    //   const subtaskPostResponse = await request(app.getHttpServer())
+    //     .post(`/task/${task._id}/subtask`)
+    //     .send(subtaskData)
+    //     .set('Authorization', `Bearer ${token}`);
 
-      const categoryData = {
-        title: 'test',
-        color: 'red',
-      };
+    //   const categoryData = {
+    //     title: 'test',
+    //     color: 'red',
+    //   };
 
-      const subtaskCreateCategoryResponse = await request(app.getHttpServer())
-        .post('/category')
-        .send(categoryData)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskCreateCategoryResponse = await request(app.getHttpServer())
+    //     .post('/category')
+    //     .send(categoryData)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      categoryId = subtaskCreateCategoryResponse.body._id;
+    //   categoryId = subtaskCreateCategoryResponse.body._id;
 
-      const updatedSubtask = {
-        categories: [subtaskCreateCategoryResponse.body._id],
-        isCompleted: true,
-        links: ['https://www.instagram.com/ivan_anenko/'],
-      };
+    //   const updatedSubtask = {
+    //     categories: [subtaskCreateCategoryResponse.body._id],
+    //     isCompleted: true,
+    //     links: ['https://www.instagram.com/ivan_anenko/'],
+    //   };
 
-      const subtaskPatchResponse = await request(app.getHttpServer())
-        .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .send(updatedSubtask)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskPatchResponse = await request(app.getHttpServer())
+    //     .patch(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .send(updatedSubtask)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      const subtaskDeleteResponse = await request(app.getHttpServer())
-        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token2}`);
+    //   const subtaskDeleteResponse = await request(app.getHttpServer())
+    //     .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .set('Authorization', `Bearer ${token2}`);
 
-      for (const key in updatedSubtask) {
-        expect(subtaskPatchResponse.body[key]).toEqual(updatedSubtask[key]);
-      }
-      expect(subtaskPatchResponse.statusCode).toBe(200);
-      expect(subtaskDeleteResponse.statusCode).toBe(400);
+    //   for (const key in updatedSubtask) {
+    //     expect(subtaskPatchResponse.body[key]).toEqual(updatedSubtask[key]);
+    //   }
+    //   expect(subtaskPatchResponse.statusCode).toBe(200);
+    //   expect(subtaskDeleteResponse.statusCode).toBe(400);
 
-      await request(app.getHttpServer())
-        .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token}`);
-    });*/
+    //   await request(app.getHttpServer())
+    //     .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
+    //     .set('Authorization', `Bearer ${token}`);
+    // });
   });
 
   afterAll(async () => {
