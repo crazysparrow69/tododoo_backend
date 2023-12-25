@@ -327,7 +327,7 @@ export class TaskService {
   }
 
   async updateSubtask(
-    userId: string,
+    userId: Types.ObjectId,
     id: string,
     attrs: Partial<Subtask>,
   ): Promise<Subtask> {
@@ -407,18 +407,26 @@ export class TaskService {
     userId: Types.ObjectId,
     subtaskId: string,
   ): Promise<Subtask> {
-    const removedSubtask = await this.subtaskModel.findOneAndDelete({
-      _id: new Types.ObjectId(subtaskId),
-      userId,
-    });
+    const { status } = await this.checkStatusForSubtask(userId, subtaskId);
 
-    if (removedSubtask) {
-      await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
-        $pull: { subtasks: removedSubtask._id },
+    if (status === 'gigachad' || status === 'owner') {
+      const removedSubtask = await this.subtaskModel.findOneAndDelete({
+        _id: new Types.ObjectId(subtaskId),
+        userId,
       });
-    }
 
-    return removedSubtask;
+      if (removedSubtask) {
+        await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
+          $pull: { subtasks: removedSubtask._id },
+        });
+      }
+
+      return removedSubtask;
+    } else if (status === 'assignee') {
+      throw new BadRequestException(
+        'You are not allowed to remove this subtask',
+      );
+    }
   }
 
   async getStats(userId: string): Promise<Stats> {
@@ -508,7 +516,7 @@ export class TaskService {
   }
 
   private async checkStatusForSubtask(
-    userId: string,
+    userId: Types.ObjectId,
     id: string,
   ): Promise<CheckStatusForSubtaskInterface> {
     let status: string;
