@@ -127,7 +127,7 @@ export class TaskController {
 
   @Patch('/subtask/:id')
   updateSubtask(
-    @CurrentUser() userId: string,
+    @CurrentUser() userId: Types.ObjectId,
     @Param('id') id: string,
     @Body() body: UpdateSubtaskDto,
   ) {
