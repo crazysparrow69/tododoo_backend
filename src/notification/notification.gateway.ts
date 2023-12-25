@@ -34,9 +34,7 @@ export class NotificationGateway
     private jwtService: JwtService,
     private subtConfService: SubtaskConfirmService,
     private taskService: TaskService,
-  ) {
-    console.log('Socket created');
-  }
+  ) {}
 
   @WebSocketServer() io: Namespace;
 
