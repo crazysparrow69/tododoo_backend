@@ -4,12 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, Document } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
-import { Category } from './category.schema';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 import { QueryCategoryDto } from './dtos/query-category.dto';
 import { User } from '../user/user.schema';
+import { Category } from './category.schema';
 import { Task } from '../task/task.schema';
 
 interface createdCategoryDoc {
@@ -26,6 +26,25 @@ export class CategoryService {
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
   ) {}
+
+  async create(
+    userId: string,
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<Category> {
+    const createdCategory = await this.categoryModel.create({
+      userId,
+      ...createCategoryDto,
+    });
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { categories: createdCategory._id },
+    });
+
+    const { __v, ...createdCategoryData } =
+      createdCategory.toObject() as createdCategoryDoc;
+
+    return createdCategoryData;
+  }
 
   async findOne(userId: string, id: string): Promise<Category> {
     if (!Types.ObjectId.isValid(id))
@@ -66,25 +85,6 @@ export class CategoryService {
       .exec();
 
     return { categories: foundCategories, currentPage: page, totalPages };
-  }
-
-  async create(
-    userId: string,
-    createCategoryDto: CreateCategoryDto,
-  ): Promise<Category> {
-    const createdCategory = await this.categoryModel.create({
-      userId,
-      ...createCategoryDto,
-    });
-
-    await this.userModel.findByIdAndUpdate(userId, {
-      $push: { categories: createdCategory._id },
-    });
-
-    const { __v, ...createdCategoryData } =
-      createdCategory.toObject() as createdCategoryDoc;
-
-    return createdCategoryData;
   }
 
   async update(

@@ -11,18 +11,27 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { TaskService } from './task.service';
+import { NotificationService } from './../notification/notification.service';
+import { Task } from './task.schema';
+import { Subtask } from './subtask.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { CreateSubtaskDto } from './dtos/create-subtask.dto';
+import { UpdateSubtaskDto } from './dtos/update-subtask.dto';
 import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('task')
 @UseGuards(AuthGuard)
 export class TaskController {
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private notificationService: NotificationService,
+  ) {}
 
   @Get('/:id')
   getTask(@CurrentUser() userId: string, @Param('id') id: string) {
@@ -30,14 +39,43 @@ export class TaskController {
   }
 
   @Get('/')
-  getTasks(@CurrentUser() userId: string, @Query() query: QueryTaskDto) {
-    return this.taskService.find(userId, query);
+  async getTasks(@CurrentUser() userId: string, @Query() query: QueryTaskDto) {
+    const { page = 1, limit = 10, ...queryParams } = query;
+
+    const foundTasks = (await this.taskService.findTasksByQuery(
+      userId,
+      queryParams as QueryTaskDto,
+    )) as Task[];
+
+    const foundSubtasks = (await this.taskService.findSubtasksByQuery(
+      userId,
+      queryParams as QueryTaskDto,
+    )) as Subtask[];
+
+    const tasks = [...foundTasks, ...foundSubtasks]
+      .sort((a, b) => {
+        const deadlineA = a.deadline
+          ? new Date(a.deadline).getTime()
+          : Infinity;
+        const deadlineB = b.deadline
+          ? new Date(b.deadline).getTime()
+          : Infinity;
+
+        return deadlineA - deadlineB;
+      })
+      .slice((page - 1) * limit, page * limit);
+
+    const totalPages = Math.ceil(
+      (foundTasks.length + foundSubtasks.length) / limit,
+    );
+
+    return { tasks, currentPage: page, totalPages };
   }
 
   @Post('/')
   @HttpCode(HttpStatus.CREATED)
   createTask(@CurrentUser() userId: string, @Body() body: CreateTaskDto) {
-    return this.taskService.create(userId, body);
+    return this.taskService.createTask(userId, body);
   }
 
   @Patch('/:id')
@@ -46,17 +84,71 @@ export class TaskController {
     @Param('id') id: string,
     @Body() body: UpdateTaskDto,
   ) {
-    return this.taskService.update(userId, id, body);
+    return this.taskService.updateTask(userId, id, body);
   }
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
-    return this.taskService.remove(userId, id);
+  async removeTask(@CurrentUser() userId: string, @Param('id') id: string) {
+    const removedTask = await this.taskService.removeTask(userId, id);
+    removedTask.subtasks.forEach((el) =>
+      this.notificationService.deleteSubtaskConf(el._id.toString()),
+    );
+    return removedTask;
   }
 
   @Post('/stats')
   getStats(@CurrentUser() userId: string) {
     return this.taskService.getStats(userId);
+  }
+
+  @Post('/:taskId/subtask')
+  @HttpCode(HttpStatus.CREATED)
+  async createSubtask(
+    @CurrentUser() userId: string,
+    @Param('taskId') taskId: string,
+    @Body() body: CreateSubtaskDto,
+  ) {
+    const createdSubtask = await this.taskService.addSubtask(
+      userId,
+      taskId,
+      body,
+    );
+
+    if (userId.toString() !== body.assigneeId.toString()) {
+      await this.notificationService.createSubtaskConf(
+        { assigneeId: body.assigneeId, subtaskId: createdSubtask._id },
+        userId,
+      );
+    }
+
+    return createdSubtask;
+  }
+
+  @Patch('/subtask/:id')
+  updateSubtask(
+    @CurrentUser() userId: Types.ObjectId,
+    @Param('id') id: string,
+    @Body() body: UpdateSubtaskDto,
+  ) {
+    return this.taskService.updateSubtask(userId, id, body);
+  }
+
+  @Delete('/subtask/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeSubtask(
+    @CurrentUser() userId: Types.ObjectId,
+    @Param('id') id: string,
+  ) {
+    const removedSubtask = await this.taskService.removeSubtask(userId, id);
+    const assigneeId = removedSubtask.assigneeId;
+    if (
+      userId !== assigneeId &&
+      !removedSubtask.isConfirmed &&
+      !removedSubtask.rejected
+    ) {
+      await this.notificationService.deleteSubtaskConf(id);
+    }
+    return removedSubtask;
   }
 }

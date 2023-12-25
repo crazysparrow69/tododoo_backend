@@ -10,9 +10,7 @@ import {
 } from 'class-validator';
 import { BadRequestException } from '@nestjs/common';
 
-import { Category } from '../../category/category.schema';
-
-export class CreateTaskDto {
+export class CreateSubtaskDto {
   @IsString()
   @Length(3, 50)
   title: string;
@@ -21,10 +19,8 @@ export class CreateTaskDto {
   @Length(3, 1000)
   description: string;
 
-  @IsArray()
-  @ArrayMaxSize(5)
-  @IsOptional()
-  categories: Category[];
+  @IsString()
+  assigneeId: string;
 
   @IsBoolean()
   @IsOptional()

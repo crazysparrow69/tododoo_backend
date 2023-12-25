@@ -1,8 +1,9 @@
 import { IsEmail, IsString, IsOptional, Length } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class QueryUserDto {
   @IsString()
-  @Length(3, 20)
+  @Length(1, 20)
   @IsOptional()
   username: string;
 
@@ -10,4 +11,12 @@ export class QueryUserDto {
   @Length(1, 100)
   @IsOptional()
   email: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  limit: number;
 }
