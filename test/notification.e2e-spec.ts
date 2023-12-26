@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { User, Task, Subtask } from '../test/interfaces';
+import { User, Task } from '../test/interfaces';
 
 describe('Notification/Task controller (e2e)', () => {
   let app: INestApplication;
@@ -18,9 +18,7 @@ describe('Notification/Task controller (e2e)', () => {
   };
   let token: string;
   let token2: string;
-  let categoryId: string;
   let task: Task;
-  let subtask: Subtask;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
