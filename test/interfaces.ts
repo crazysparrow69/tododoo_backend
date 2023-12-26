@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
-import { Avatar } from '../src/user/user.schema';
+import { Avatar } from '../src/user/user.interface';
 
-interface User {
+export interface User {
   _id: Types.ObjectId;
   username: string;
   password: string;
@@ -13,14 +13,14 @@ interface User {
   updatedAt: Date;
 }
 
-interface Category {
+export interface Category {
   _id: Types.ObjectId;
   title: string;
   color: string;
   userId: Types.ObjectId;
 }
 
-interface Task {
+export interface Task {
   _id: Types.ObjectId;
   title: string;
   description: string;
@@ -34,7 +34,7 @@ interface Task {
   updatedAt: Date;
 }
 
-interface Subtask {
+export interface Subtask {
   _id: Types.ObjectId;
   title: string;
   description: string;
@@ -51,7 +51,7 @@ interface Subtask {
   updatedAt: Date;
 }
 
-const taskControllerDatasets = [
+export const taskControllerDatasets = [
   {
     message: 'empty title',
     data: {
@@ -207,5 +207,3 @@ const taskControllerDatasets = [
     },
   },
 ];
-
-export { User, Category, Task, Subtask, taskControllerDatasets };

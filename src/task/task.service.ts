@@ -13,43 +13,13 @@ import { Category } from '../category/category.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 import { CreateSubtaskDto } from './dtos/create-subtask.dto';
-import { Subtask, SubtaskDocument } from './subtask.schema';
-
-interface QueryParamsTask {
-  userId: string;
-  isCompleted?: boolean;
-  categories?: object;
-  deadline?: object;
-}
-
-interface QueryParamsSubtask {
-  assigneeId: string;
-  rejected: boolean;
-  isConfirmed: boolean;
-  isCompleted?: boolean;
-  categories?: object;
-  deadline?: object;
-}
-
-interface CreatedTaskDoc {
-  __v: string;
-  title: string;
-  description: string;
-  categories: Category[];
-  isCompleted: boolean;
-  dateOfCompletion: Date;
-  links: Array<string>;
-  deadline: Date;
-  subtasks: Subtask[];
-  userId: User;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface CheckStatusForSubtaskInterface {
-  foundSubtask: SubtaskDocument;
-  status: string;
-}
+import { Subtask } from './subtask.schema';
+import {
+  QueryParamsTask,
+  QueryParamsSubtask,
+  CreatedTaskDoc,
+  CheckStatusForSubtask,
+} from './task.interface';
 
 type Stats = {
   date: Date;
@@ -518,7 +488,7 @@ export class TaskService {
   private async checkStatusForSubtask(
     userId: Types.ObjectId,
     id: string,
-  ): Promise<CheckStatusForSubtaskInterface> {
+  ): Promise<CheckStatusForSubtask> {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
       _id: new Types.ObjectId(id),

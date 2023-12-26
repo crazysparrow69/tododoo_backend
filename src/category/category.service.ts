@@ -11,13 +11,7 @@ import { QueryCategoryDto } from './dtos/query-category.dto';
 import { User } from '../user/user.schema';
 import { Category } from './category.schema';
 import { Task } from '../task/task.schema';
-
-interface createdCategoryDoc {
-  __v: string;
-  title: string;
-  color: string;
-  userId: User;
-}
+import { createdCategoryDoc } from './category.interface';
 
 @Injectable()
 export class CategoryService {

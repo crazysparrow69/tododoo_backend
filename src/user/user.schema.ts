@@ -3,13 +3,9 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 import { Category } from '../category/category.schema';
 import { Task } from '../task/task.schema';
+import { Avatar } from './user.interface';
 
 export type UserDocument = HydratedDocument<User>;
-
-export interface Avatar {
-  url: string;
-  public_id: string;
-}
 
 @Schema()
 export class User {

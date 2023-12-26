@@ -6,11 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { User } from '../user/user.schema';
-
-export interface UploadAvatarInterface {
-  url: string;
-  public_id: string;
-}
+import { UploadAvatar } from './image.interface';
 
 @Injectable()
 export class ImageService {
@@ -22,10 +18,7 @@ export class ImageService {
     });
   }
 
-  async uploadAvatar(
-    userId: string,
-    file: any,
-  ): Promise<UploadAvatarInterface> {
+  async uploadAvatar(userId: string, file: any): Promise<UploadAvatar> {
     if (!['image/jpeg', 'image/png'].includes(file.mimetype)) {
       throw new BadRequestException('Invalid file mimetype');
     }

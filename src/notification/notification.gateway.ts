@@ -14,11 +14,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { TaskService } from '../task/task.service';
 import { SubtaskConfirmService } from '../confirmation/subtask-confirmation.service';
 import { User } from '../user/user.schema';
-
-interface UserConnection {
-  userId: Types.ObjectId;
-  socketId: string;
-}
+import { UserConnection } from './notification.interface';
 
 @WebSocketGateway({
   cors: {
