@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { User } from '../user/user.schema';
-import { UploadAvatar } from './image.interface';
+import { Avatar } from '../user/user.interface';
 
 @Injectable()
 export class ImageService {
@@ -18,7 +18,7 @@ export class ImageService {
     });
   }
 
-  async uploadAvatar(userId: string, file: any): Promise<UploadAvatar> {
+  async uploadAvatar(userId: string, file: any): Promise<Avatar> {
     if (!['image/jpeg', 'image/png'].includes(file.mimetype)) {
       throw new BadRequestException('Invalid file mimetype');
     }
