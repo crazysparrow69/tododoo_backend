@@ -3,8 +3,6 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { User, Task, Subtask } from '../test/interfaces';
-import e from 'express';
-import exp from 'constants';
 
 describe('Notification/Task controller (e2e)', () => {
   let app: INestApplication;

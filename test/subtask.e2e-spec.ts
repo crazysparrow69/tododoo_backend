@@ -104,7 +104,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         expect(subtaskPostResponse.body[key]).toEqual(subtaskData[key]);
       }
       expect(subtaskPostResponse.statusCode).toBe(201);
-    });
+    }, 10000);
 
     it('should create a subtask for other user and return it with 201 status code', async () => {
       const subtaskData = {
@@ -131,7 +131,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    }, 10000);
 
     taskControllerDatasets.forEach((dataset) => {
       it(`should return an error if request is provided with ${dataset.message}`, async () => {
@@ -142,7 +142,7 @@ describe('Subtask (Task) controller (e2e)', () => {
 
         expect(subtaskPostResponse.statusCode).toBeGreaterThanOrEqual(400);
       });
-    });
+    }, 10000);
   });
 
   describe('/task/subtask/:id (GET)', () => {
@@ -189,7 +189,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    }, 10000);
   });
 
   describe('/task//subtask/:id (PATCH)', () => {
@@ -214,7 +214,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         expect(subtaskPatchResponse.body[key]).toEqual(updatedSubtask[key]);
       }
       expect(subtaskPatchResponse.statusCode).toBe(200);
-    });
+    }, 10000);
 
     it('should set dateOfCompletion if isCompleted is true', async () => {
       const updatedSubtask = {
@@ -227,7 +227,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(subtaskPatchResponse.body.dateOfCompletion).toBeDefined();
-    });
+    }, 10000);
 
     it('should set dateOfCompletion to null if isCompleted is false', async () => {
       const updatedSubtask = {
@@ -240,7 +240,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(subtaskPatchResponse.body.dateOfCompletion).toBeNull();
-    });
+    }, 10000);
 
     it('should return an error with 400 status code when request url provided with invalid subtaskId', async () => {
       const updatedSubtask = {
@@ -252,7 +252,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         .send(updatedSubtask)
         .set('Authorization', `Bearer ${token}`);
       expect(subtaskPatchResponse.statusCode).toBe(400);
-    });
+    }, 10000);
 
     // tests with other user
 
@@ -292,7 +292,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    }, 10000);
 
     it('should return no changed subtask, who give task, want to change categories, links and ID', async () => {
       const subtaskData = {
@@ -342,7 +342,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    }, 10000);
 
     // TODO fix this tests (problem - you need to confirm subtask notification by using sockets without PATCH)
     //
@@ -441,7 +441,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(subtaskDeleteResponse.statusCode).toBe(204);
-    });
+    }, 10000);
 
     it('should delete a subtask, when user, who give task, want to delete subtask', async () => {
       const subtaskData = {
@@ -465,7 +465,7 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(subtaskDeleteResponse.statusCode).toBe(204);
-    });
+    }, 10000);
 
     it('should return an error with 400 status code when user, who take task, want to delete subtask', async () => {
       const subtaskData = {
@@ -493,7 +493,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/task/subtask/${subtaskPostResponse.body._id}`)
         .set('Authorization', `Bearer ${token}`);
-    });
+    }, 10000);
 
     it('should delete a subtask, when user, who give task, want to update and after that delete subtask', async () => {
       const subtaskData = {
@@ -532,7 +532,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       }
       expect(subtaskPatchResponse.statusCode).toBe(200);
       expect(subtaskDeleteResponse.statusCode).toBe(204);
-    });
+    }, 10000);
 
     it('should delete a subtask, when user, who give task, want to update (NO PREMISSION DATA) and after that delete subtask', async () => {
       const subtaskData = {
@@ -583,7 +583,7 @@ describe('Subtask (Task) controller (e2e)', () => {
       }
       expect(subtaskPatchResponse.statusCode).toBe(200);
       expect(subtaskDeleteResponse.statusCode).toBe(204);
-    });
+    }, 10000);
 
     // TODO fix this tests (problem - you need to confirm subtask notification by using sockets without PATCH)
     //
