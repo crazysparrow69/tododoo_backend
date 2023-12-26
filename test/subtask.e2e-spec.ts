@@ -344,6 +344,8 @@ describe('Subtask (Task) controller (e2e)', () => {
         .set('Authorization', `Bearer ${token}`);
     });
 
+    // TODO fix this tests (problem - you need to confirm subtask notification by using sockets without PATCH)
+    //
     // it('should work correctly, when user, who take task, want to change categories, isComplited and links', async () => {
     //   const subtaskData = {
     //     title: 'subtask',
@@ -583,6 +585,8 @@ describe('Subtask (Task) controller (e2e)', () => {
       expect(subtaskDeleteResponse.statusCode).toBe(204);
     });
 
+    // TODO fix this tests (problem - you need to confirm subtask notification by using sockets without PATCH)
+    //
     // it('should return an error with 400 status code when user, who take task, want to update (NO PREMISSION DATA) and after that delete subtask', async () => {
     //   const subtaskData = {
     //     title: 'subtask',
