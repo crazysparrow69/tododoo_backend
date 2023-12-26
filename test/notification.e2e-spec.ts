@@ -108,9 +108,9 @@ describe('Notification/Task controller (e2e)', () => {
       expect(notificationSubtaskPostResponse.statusCode).toBe(201);
       expect(notificationGetResponse.statusCode).toBe(200);
 
-      // await request(app.getHttpServer())
-      //  .delete(`/task/subtask/${notificationSubtaskPostResponse.body._id}`)
-      //  .set('Authorization', `Bearer ${token}`);
+      await request(app.getHttpServer())
+        .delete(`/task/subtask/${notificationSubtaskPostResponse.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
     });
   });
 
