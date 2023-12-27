@@ -8,19 +8,14 @@ import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { Types, Model } from 'mongoose';
 
+import { ImageService } from '../image/image.service';
 import { User } from './user.schema';
-import { Task } from '../task/task.schema';
+import { findUsersByUsername } from './user.interface';
 import { Category } from '../category/category.schema';
+import { Task } from '../task/task.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ImageService } from '../image/image.service';
-
-export interface findUsersByUsernameInterface {
-  foundUsers: User[];
-  page: number;
-  totalPages: number;
-}
 
 const scrypt = promisify(_scrypt);
 
@@ -47,7 +42,7 @@ export class UserService {
     username,
     page = 1,
     limit = 10,
-  }: QueryUserDto): Promise<findUsersByUsernameInterface> {
+  }: QueryUserDto): Promise<findUsersByUsername> {
     const regex = new RegExp(`^${username}`, 'i');
     const count = await this.userModel.countDocuments({
       username: { $regex: regex },
