@@ -13,42 +13,13 @@ import { Category } from '../category/category.schema';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { QueryTaskDto } from './dtos/query-task.dto';
 import { CreateSubtaskDto } from './dtos/create-subtask.dto';
-import { Subtask, SubtaskDocument } from './subtask.schema';
-
-interface QueryParamsTask {
-  userId: string;
-  isCompleted?: boolean;
-  categories?: object;
-  deadline?: object;
-}
-
-interface QueryParamsSubtask {
-  assigneeId: string;
-  rejected: boolean;
-  isCompleted?: boolean;
-  categories?: object;
-  deadline?: object;
-}
-
-interface CreatedTaskDoc {
-  __v: string;
-  title: string;
-  description: string;
-  categories: Category[];
-  isCompleted: boolean;
-  dateOfCompletion: Date;
-  links: Array<string>;
-  deadline: Date;
-  subtasks: Subtask[];
-  userId: User;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface CheckStatusForSubtaskInterface {
-  foundSubtask: SubtaskDocument;
-  status: string;
-}
+import { Subtask } from './subtask.schema';
+import {
+  QueryParamsTask,
+  QueryParamsSubtask,
+  CreatedTaskDoc,
+  CheckStatusForSubtask,
+} from './task.interface';
 
 type Stats = {
   date: Date;
@@ -107,42 +78,8 @@ export class TaskService {
       queryParams.categories = { $all: categories };
     }
 
-    if (deadline) {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month =
-        date.getMonth() + 1 < 10
-          ? `0${date.getMonth() + 1}`
-          : date.getMonth() + 1;
-      const day = date.getDate();
-      const todayMidnight = new Date(`${year}-${month}-${day}`);
-
-      if (deadline === 'day') {
-        queryParams.deadline = todayMidnight;
-      } else if (deadline == 'week') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setDate(today.getDate() + 7)),
-        };
-      } else if (deadline === 'month') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setMonth(today.getMonth() + 1)),
-        };
-      } else if (deadline === 'year') {
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(`${year + 1}-${month}-${day}`),
-        };
-      } else if (deadline === 'outdated') {
-        queryParams.deadline = {
-          $lt: todayMidnight,
-        };
-      } else if (deadline === 'nodeadline') {
-        queryParams.deadline = null;
-      }
+    if (deadline && deadline !== 'all') {
+      queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
     let foundTasks: Task[];
@@ -155,7 +92,7 @@ export class TaskService {
         path: 'subtasks',
         select: '-_v -createdAt -updatedAt -categories -links',
         populate: {
-          path: 'userId',
+          path: 'assigneeId',
           select: 'username avatar',
         },
       },
@@ -259,7 +196,7 @@ export class TaskService {
       });
     }
 
-    return;
+    return deletedTask;
   }
 
   async findSubtasksByQuery(
@@ -284,6 +221,7 @@ export class TaskService {
     let queryParams: QueryParamsSubtask = {
       assigneeId,
       rejected: false,
+      isConfirmed: true,
     };
 
     if (isCompleted !== null) {
@@ -294,42 +232,8 @@ export class TaskService {
       queryParams.categories = { $all: categories };
     }
 
-    if (deadline) {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month =
-        date.getMonth() + 1 < 10
-          ? `0${date.getMonth() + 1}`
-          : date.getMonth() + 1;
-      const day = date.getDate();
-      const todayMidnight = new Date(`${year}-${month}-${day}`);
-
-      if (deadline === 'day') {
-        queryParams.deadline = todayMidnight;
-      } else if (deadline == 'week') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setDate(today.getDate() + 7)),
-        };
-      } else if (deadline === 'month') {
-        const today = new Date(`${year}-${month}-${day}`);
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(today.setMonth(today.getMonth() + 1)),
-        };
-      } else if (deadline === 'year') {
-        queryParams.deadline = {
-          $gte: todayMidnight,
-          $lte: new Date(`${year + 1}-${month}-${day}`),
-        };
-      } else if (deadline === 'outdated') {
-        queryParams.deadline = {
-          $lt: todayMidnight,
-        };
-      } else if (deadline === 'nodeadline') {
-        queryParams.deadline = null;
-      }
+    if (deadline && deadline !== 'all') {
+      queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
     let foundSubtasks: Subtask[];
@@ -337,6 +241,10 @@ export class TaskService {
       {
         path: 'categories',
         select: '-__v',
+      },
+      {
+        path: 'userId',
+        select: 'username avatar',
       },
     ];
 
@@ -368,11 +276,16 @@ export class TaskService {
     userId: string,
     taskId: string,
     createSubtaskDto: CreateSubtaskDto,
-  ): Promise<void> {
+  ): Promise<Subtask> {
     const createdSubtask = await this.subtaskModel.create({
+      _id: new Types.ObjectId(),
       userId,
       taskId,
       dateOfCompletion: createSubtaskDto.isCompleted ? new Date() : null,
+      isConfirmed:
+        userId.toString() === createSubtaskDto.assigneeId.toString()
+          ? true
+          : false,
       ...createSubtaskDto,
     });
 
@@ -380,11 +293,11 @@ export class TaskService {
       $push: { subtasks: createdSubtask._id },
     });
 
-    return;
+    return createdSubtask;
   }
 
   async updateSubtask(
-    userId: string,
+    userId: Types.ObjectId,
     id: string,
     attrs: Partial<Subtask>,
   ): Promise<Subtask> {
@@ -397,6 +310,9 @@ export class TaskService {
         userId,
         id,
       );
+      if (status === 'assignee' && foundSubtask.isConfirmed === false) {
+        throw new Error('Could not update subtask');
+      }
 
       if ('isCompleted' in attrs) {
         foundSubtask.isCompleted = attrs.isCompleted;
@@ -438,19 +354,49 @@ export class TaskService {
     }
   }
 
-  async removeSubtask(userId: string, subtaskId: string): Promise<void> {
-    const removedSubtask = await this.subtaskModel.findOneAndDelete({
-      _id: subtaskId,
-      userId,
-    });
-
-    if (removedSubtask) {
-      await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
-        $pull: { subtasks: removedSubtask._id },
-      });
+  async updateSubtaskIsConf(
+    userId: Types.ObjectId,
+    subtaskId: string,
+    value: boolean,
+  ): Promise<void> {
+    const foundSubtask = await this.subtaskModel.findById(
+      new Types.ObjectId(subtaskId),
+    );
+    if (foundSubtask) {
+      const assigneeId = foundSubtask.assigneeId.toString();
+      if (userId.toString() === assigneeId) {
+        foundSubtask.isConfirmed = value;
+        if (value === false) foundSubtask.rejected = true;
+        await foundSubtask.save();
+      }
     }
-
     return;
+  }
+
+  async removeSubtask(
+    userId: Types.ObjectId,
+    subtaskId: string,
+  ): Promise<Subtask> {
+    const { status } = await this.checkStatusForSubtask(userId, subtaskId);
+
+    if (status === 'gigachad' || status === 'owner') {
+      const removedSubtask = await this.subtaskModel.findOneAndDelete({
+        _id: new Types.ObjectId(subtaskId),
+        userId,
+      });
+
+      if (removedSubtask) {
+        await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
+          $pull: { subtasks: removedSubtask._id },
+        });
+      }
+
+      return removedSubtask;
+    } else if (status === 'assignee') {
+      throw new BadRequestException(
+        'You are not allowed to remove this subtask',
+      );
+    }
   }
 
   async getStats(userId: string): Promise<Stats> {
@@ -504,13 +450,48 @@ export class TaskService {
     return stats;
   }
 
+  private getDeadlineFilter(deadline: string = 'all'): object | null {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month =
+      date.getMonth() + 1 < 10
+        ? `0${date.getMonth() + 1}`
+        : date.getMonth() + 1;
+    const day = date.getDate();
+    const todayMidnight = new Date(`${year}-${month}-${day}`);
+
+    switch (deadline) {
+      case 'day':
+        return todayMidnight;
+      case 'week':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(date.setDate(date.getDate() + 7)),
+        };
+      case 'month':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(date.setMonth(date.getMonth() + 1)),
+        };
+      case 'year':
+        return {
+          $gte: todayMidnight,
+          $lte: new Date(`${year + 1}-${month}-${day}`),
+        };
+      case 'outdated':
+        return { $lt: todayMidnight };
+      case 'nodeadline':
+        return null;
+    }
+  }
+
   private async checkStatusForSubtask(
-    userId: string,
+    userId: Types.ObjectId,
     id: string,
-  ): Promise<CheckStatusForSubtaskInterface> {
+  ): Promise<CheckStatusForSubtask> {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
-      _id: id,
+      _id: new Types.ObjectId(id),
       $or: [{ userId: userId }, { assigneeId: userId }],
     });
 
