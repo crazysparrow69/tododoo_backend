@@ -14,11 +14,15 @@ import { AppController } from './app.controller';
 
 require('dotenv').config();
 
-const DATABASE_URI = process.env.MODE
-  ? process.env.MODE.trim() === 'development'
-    ? process.env.DATABASE_URI_DEV
-    : process.env.DATABASE_URI_TEST
-  : process.env.DATABASE_URI_PROD;
+let DATABASE_URI: string;
+
+if (process.env.MODE === 'development') {
+  DATABASE_URI = process.env.DATABASE_URI_DEV;
+} else if (process.env.MODE === 'prod') {
+  DATABASE_URI = process.env.DATABASE_URI_PROD;
+} else {
+  DATABASE_URI = process.env.DATABASE_URI_TEST;
+}
 
 @Module({
   imports: [
@@ -39,5 +43,4 @@ const DATABASE_URI = process.env.MODE
   controllers: [AppController],
   providers: [AppService],
 })
-
 export class AppModule {}
