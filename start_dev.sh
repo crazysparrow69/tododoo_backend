@@ -8,4 +8,5 @@ else
     echo "Unsupported operating system"
     exit 1
 fi
+
 nest start --watch
