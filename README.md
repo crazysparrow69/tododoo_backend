@@ -4,7 +4,7 @@
 
 [Dev link](https://my-tododo-dev.vercel.app/)
 
-# Our production and development links
+# Our frontEnd repo link
 
 [FrontEnd repo](https://github.com/Dimdim28/to_do_list_frontend)
 
