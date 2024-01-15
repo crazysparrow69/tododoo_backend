@@ -1,5 +1,5 @@
 # Our production and development links
-Attention!!! You need to wait a couple of minutes before the website loads.
+Attention!!! You need to wait a couple of minutes before the website loads. It is a bug of hosting platform we are using, we will work on it later.
 
 [Prod link](https://my-tododo.vercel.app/)
 
