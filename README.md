@@ -1,4 +1,5 @@
 # Our production and development links
+Attention!!! You need to wait a couple of minutes before the website loads.
 
 [Prod link](https://my-tododo.vercel.app/)
 
