@@ -18,12 +18,15 @@ import { TaskService } from "./task.service";
 import { NotificationService } from "./../notification/notification.service";
 import { Task } from "./task.schema";
 import { Subtask } from "./subtask.schema";
-import { CreateTaskDto } from "./dtos/create-task.dto";
-import { UpdateTaskDto } from "./dtos/update-task.dto";
-import { QueryTaskDto } from "./dtos/query-task.dto";
-import { CreateSubtaskDto } from "./dtos/create-subtask.dto";
-import { UpdateSubtaskDto } from "./dtos/update-subtask.dto";
+
 import { CurrentUser } from "../decorators/current-user.decorator";
+import {
+  CreateSubtaskDto,
+  CreateTaskDto,
+  QueryTaskDto,
+  UpdateSubtaskDto,
+  UpdateTaskDto,
+} from "./dtos";
 
 @Controller("task")
 @UseGuards(AuthGuard)

@@ -12,11 +12,9 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 
+import { CreateCategoryDto, QueryCategoryDto, UpdateCategoryDto } from "./dtos";
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { CategoryService } from "./category.service";
-import { CreateCategoryDto } from "./dtos/create-category.dto";
-import { UpdateCategoryDto } from "./dtos/update-category.dto";
-import { QueryCategoryDto } from "./dtos/query-category.dto";
 import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("category")
