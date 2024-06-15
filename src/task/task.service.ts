@@ -1,25 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import {
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common/exceptions';
-import { Types } from 'mongoose';
+} from "@nestjs/common/exceptions";
+import { Types } from "mongoose";
 
-import { Task } from './task.schema';
-import { User } from '../user/user.schema';
-import { Category } from '../category/category.schema';
-import { CreateTaskDto } from './dtos/create-task.dto';
-import { QueryTaskDto } from './dtos/query-task.dto';
-import { CreateSubtaskDto } from './dtos/create-subtask.dto';
-import { Subtask } from './subtask.schema';
+import { Task } from "./task.schema";
+import { User } from "../user/user.schema";
+import { Category } from "../category/category.schema";
+import { CreateTaskDto } from "./dtos/create-task.dto";
+import { QueryTaskDto } from "./dtos/query-task.dto";
+import { CreateSubtaskDto } from "./dtos/create-subtask.dto";
+import { Subtask } from "./subtask.schema";
 import {
   QueryParamsTask,
   QueryParamsSubtask,
   CreatedTaskDoc,
   CheckStatusForSubtask,
-} from './task.interface';
+} from "./task.interface";
 
 type Stats = {
   date: Date;
@@ -32,24 +32,24 @@ export class TaskService {
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
-    @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
+    @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>
   ) {}
 
   async findOne(userId: string, id: string): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
 
     const foundTask = await this.taskModel
       .findOne({ _id: id, userId })
-      .select(['-__v']);
-    if (!foundTask) throw new NotFoundException('Task not found');
+      .select(["-__v"]);
+    if (!foundTask) throw new NotFoundException("Task not found");
 
     return foundTask;
   }
 
   async findTasksByQuery(
     userId: string,
-    query: QueryTaskDto,
+    query: QueryTaskDto
   ): Promise<
     | {
         tasks: Task[];
@@ -66,7 +66,7 @@ export class TaskService {
       deadline = null,
     } = query;
 
-    let queryParams: QueryParamsTask = {
+    const queryParams: QueryParamsTask = {
       userId: userId,
     };
 
@@ -78,22 +78,22 @@ export class TaskService {
       queryParams.categories = { $all: categories };
     }
 
-    if (deadline && deadline !== 'all') {
+    if (deadline && deadline !== "all") {
       queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
     let foundTasks: Task[];
     const populateParams = [
       {
-        path: 'categories',
-        select: '-__v',
+        path: "categories",
+        select: "-__v",
       },
       {
-        path: 'subtasks',
-        select: '-_v -createdAt -updatedAt -categories -links',
+        path: "subtasks",
+        select: "-_v -createdAt -updatedAt -categories -links",
         populate: {
-          path: 'assigneeId',
-          select: 'username avatar',
+          path: "assigneeId",
+          select: "username avatar",
         },
       },
     ];
@@ -108,7 +108,7 @@ export class TaskService {
         .populate(populateParams)
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .select(['-__v'])
+        .select(["-__v"])
         .exec();
 
       return { tasks: foundTasks, currentPage: page, totalPages };
@@ -116,7 +116,7 @@ export class TaskService {
       foundTasks = await this.taskModel
         .find(queryParams)
         .populate(populateParams)
-        .select('-__v');
+        .select("-__v");
 
       return foundTasks;
     }
@@ -124,7 +124,7 @@ export class TaskService {
 
   async createTask(
     userId: string,
-    createTaskDto: CreateTaskDto,
+    createTaskDto: CreateTaskDto
   ): Promise<Task> {
     const createdTask = await this.taskModel.create({
       userId,
@@ -136,7 +136,7 @@ export class TaskService {
       $push: { tasks: createdTask._id },
     });
 
-    await createdTask.populate('categories');
+    await createdTask.populate("categories");
 
     const { __v, ...createdTaskData } =
       createdTask.toObject() as CreatedTaskDoc;
@@ -147,10 +147,10 @@ export class TaskService {
   async updateTask(
     userId: string,
     id: string,
-    attrs: Partial<Task>,
+    attrs: Partial<Task>
   ): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
 
     if (attrs.categories) {
       const count = await this.categoryModel.countDocuments({
@@ -159,7 +159,7 @@ export class TaskService {
       });
       if (count !== attrs.categories.length)
         throw new BadRequestException(
-          "Some categories listed in categories array don't exist or belong to user",
+          "Some categories listed in categories array don't exist or belong to user"
         );
     }
 
@@ -171,16 +171,16 @@ export class TaskService {
 
     const updatedTask = await this.taskModel
       .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
-      .populate('categories')
-      .select(['-__v']);
-    if (!updatedTask) throw new NotFoundException('Task not found');
+      .populate("categories")
+      .select(["-__v"]);
+    if (!updatedTask) throw new NotFoundException("Task not found");
 
     return updatedTask;
   }
 
   async removeTask(userId: string, id: string): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
 
     const deletedTask = await this.taskModel.findOneAndDelete({
       _id: id,
@@ -201,7 +201,7 @@ export class TaskService {
 
   async findSubtasksByQuery(
     assigneeId: string,
-    query: QueryTaskDto,
+    query: QueryTaskDto
   ): Promise<
     | {
         subtasks: Subtask[];
@@ -218,7 +218,7 @@ export class TaskService {
       deadline = null,
     } = query;
 
-    let queryParams: QueryParamsSubtask = {
+    const queryParams: QueryParamsSubtask = {
       assigneeId,
       rejected: false,
       isConfirmed: true,
@@ -232,19 +232,19 @@ export class TaskService {
       queryParams.categories = { $all: categories };
     }
 
-    if (deadline && deadline !== 'all') {
+    if (deadline && deadline !== "all") {
       queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
     let foundSubtasks: Subtask[];
     const populateParams = [
       {
-        path: 'categories',
-        select: '-__v',
+        path: "categories",
+        select: "-__v",
       },
       {
-        path: 'userId',
-        select: 'username avatar',
+        path: "userId",
+        select: "username avatar",
       },
     ];
 
@@ -258,7 +258,7 @@ export class TaskService {
         .populate(populateParams)
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .select(['-__v'])
+        .select(["-__v"])
         .exec();
 
       return { subtasks: foundSubtasks, currentPage: page, totalPages };
@@ -266,7 +266,7 @@ export class TaskService {
       foundSubtasks = await this.subtaskModel
         .find(queryParams)
         .populate(populateParams)
-        .select('-__v');
+        .select("-__v");
 
       return foundSubtasks;
     }
@@ -275,7 +275,7 @@ export class TaskService {
   async addSubtask(
     userId: string,
     taskId: string,
-    createSubtaskDto: CreateSubtaskDto,
+    createSubtaskDto: CreateSubtaskDto
   ): Promise<Subtask> {
     const createdSubtask = await this.subtaskModel.create({
       _id: new Types.ObjectId(),
@@ -299,22 +299,22 @@ export class TaskService {
   async updateSubtask(
     userId: Types.ObjectId,
     id: string,
-    attrs: Partial<Subtask>,
+    attrs: Partial<Subtask>
   ): Promise<Subtask> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
     }
 
     try {
       const { foundSubtask, status } = await this.checkStatusForSubtask(
         userId,
-        id,
+        id
       );
-      if (status === 'assignee' && foundSubtask.isConfirmed === false) {
-        throw new Error('Could not update subtask');
+      if (status === "assignee" && foundSubtask.isConfirmed === false) {
+        throw new Error("Could not update subtask");
       }
 
-      if ('isCompleted' in attrs) {
+      if ("isCompleted" in attrs) {
         foundSubtask.isCompleted = attrs.isCompleted;
         foundSubtask.dateOfCompletion = attrs.isCompleted ? new Date() : null;
       }
@@ -323,11 +323,11 @@ export class TaskService {
 
       const { categories = null, ...restData } = attrs;
 
-      if (status === 'assignee') {
+      if (status === "assignee") {
         foundSubtask.rejected = attrs.rejected ?? foundSubtask.rejected;
       }
 
-      if ((status === 'assignee' || status === 'gigachad') && categories) {
+      if ((status === "assignee" || status === "gigachad") && categories) {
         const count = await this.categoryModel.countDocuments({
           _id: { $in: attrs.categories },
           userId,
@@ -335,14 +335,14 @@ export class TaskService {
 
         if (count !== attrs.categories.length) {
           throw new BadRequestException(
-            "Some categories listed in categories array don't exist or belong to the user",
+            "Some categories listed in categories array don't exist or belong to the user"
           );
         }
 
         foundSubtask.categories = attrs.categories;
       }
 
-      if (status === 'owner' || status === 'gigachad') {
+      if (status === "owner" || status === "gigachad") {
         Object.assign(foundSubtask, restData);
       }
 
@@ -357,10 +357,10 @@ export class TaskService {
   async updateSubtaskIsConf(
     userId: Types.ObjectId,
     subtaskId: string,
-    value: boolean,
+    value: boolean
   ): Promise<void> {
     const foundSubtask = await this.subtaskModel.findById(
-      new Types.ObjectId(subtaskId),
+      new Types.ObjectId(subtaskId)
     );
     if (foundSubtask) {
       const assigneeId = foundSubtask.assigneeId.toString();
@@ -375,11 +375,11 @@ export class TaskService {
 
   async removeSubtask(
     userId: Types.ObjectId,
-    subtaskId: string,
+    subtaskId: string
   ): Promise<Subtask> {
     const { status } = await this.checkStatusForSubtask(userId, subtaskId);
 
-    if (status === 'gigachad' || status === 'owner') {
+    if (status === "gigachad" || status === "owner") {
       const removedSubtask = await this.subtaskModel.findOneAndDelete({
         _id: new Types.ObjectId(subtaskId),
         userId,
@@ -392,9 +392,9 @@ export class TaskService {
       }
 
       return removedSubtask;
-    } else if (status === 'assignee') {
+    } else if (status === "assignee") {
       throw new BadRequestException(
-        'You are not allowed to remove this subtask',
+        "You are not allowed to remove this subtask"
       );
     }
   }
@@ -450,7 +450,7 @@ export class TaskService {
     return stats;
   }
 
-  private getDeadlineFilter(deadline: string = 'all'): object | null {
+  private getDeadlineFilter(deadline: string = "all"): object | null {
     const date = new Date();
     const year = date.getFullYear();
     const month =
@@ -461,33 +461,33 @@ export class TaskService {
     const todayMidnight = new Date(`${year}-${month}-${day}`);
 
     switch (deadline) {
-      case 'day':
+      case "day":
         return todayMidnight;
-      case 'week':
+      case "week":
         return {
           $gte: todayMidnight,
           $lte: new Date(date.setDate(date.getDate() + 7)),
         };
-      case 'month':
+      case "month":
         return {
           $gte: todayMidnight,
           $lte: new Date(date.setMonth(date.getMonth() + 1)),
         };
-      case 'year':
+      case "year":
         return {
           $gte: todayMidnight,
           $lte: new Date(`${year + 1}-${month}-${day}`),
         };
-      case 'outdated':
+      case "outdated":
         return { $lt: todayMidnight };
-      case 'nodeadline':
+      case "nodeadline":
         return null;
     }
   }
 
   private async checkStatusForSubtask(
     userId: Types.ObjectId,
-    id: string,
+    id: string
   ): Promise<CheckStatusForSubtask> {
     let status: string;
     const foundSubtask = await this.subtaskModel.findOne({
@@ -495,19 +495,19 @@ export class TaskService {
       $or: [{ userId: userId }, { assigneeId: userId }],
     });
 
-    if (!foundSubtask) throw new Error('Subtask not found');
+    if (!foundSubtask) throw new Error("Subtask not found");
 
     const isOwner = foundSubtask.userId.toString() === userId.toString();
     const isAssignee = foundSubtask.assigneeId.toString() === userId.toString();
 
     if (isOwner) {
       if (isAssignee) {
-        status = 'gigachad';
+        status = "gigachad";
       } else {
-        status = 'owner';
+        status = "owner";
       }
     } else {
-      status = 'assignee';
+      status = "assignee";
     }
 
     return { foundSubtask, status };

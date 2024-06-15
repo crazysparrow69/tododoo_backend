@@ -1,9 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Types, HydratedDocument } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose, { Types, HydratedDocument } from "mongoose";
 
-import { User } from '../user/user.schema';
-import { Category } from '../category/category.schema';
-import { Task } from './task.schema';
+import { User } from "../user/user.schema";
+import { Category } from "../category/category.schema";
+import { Task } from "./task.schema";
 
 export type SubtaskDocument = HydratedDocument<Subtask>;
 
@@ -18,7 +18,7 @@ export class Subtask {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }] })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }] })
   categories: Category[];
 
   @Prop({ default: false })
@@ -36,13 +36,13 @@ export class Subtask {
   @Prop({ default: false })
   rejected: boolean;
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" })
   userId: User;
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Task' })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "Task" })
   taskId: Task;
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" })
   assigneeId: User | Types.ObjectId;
 
   @Prop({ required: true })

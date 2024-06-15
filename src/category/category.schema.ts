@@ -1,8 +1,8 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose from "mongoose";
+import { HydratedDocument } from "mongoose";
 
-import { User } from '../user/user.schema';
+import { User } from "../user/user.schema";
 
 export type CategoryDocument = HydratedDocument<Category>;
 
@@ -14,7 +14,7 @@ export class Category {
   @Prop()
   color: string;
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" })
   userId: User;
 }
 

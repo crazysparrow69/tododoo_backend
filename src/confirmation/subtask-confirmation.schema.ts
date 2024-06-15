@@ -1,8 +1,8 @@
-import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { Schema, SchemaFactory, Prop } from "@nestjs/mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
 
-import { User } from '../user/user.schema';
-import { Subtask } from '../task/subtask.schema';
+import { User } from "../user/user.schema";
+import { Subtask } from "../task/subtask.schema";
 
 export type SubtaskDocument = HydratedDocument<SubtaskConfirmation>;
 
@@ -11,16 +11,16 @@ export class SubtaskConfirmation {
   @Prop()
   _id: Types.ObjectId;
 
-  @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
+  @Prop({ required: true, type: Types.ObjectId, ref: "User" })
   userId: User | Types.ObjectId;
 
-  @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
+  @Prop({ required: true, type: Types.ObjectId, ref: "User" })
   assigneeId: User | Types.ObjectId;
 
-  @Prop({ required: true, type: Types.ObjectId, ref: 'Subtask' })
+  @Prop({ required: true, type: Types.ObjectId, ref: "Subtask" })
   subtaskId: Subtask | Types.ObjectId;
 
-  @Prop({ default: 'subtask-confirmation' })
+  @Prop({ default: "subtask-confirmation" })
   type: string;
 
   @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })

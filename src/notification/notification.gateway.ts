@@ -5,22 +5,22 @@ import {
   OnGatewayDisconnect,
   WebSocketServer,
   WsException,
-} from '@nestjs/websockets';
-import { Namespace, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { Types, Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+} from "@nestjs/websockets";
+import { Namespace, Socket } from "socket.io";
+import { JwtService } from "@nestjs/jwt";
+import { Types, Model } from "mongoose";
+import { InjectModel } from "@nestjs/mongoose";
 
-import { TaskService } from '../task/task.service';
-import { SubtaskConfirmService } from '../confirmation/subtask-confirmation.service';
-import { User } from '../user/user.schema';
-import { UserConnection } from './notification.interface';
+import { TaskService } from "../task/task.service";
+import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
+import { User } from "../user/user.schema";
+import { UserConnection } from "./notification.interface";
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: "*",
   },
-  namespace: '/notifications',
+  namespace: "/notifications",
 })
 export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -29,7 +29,7 @@ export class NotificationGateway
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
     private subtConfService: SubtaskConfirmService,
-    private taskService: TaskService,
+    private taskService: TaskService
   ) {}
 
   @WebSocketServer() io: Namespace;
@@ -38,9 +38,9 @@ export class NotificationGateway
 
   async handleConnection(client: Socket): Promise<void> {
     try {
-      const token = client.handshake.headers['token'];
+      const token = client.handshake.headers["token"];
       if (!token) {
-        throw new WsException('Unauthorized');
+        throw new WsException("Unauthorized");
       }
       const userId = await this.validateToken(token as string);
       this.addUserConnection(userId, client.id);
@@ -50,7 +50,7 @@ export class NotificationGateway
       console.log(`Number of connected sockets: ${sockets.size}`);
       console.log(this.connections);
     } catch (err) {
-      client.emit('errorServer', err.message);
+      client.emit("errorServer", err.message);
       client.disconnect();
     }
   }
@@ -64,20 +64,20 @@ export class NotificationGateway
     console.log(this.connections);
   }
 
-  @SubscribeMessage('subtask:confirm')
+  @SubscribeMessage("subtask:confirm")
   async handleSubtaskConfirmation(
     client: Socket,
-    subtaskId: string,
+    subtaskId: string
   ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.taskService.updateSubtaskIsConf(userId, subtaskId, true);
   }
 
-  @SubscribeMessage('subtask:reject')
+  @SubscribeMessage("subtask:reject")
   async handleSubtaskRejection(
     client: Socket,
-    subtaskId: string,
+    subtaskId: string
   ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
@@ -86,7 +86,7 @@ export class NotificationGateway
 
   private addUserConnection(
     userId: Types.ObjectId,
-    socketId: string,
+    socketId: string
   ): UserConnection | null {
     if (this.connections.some((el) => el.userId === userId)) {
       return null;
@@ -101,10 +101,10 @@ export class NotificationGateway
   }
 
   public findConnectionByUserId(
-    userId: string | Types.ObjectId,
+    userId: string | Types.ObjectId
   ): string | null {
     const conn = this.connections.find(
-      (el) => el.userId.toString() === userId.toString(),
+      (el) => el.userId.toString() === userId.toString()
     );
     return conn ? conn.socketId : null;
   }
@@ -116,7 +116,7 @@ export class NotificationGateway
 
   private findAndDeleteUserConnection(socketId: string): UserConnection | null {
     const connectionIndex = this.connections.findIndex(
-      (el) => el.socketId === socketId,
+      (el) => el.socketId === socketId
     );
 
     if (connectionIndex === -1) {
@@ -129,7 +129,7 @@ export class NotificationGateway
   }
 
   private async validateToken(token: string): Promise<Types.ObjectId> {
-    if (!token) throw new WsException('Unauthorized');
+    if (!token) throw new WsException("Unauthorized");
 
     const payload = await this.jwtService.verifyAsync(token, {
       secret: process.env.ACCESS_TOKEN_SECRET,
@@ -138,7 +138,7 @@ export class NotificationGateway
     payload.sub = new Types.ObjectId(payload.sub);
 
     const foundUser = await this.userModel.findById(payload.sub);
-    if (!foundUser) throw new WsException('Unauthorized');
+    if (!foundUser) throw new WsException("Unauthorized");
 
     return foundUser._id;
   }

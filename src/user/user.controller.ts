@@ -10,68 +10,67 @@ import {
   Request,
   HttpCode,
   HttpStatus,
-  Param,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { AuthService } from './auth.service';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { QueryUserDto } from './dtos/query-user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
-import { SigninUserDto } from './dtos/signin-user.dto';
-import { ChangePasswordDto } from './dtos/change-password.dto';
-import { CurrentUser } from '../decorators/current-user.decorator';
+import { AuthGuard } from "../auth/guards/auth.guard";
+import { AuthService } from "./auth.service";
+import { UserService } from "./user.service";
+import { CreateUserDto } from "./dtos/create-user.dto";
+import { QueryUserDto } from "./dtos/query-user.dto";
+import { UpdateUserDto } from "./dtos/update-user.dto";
+import { SigninUserDto } from "./dtos/signin-user.dto";
+import { ChangePasswordDto } from "./dtos/change-password.dto";
+import { CurrentUser } from "../decorators/current-user.decorator";
 
-@Controller('user')
+@Controller("user")
 export class UserController {
   constructor(
     private userService: UserService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {}
 
-  @Get('/me')
+  @Get("/me")
   @UseGuards(AuthGuard)
   getUser(@Request() req) {
     return this.userService.findOne(req.user.sub);
   }
 
-  @Get('/')
+  @Get("/")
   @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
     return this.userService.findUsersByUsername(query);
   }
 
-  @Post('/signup')
+  @Post("/signup")
   @HttpCode(HttpStatus.CREATED)
   createUser(@Body() body: CreateUserDto) {
     return this.authService.signup(body);
   }
 
-  @Post('/signin')
+  @Post("/signin")
   signIn(@Body() body: SigninUserDto) {
     return this.authService.signin(body.email, body.password);
   }
 
-  @Patch('/')
+  @Patch("/")
   @UseGuards(AuthGuard)
   updateUser(@CurrentUser() userId: string, @Body() body: UpdateUserDto) {
     return this.userService.update(userId, body);
   }
 
-  @Delete('/')
+  @Delete("/")
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   removeUser(@CurrentUser() userId: string) {
     return this.userService.remove(userId);
   }
 
-  @Post('/password')
+  @Post("/password")
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   changePassword(
     @CurrentUser() userId: string,
-    @Body() passwords: ChangePasswordDto,
+    @Body() passwords: ChangePasswordDto
   ) {
     return this.userService.changePassword(userId, passwords);
   }

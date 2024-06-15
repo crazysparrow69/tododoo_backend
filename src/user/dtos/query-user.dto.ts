@@ -1,5 +1,5 @@
-import { IsEmail, IsString, IsOptional, Length } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsEmail, IsString, IsOptional, Length } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class QueryUserDto {
   @IsString()

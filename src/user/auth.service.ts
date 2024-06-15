@@ -1,19 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common/exceptions';
-import { JwtService } from '@nestjs/jwt';
+} from "@nestjs/common/exceptions";
+import { JwtService } from "@nestjs/jwt";
 
-import { UserService } from './user.service';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { QueryUserDto } from './dtos/query-user.dto';
+import { UserService } from "./user.service";
+import { CreateUserDto } from "./dtos/create-user.dto";
+import { QueryUserDto } from "./dtos/query-user.dto";
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async signup(createUserDto: CreateUserDto) {
@@ -29,16 +29,16 @@ export class AuthService {
   async signin(email: string, password: string) {
     const [foundUser] = await this.userService.find({ email } as QueryUserDto);
     if (!foundUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     const isPasswordValid = await this.userService.comparePasswords(
       foundUser.password,
-      password,
+      password
     );
 
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid password');
+      throw new BadRequestException("Invalid password");
     }
 
     const token = await this.jwtService.signAsync({
