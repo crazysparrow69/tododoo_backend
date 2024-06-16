@@ -1,15 +1,15 @@
 import {
   Controller,
   Post,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { ImageService } from "./image.service";
 import { CurrentUser } from "../decorators/current-user.decorator";
+import { ImageService } from "./image.service";
 
 @UseGuards(AuthGuard)
 @Controller("image")

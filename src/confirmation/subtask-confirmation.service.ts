@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
+import { CreateSubtaskConfirmationDto } from "./dtos";
 import { SubtaskConfirmation } from "./subtask-confirmation.schema";
-import { CreateSubtaskConfirmationDto } from "./dtos/create-subtask-confirmation.dto";
 
 @Injectable()
 export class SubtaskConfirmService {

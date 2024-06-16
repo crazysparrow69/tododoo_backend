@@ -1,25 +1,22 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
 import {
-  NotFoundException,
   BadRequestException,
+  NotFoundException,
 } from "@nestjs/common/exceptions";
-import { Types } from "mongoose";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model, Types } from "mongoose";
 
-import { Task } from "./task.schema";
-import { User } from "../user/user.schema";
 import { Category } from "../category/category.schema";
-import { CreateTaskDto } from "./dtos/create-task.dto";
-import { QueryTaskDto } from "./dtos/query-task.dto";
-import { CreateSubtaskDto } from "./dtos/create-subtask.dto";
+import { User } from "../user/user.schema";
+import { CreateSubtaskDto, CreateTaskDto, QueryTaskDto } from "./dtos";
 import { Subtask } from "./subtask.schema";
 import {
-  QueryParamsTask,
-  QueryParamsSubtask,
-  CreatedTaskDoc,
   CheckStatusForSubtask,
+  CreatedTaskDoc,
+  QueryParamsSubtask,
+  QueryParamsTask,
 } from "./task.interface";
+import { Task } from "./task.schema";
 
 type Stats = {
   date: Date;

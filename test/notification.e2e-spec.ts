@@ -3,7 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 
 import { AppModule } from "../src/app.module";
-import { User, Task } from "../test/interfaces";
+import { Task, User } from "../test/interfaces";
 
 describe("Notification/Task controller (e2e)", () => {
   let app: INestApplication;

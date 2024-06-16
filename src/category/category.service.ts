@@ -1,17 +1,16 @@
 import {
-  Injectable,
   BadRequestException,
+  Injectable,
   NotFoundException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
-import { CreateCategoryDto } from "./dtos/create-category.dto";
-import { QueryCategoryDto } from "./dtos/query-category.dto";
-import { User } from "../user/user.schema";
-import { Category } from "./category.schema";
 import { Task } from "../task/task.schema";
+import { User } from "../user/user.schema";
 import { createdCategoryDoc } from "./category.interface";
+import { Category } from "./category.schema";
+import { CreateCategoryDto, QueryCategoryDto } from "./dtos";
 
 @Injectable()
 export class CategoryService {

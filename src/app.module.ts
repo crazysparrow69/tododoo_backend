@@ -2,16 +2,17 @@ import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt/dist";
 import { MongooseModule } from "@nestjs/mongoose";
 
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
-import { UserModule } from "./user/user.module";
 import { CategoryModule } from "./category/category.module";
-import { TaskModule } from "./task/task.module";
+import { ConfirmationModule } from "./confirmation/confirmation.module";
 import { ImageModule } from "./image/image.module";
 import { NotificationModule } from "./notification/notification.module";
-import { ConfirmationModule } from "./confirmation/confirmation.module";
-import { AppService } from "./app.service";
-import { AppController } from "./app.controller";
+import { TaskModule } from "./task/task.module";
+import { UserModule } from "./user/user.module";
 
+// eslint-disable-next-line
 require("dotenv").config();
 
 let DATABASE_URI: string;

@@ -3,7 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 
 import { AppModule } from "../src/app.module";
-import { User, Category } from "../test/interfaces";
+import { Category, User } from "../test/interfaces";
 
 describe("Category controller (e2e)", () => {
   let app: INestApplication;

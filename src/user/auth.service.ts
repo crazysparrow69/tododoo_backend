@@ -1,13 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import {
-  NotFoundException,
   BadRequestException,
+  NotFoundException,
 } from "@nestjs/common/exceptions";
 import { JwtService } from "@nestjs/jwt";
 
+import { CreateUserDto, QueryUserDto } from "./dtos";
 import { UserService } from "./user.service";
-import { CreateUserDto } from "./dtos/create-user.dto";
-import { QueryUserDto } from "./dtos/query-user.dto";
 
 @Injectable()
 export class AuthService {

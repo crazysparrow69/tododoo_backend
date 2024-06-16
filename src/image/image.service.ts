@@ -1,16 +1,18 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+// eslint-disable-next-line
 import * as cloudinary from "cloudinary";
 import * as fs from "fs";
+import { Model } from "mongoose";
 import * as path from "path";
 
-import { User } from "../user/user.schema";
 import { Avatar } from "../user/user.interface";
+import { User } from "../user/user.schema";
 
 @Injectable()
 export class ImageService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {
+    // eslint-disable-next-line
     cloudinary.v2.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
@@ -41,6 +43,7 @@ export class ImageService {
 
     try {
       this.saveFileLocal(file.buffer, destinationPath);
+      // eslint-disable-next-line
       const result = await cloudinary.v2.uploader.upload(destinationPath, {
         use_filename: true,
         unique_filename: false,
@@ -62,6 +65,7 @@ export class ImageService {
   }
 
   deleteAvatar(publicId: string): Promise<void> {
+    // eslint-disable-next-line
     return cloudinary.v2.uploader.destroy(publicId);
   }
 

@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
   Body,
-  Param,
-  Query,
-  UseGuards,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
 } from "@nestjs/common";
 
-import { CreateCategoryDto, QueryCategoryDto, UpdateCategoryDto } from "./dtos";
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { CategoryService } from "./category.service";
 import { CurrentUser } from "../decorators/current-user.decorator";
+import { CategoryService } from "./category.service";
+import { CreateCategoryDto, QueryCategoryDto, UpdateCategoryDto } from "./dtos";
 
 @Controller("category")
 @UseGuards(AuthGuard)

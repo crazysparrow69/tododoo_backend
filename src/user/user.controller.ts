@@ -1,20 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
   Body,
-  Query,
-  UseGuards,
-  Request,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
 } from "@nestjs/common";
 
 import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../decorators/current-user.decorator";
 import { AuthService } from "./auth.service";
-import { UserService } from "./user.service";
 import {
   ChangePasswordDto,
   CreateUserDto,
@@ -22,7 +22,7 @@ import {
   SigninUserDto,
   UpdateUserDto,
 } from "./dtos";
-import { CurrentUser } from "../decorators/current-user.decorator";
+import { UserService } from "./user.service";
 
 @Controller("user")
 export class UserController {

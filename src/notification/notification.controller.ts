@@ -1,9 +1,9 @@
-import { Controller, Get, UseGuards, Query } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { Types } from "mongoose";
 
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { NotificationService } from "../notification/notification.service";
 import { CurrentUser } from "../decorators/current-user.decorator";
+import { NotificationService } from "../notification/notification.service";
 
 @UseGuards(AuthGuard)
 @Controller("notification")

@@ -1,18 +1,18 @@
+import { JwtService } from "@nestjs/jwt";
+import { InjectModel } from "@nestjs/mongoose";
 import {
-  SubscribeMessage,
-  WebSocketGateway,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
   WebSocketServer,
   WsException,
 } from "@nestjs/websockets";
+import { Model, Types } from "mongoose";
 import { Namespace, Socket } from "socket.io";
-import { JwtService } from "@nestjs/jwt";
-import { Types, Model } from "mongoose";
-import { InjectModel } from "@nestjs/mongoose";
 
-import { TaskService } from "../task/task.service";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
+import { TaskService } from "../task/task.service";
 import { User } from "../user/user.schema";
 import { UserConnection } from "./notification.interface";
 

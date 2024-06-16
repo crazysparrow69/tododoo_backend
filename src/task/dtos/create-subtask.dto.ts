@@ -1,14 +1,14 @@
+import { BadRequestException } from "@nestjs/common";
 import { Transform } from "class-transformer";
 import {
-  IsString,
-  IsOptional,
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsDate,
-  IsArray,
+  IsOptional,
+  IsString,
   Length,
-  ArrayMaxSize,
 } from "class-validator";
-import { BadRequestException } from "@nestjs/common";
 
 export class CreateSubtaskDto {
   @IsString()

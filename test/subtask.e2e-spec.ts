@@ -4,10 +4,10 @@ import * as request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import {
-  User,
-  Task,
   Subtask,
+  Task,
   taskControllerDatasets,
+  User,
 } from "../test/interfaces";
 
 describe("Subtask (Task) controller (e2e)", () => {
@@ -24,6 +24,7 @@ describe("Subtask (Task) controller (e2e)", () => {
   };
   let token: string;
   let token2: string;
+  // eslint-disable-next-line
   let categoryId: string;
   let task: Task;
   let subtask: Subtask;

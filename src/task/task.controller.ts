@@ -1,25 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
   Body,
-  Param,
-  Query,
-  UseGuards,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
 } from "@nestjs/common";
 import { Types } from "mongoose";
 
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { TaskService } from "./task.service";
-import { NotificationService } from "./../notification/notification.service";
-import { Task } from "./task.schema";
-import { Subtask } from "./subtask.schema";
-
 import { CurrentUser } from "../decorators/current-user.decorator";
+import { NotificationService } from "./../notification/notification.service";
 import {
   CreateSubtaskDto,
   CreateTaskDto,
@@ -27,6 +23,9 @@ import {
   UpdateSubtaskDto,
   UpdateTaskDto,
 } from "./dtos";
+import { Subtask } from "./subtask.schema";
+import { Task } from "./task.schema";
+import { TaskService } from "./task.service";
 
 @Controller("task")
 @UseGuards(AuthGuard)

@@ -1,13 +1,13 @@
+import { BadRequestException } from "@nestjs/common";
 import { Transform } from "class-transformer";
 import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsArray,
-  Length,
   ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsString,
+  Length,
 } from "class-validator";
-import { BadRequestException } from "@nestjs/common";
 import { Types } from "mongoose";
 
 import { Category } from "../../category/category.schema";

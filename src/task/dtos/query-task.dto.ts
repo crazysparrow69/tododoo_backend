@@ -1,6 +1,6 @@
-import { IsOptional, IsArray, IsNumber } from "class-validator";
-import { Transform } from "class-transformer";
 import { BadRequestException } from "@nestjs/common";
+import { Transform } from "class-transformer";
+import { IsArray, IsNumber, IsOptional } from "class-validator";
 import { Types } from "mongoose";
 
 export class QueryTaskDto {
