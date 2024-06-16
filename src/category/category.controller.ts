@@ -12,10 +12,10 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto, QueryCategoryDto, UpdateCategoryDto } from "./dtos";
+import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("category")
 @UseGuards(AuthGuard)

@@ -6,8 +6,6 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
-import { Category } from "../category/category.schema";
-import { User } from "../user/user.schema";
 import { CreateSubtaskDto, CreateTaskDto, QueryTaskDto } from "./dtos";
 import { Subtask } from "./subtask.schema";
 import {
@@ -17,6 +15,8 @@ import {
   QueryParamsTask,
 } from "./task.interface";
 import { Task } from "./task.schema";
+import { Category } from "../category/category.schema";
+import { User } from "../user/user.schema";
 
 type Stats = {
   date: Date;

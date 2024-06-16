@@ -6,11 +6,11 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
-import { Task } from "../task/task.schema";
-import { User } from "../user/user.schema";
 import { createdCategoryDoc } from "./category.interface";
 import { Category } from "./category.schema";
 import { CreateCategoryDto, QueryCategoryDto } from "./dtos";
+import { Task } from "../task/task.schema";
+import { User } from "../user/user.schema";
 
 @Injectable()
 export class CategoryService {

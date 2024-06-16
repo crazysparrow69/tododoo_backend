@@ -12,8 +12,6 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 import { AuthService } from "./auth.service";
 import {
   ChangePasswordDto,
@@ -23,6 +21,8 @@ import {
   UpdateUserDto,
 } from "./dtos";
 import { UserService } from "./user.service";
+import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("user")
 export class UserController {

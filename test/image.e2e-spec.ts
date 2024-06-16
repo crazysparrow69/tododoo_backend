@@ -1,6 +1,7 @@
+import * as path from "path";
+
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import * as path from "path";
 import * as request from "supertest";
 
 import { AppModule } from "../src/app.module";

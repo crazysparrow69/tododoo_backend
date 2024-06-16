@@ -11,10 +11,10 @@ import {
 import { Model, Types } from "mongoose";
 import { Namespace, Socket } from "socket.io";
 
+import { UserConnection } from "./notification.interface";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
 import { TaskService } from "../task/task.service";
 import { User } from "../user/user.schema";
-import { UserConnection } from "./notification.interface";
 
 @WebSocketGateway({
   cors: {

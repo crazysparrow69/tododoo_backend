@@ -1,15 +1,15 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 
+import { Subtask, SubtaskSchema } from "./subtask.schema";
+import { TaskController } from "./task.controller";
+import { Task, TaskSchema } from "./task.schema";
+import { TaskService } from "./task.service";
 import { AuthModule } from "../auth/auth.module";
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { Category, CategorySchema } from "../category/category.schema";
 import { NotificationModule } from "../notification/notification.module";
 import { User, UserSchema } from "../user/user.schema";
-import { Subtask, SubtaskSchema } from "./subtask.schema";
-import { TaskController } from "./task.controller";
-import { Task, TaskSchema } from "./task.schema";
-import { TaskService } from "./task.service";
 
 @Module({
   imports: [

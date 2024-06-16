@@ -1,19 +1,20 @@
+import { randomBytes, scrypt as _scrypt } from "crypto";
+import { promisify } from "util";
+
 import { Injectable } from "@nestjs/common";
 import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common/exceptions";
 import { InjectModel } from "@nestjs/mongoose";
-import { randomBytes, scrypt as _scrypt } from "crypto";
 import { Model, Types } from "mongoose";
-import { promisify } from "util";
 
-import { Category } from "../category/category.schema";
-import { ImageService } from "../image/image.service";
-import { Task } from "../task/task.schema";
 import { ChangePasswordDto, CreateUserDto, QueryUserDto } from "./dtos";
 import { findUsersByUsername } from "./user.interface";
 import { User } from "./user.schema";
+import { Category } from "../category/category.schema";
+import { ImageService } from "../image/image.service";
+import { Task } from "../task/task.schema";
 
 const scrypt = promisify(_scrypt);
 

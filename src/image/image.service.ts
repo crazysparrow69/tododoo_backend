@@ -1,10 +1,11 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 // eslint-disable-next-line
 import * as cloudinary from "cloudinary";
-import * as fs from "fs";
 import { Model } from "mongoose";
-import * as path from "path";
 
 import { Avatar } from "../user/user.interface";
 import { User } from "../user/user.schema";

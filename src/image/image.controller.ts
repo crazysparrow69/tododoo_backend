@@ -7,9 +7,9 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 
+import { ImageService } from "./image.service";
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { CurrentUser } from "../decorators/current-user.decorator";
-import { ImageService } from "./image.service";
 
 @UseGuards(AuthGuard)
 @Controller("image")

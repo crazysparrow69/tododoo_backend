@@ -13,8 +13,6 @@ import {
 } from "@nestjs/common";
 import { Types } from "mongoose";
 
-import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 import { NotificationService } from "./../notification/notification.service";
 import {
   CreateSubtaskDto,
@@ -26,6 +24,8 @@ import {
 import { Subtask } from "./subtask.schema";
 import { Task } from "./task.schema";
 import { TaskService } from "./task.service";
+import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("task")
 @UseGuards(AuthGuard)
