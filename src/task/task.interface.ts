@@ -19,7 +19,6 @@ export interface QueryParamsSubtask {
 }
 
 export interface CreatedTaskDoc {
-  __v: string;
   title: string;
   description: string;
   categories: Category[];

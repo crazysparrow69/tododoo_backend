@@ -33,7 +33,7 @@ export class CategoryService {
       $push: { categories: createdCategory._id },
     });
 
-    const { __v, ...createdCategoryData } =
+    const createdCategoryData =
       createdCategory.toObject() as createdCategoryDoc;
 
     return createdCategoryData;
