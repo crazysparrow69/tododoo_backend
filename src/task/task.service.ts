@@ -135,8 +135,7 @@ export class TaskService {
 
     await createdTask.populate("categories");
 
-    const { __v, ...createdTaskData } =
-      createdTask.toObject() as CreatedTaskDoc;
+    const createdTaskData = createdTask.toObject() as CreatedTaskDoc;
 
     return createdTaskData;
   }
