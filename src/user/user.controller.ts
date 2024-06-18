@@ -12,24 +12,14 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { AuthService } from "./auth.service";
-import {
-  ChangePasswordDto,
-  CreateUserDto,
-  QueryUserDto,
-  SigninUserDto,
-  UpdateUserDto,
-} from "./dtos";
+import { ChangePasswordDto, QueryUserDto, UpdateUserDto } from "./dtos";
 import { UserService } from "./user.service";
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("user")
 export class UserController {
-  constructor(
-    private userService: UserService,
-    private authService: AuthService
-  ) {}
+  constructor(private userService: UserService) {}
 
   @Get("/me")
   @UseGuards(AuthGuard)
@@ -41,17 +31,6 @@ export class UserController {
   @UseGuards(AuthGuard)
   getUsers(@Query() query: QueryUserDto) {
     return this.userService.findUsersByUsername(query);
-  }
-
-  @Post("/signup")
-  @HttpCode(HttpStatus.CREATED)
-  createUser(@Body() body: CreateUserDto) {
-    return this.authService.signup(body);
-  }
-
-  @Post("/signin")
-  signIn(@Body() body: SigninUserDto) {
-    return this.authService.signin(body.email, body.password);
   }
 
   @Patch("/")

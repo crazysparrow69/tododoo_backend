@@ -9,7 +9,9 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
-import { ChangePasswordDto, CreateUserDto, QueryUserDto } from "./dtos";
+import { SignupUserDto } from "src/auth/dtos";
+
+import { ChangePasswordDto, QueryUserDto } from "./dtos";
 import { findUsersByUsername } from "./user.interface";
 import { User } from "./user.schema";
 import { Category } from "../category/category.schema";
@@ -59,7 +61,7 @@ export class UserService {
     return { foundUsers, page, totalPages };
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: SignupUserDto): Promise<User> {
     const [foundUser] = await this.find({
       email: createUserDto.email,
     } as QueryUserDto);
