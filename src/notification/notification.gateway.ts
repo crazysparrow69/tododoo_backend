@@ -1,3 +1,4 @@
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import {
@@ -29,7 +30,8 @@ export class NotificationGateway
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
     private subtConfService: SubtaskConfirmService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private readonly configService: ConfigService
   ) {}
 
   @WebSocketServer() io: Namespace;
@@ -132,7 +134,7 @@ export class NotificationGateway
     if (!token) throw new WsException("Unauthorized");
 
     const payload = await this.jwtService.verifyAsync(token, {
-      secret: process.env.ACCESS_TOKEN_SECRET,
+      secret: this.configService.get("ACCESS_TOKEN_SECRET"),
     });
 
     payload.sub = new Types.ObjectId(payload.sub);

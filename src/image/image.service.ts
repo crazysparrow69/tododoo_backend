@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 // eslint-disable-next-line
 import * as cloudinary from "cloudinary";
@@ -12,12 +13,15 @@ import { User } from "../user/user.schema";
 
 @Injectable()
 export class ImageService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly configService: ConfigService
+  ) {
     // eslint-disable-next-line
     cloudinary.v2.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
+      cloud_name: this.configService.get("CLOUDINARY_CLOUD_NAME"),
+      api_key: this.configService.get("CLOUDINARY_API_KEY"),
+      api_secret: this.configService.get("CLOUDINARY_API_SECRET"),
     });
   }
 

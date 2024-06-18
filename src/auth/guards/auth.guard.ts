@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Request } from "express";
@@ -15,6 +16,7 @@ import { User } from "../../user/user.schema";
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
+    private readonly configService: ConfigService,
     @InjectModel(User.name) private userModel: Model<User>
   ) {}
 
@@ -25,7 +27,7 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.ACCESS_TOKEN_SECRET,
+        secret: this.configService.get("ACCESS_TOKEN_SECRET"),
       });
 
       payload.sub = new Types.ObjectId(payload.sub);
