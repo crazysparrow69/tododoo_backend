@@ -1,29 +1,27 @@
 import {
-  Injectable,
   BadRequestException,
+  Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model, Types } from "mongoose";
 
-import { CreateCategoryDto } from './dtos/create-category.dto';
-import { QueryCategoryDto } from './dtos/query-category.dto';
-import { User } from '../user/user.schema';
-import { Category } from './category.schema';
-import { Task } from '../task/task.schema';
-import { createdCategoryDoc } from './category.interface';
+import { Category } from "./category.schema";
+import { CreateCategoryDto, QueryCategoryDto } from "./dtos";
+import { Task } from "../task/task.schema";
+import { User } from "../user/user.schema";
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
-    @InjectModel(Category.name) private categoryModel: Model<Category>,
+    @InjectModel(Category.name) private categoryModel: Model<Category>
   ) {}
 
   async create(
     userId: string,
-    createCategoryDto: CreateCategoryDto,
+    createCategoryDto: CreateCategoryDto
   ): Promise<Category> {
     const createdCategory = await this.categoryModel.create({
       userId,
@@ -34,27 +32,24 @@ export class CategoryService {
       $push: { categories: createdCategory._id },
     });
 
-    const { __v, ...createdCategoryData } =
-      createdCategory.toObject() as createdCategoryDoc;
-
-    return createdCategoryData;
+    return createdCategory.toObject();
   }
 
   async findOne(userId: string, id: string): Promise<Category> {
     if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
 
     const foundCategory = await this.categoryModel
       .findOne({ _id: id, userId })
-      .select(['-__v']);
-    if (!foundCategory) throw new NotFoundException('Category not found');
+      .select(["-__v"]);
+    if (!foundCategory) throw new NotFoundException("Category not found");
 
     return foundCategory;
   }
 
   async find(
     userId: string,
-    query: QueryCategoryDto,
+    query: QueryCategoryDto
   ): Promise<{
     categories: Category[];
     currentPage: number;
@@ -75,7 +70,7 @@ export class CategoryService {
       .find(queryParams)
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .select(['-__v'])
+      .select(["-__v"])
       .exec();
 
     return { categories: foundCategories, currentPage: page, totalPages };
@@ -84,22 +79,22 @@ export class CategoryService {
   async update(
     userId: string,
     id: string,
-    attrs: Partial<Category>,
+    attrs: Partial<Category>
   ): Promise<Category> {
     if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
 
     const updatedCategory = await this.categoryModel
       .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
-      .select(['-__v']);
-    if (!updatedCategory) throw new NotFoundException('Category not found');
+      .select(["-__v"]);
+    if (!updatedCategory) throw new NotFoundException("Category not found");
 
     return updatedCategory;
   }
 
   async remove(userId: string, id: string): Promise<Category> {
     if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ObjectId');
+      throw new BadRequestException("Invalid ObjectId");
 
     const deletedCategory = await this.categoryModel.findOneAndDelete({
       _id: id,
@@ -114,7 +109,7 @@ export class CategoryService {
         { categories: deletedCategory._id },
         {
           $pull: { categories: deletedCategory._id },
-        },
+        }
       );
     }
 

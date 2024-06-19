@@ -1,6 +1,6 @@
-import { User } from '../user/user.schema';
-import { Category } from '../category/category.schema';
-import { Subtask, SubtaskDocument } from './subtask.schema';
+import { Subtask, SubtaskDocument } from "./subtask.schema";
+import { Category } from "../category/category.schema";
+import { User } from "../user/user.schema";
 
 export interface QueryParamsTask {
   userId: string;

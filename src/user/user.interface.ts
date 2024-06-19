@@ -1,4 +1,4 @@
-import { User } from './user.schema';
+import { User } from "./user.schema";
 
 export interface Avatar {
   url: string;

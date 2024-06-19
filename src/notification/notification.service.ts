@@ -1,33 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Injectable } from "@nestjs/common";
+import { Types } from "mongoose";
 
-import { SubtaskConfirmService } from '../confirmation/subtask-confirmation.service';
-import { NotificationGateway } from './notification.gateway';
-import { CreateSubtaskConfirmationDto } from '../confirmation/dtos/create-subtask-confirmation.dto';
-import { SubtaskConfirmation } from '../confirmation/subtask-confirmation.schema';
+import { NotificationGateway } from "./notification.gateway";
+import { CreateSubtaskConfirmationDto } from "../confirmation/dtos/create-subtask-confirmation.dto";
+import { SubtaskConfirmation } from "../confirmation/subtask-confirmation.schema";
+import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
 
 @Injectable()
 export class NotificationService {
   constructor(
     private subtaskConfirmService: SubtaskConfirmService,
-    private notificationGateway: NotificationGateway,
+    private notificationGateway: NotificationGateway
   ) {}
 
   async createSubtaskConf(
     dto: CreateSubtaskConfirmationDto,
-    userId: string,
+    userId: string
   ): Promise<void> {
     const createdSubtConf =
       await this.subtaskConfirmService.createSubtaskConfirmation(userId, dto);
 
     if (createdSubtConf) {
       const socketId = this.notificationGateway.findConnectionByUserId(
-        dto.assigneeId,
+        dto.assigneeId
       );
       if (socketId) {
         this.notificationGateway.io
           .to(socketId)
-          .emit('newSubtaskConfirmation', createdSubtConf);
+          .emit("newSubtaskConfirmation", createdSubtConf);
       }
     }
   }
@@ -36,7 +36,7 @@ export class NotificationService {
     userId: Types.ObjectId,
     page: number,
     limit: number,
-    skip: number,
+    skip: number
   ): Promise<{
     notifications: Array<SubtaskConfirmation>;
     currentPage: number;
@@ -60,7 +60,7 @@ export class NotificationService {
 
     const notificationsSlice = notifications.slice(
       (page - 1) * limit + skip,
-      page * limit + skip,
+      page * limit + skip
     );
 
     return { notifications: notificationsSlice, currentPage: page, totalPages };
@@ -72,12 +72,12 @@ export class NotificationService {
 
     if (deletedSubtConf) {
       const socketId = this.notificationGateway.findConnectionByUserId(
-        deletedSubtConf.assigneeId.toString(),
+        deletedSubtConf.assigneeId.toString()
       );
       if (socketId) {
         this.notificationGateway.io
           .to(socketId)
-          .emit('delSubtaskConfirmation', deletedSubtConf._id);
+          .emit("delSubtaskConfirmation", deletedSubtConf._id);
       }
     }
   }

@@ -1,9 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 
-import { Category } from '../category/category.schema';
-import { Task } from '../task/task.schema';
-import { Avatar } from './user.interface';
+import { Avatar } from "./user.interface";
+import { Category } from "../category/category.schema";
+import { Task } from "../task/task.schema";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -23,13 +23,13 @@ export class User {
 
   @Prop({
     required: false,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
   })
   tasks: Task[];
 
   @Prop({
     required: false,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
   })
   categories: Category[];
 

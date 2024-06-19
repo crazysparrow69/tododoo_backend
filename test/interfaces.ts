@@ -1,5 +1,6 @@
-import { Types } from 'mongoose';
-import { Avatar } from '../src/user/user.interface';
+import { Types } from "mongoose";
+
+import { Avatar } from "../src/user/user.interface";
 
 export interface User {
   _id: Types.ObjectId;
@@ -53,9 +54,9 @@ export interface Subtask {
 
 export const taskControllerDatasets = [
   {
-    message: 'empty title',
+    message: "empty title",
     data: {
-      description: 'description',
+      description: "description",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
@@ -65,10 +66,10 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'too short title',
+    message: "too short title",
     data: {
-      title: 'a',
-      description: 'description',
+      title: "a",
+      description: "description",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
@@ -78,10 +79,10 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'too long title',
+    message: "too long title",
     data: {
-      title: 'sportsportsportsportsportsportsportsportsportsport!',
-      description: 'description',
+      title: "sportsportsportsportsportsportsportsportsportsport!",
+      description: "description",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
@@ -91,10 +92,10 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'invalid type of title',
+    message: "invalid type of title",
     data: {
       title: 123,
-      description: 'description',
+      description: "description",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
@@ -104,9 +105,9 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'empty description',
+    message: "empty description",
     data: {
-      title: 'task',
+      title: "task",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
@@ -116,10 +117,10 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'too short description',
+    message: "too short description",
     data: {
-      title: 'task',
-      description: 'a',
+      title: "task",
+      description: "a",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
@@ -129,9 +130,9 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'invalid type of description',
+    message: "invalid type of description",
     data: {
-      title: 'task',
+      title: "task",
       description: 123,
       categories: [],
       isCompleted: true,
@@ -142,11 +143,11 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'invalid type of categories',
+    message: "invalid type of categories",
     data: {
-      title: 'task',
-      description: 'description',
-      categories: 'niggers',
+      title: "task",
+      description: "description",
+      categories: "niggers",
       isCompleted: true,
       dateOfCompletion: null,
       links: [],
@@ -155,12 +156,12 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'invalid type of isCompleted',
+    message: "invalid type of isCompleted",
     data: {
-      title: 'task',
-      description: 'description',
+      title: "task",
+      description: "description",
       categories: [],
-      isCompleted: 'yes',
+      isCompleted: "yes",
       dateOfCompletion: null,
       links: [],
       deadline: null,
@@ -168,41 +169,41 @@ export const taskControllerDatasets = [
     },
   },
   {
-    message: 'invalid type of assigneeId',
+    message: "invalid type of assigneeId",
     data: {
-      title: 'task',
-      description: 'description',
+      title: "task",
+      description: "description",
       categories: [],
-      isCompleted: 'yes',
+      isCompleted: "yes",
       dateOfCompletion: null,
       links: [],
       deadline: null,
-      assigneeId: '123',
+      assigneeId: "123",
     },
   },
   {
-    message: 'invalid type of links',
+    message: "invalid type of links",
     data: {
-      title: 'task',
-      description: 'description',
+      title: "task",
+      description: "description",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
-      links: 'https://www.instagram.com/ivan_anenko/',
+      links: "https://www.instagram.com/ivan_anenko/",
       deadline: null,
       assigneeId: 123,
     },
   },
   {
-    message: 'invalid type of deadline',
+    message: "invalid type of deadline",
     data: {
-      title: 'task',
-      description: 'description',
+      title: "task",
+      description: "description",
       categories: [],
       isCompleted: true,
       dateOfCompletion: null,
       links: [],
-      deadline: 'yesterday',
+      deadline: "yesterday",
       assigneeId: 123,
     },
   },

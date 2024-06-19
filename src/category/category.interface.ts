@@ -1,4 +1,4 @@
-import { User } from '../user/user.schema';
+import { User } from "../user/user.schema";
 
 export interface createdCategoryDoc {
   __v: string;

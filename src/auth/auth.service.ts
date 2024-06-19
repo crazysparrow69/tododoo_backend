@@ -1,22 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
-  NotFoundException,
   BadRequestException,
-} from '@nestjs/common/exceptions';
-import { JwtService } from '@nestjs/jwt';
+  NotFoundException,
+} from "@nestjs/common/exceptions";
+import { JwtService } from "@nestjs/jwt";
+import { QueryUserDto } from "src/user/dtos";
 
-import { UserService } from './user.service';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { QueryUserDto } from './dtos/query-user.dto';
+import { SignupUserDto } from "./dtos";
+import { UserService } from "../user/user.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
-  async signup(createUserDto: CreateUserDto) {
+  async signup(createUserDto: SignupUserDto) {
     const createdUser = await this.userService.create(createUserDto);
 
     const token = await this.jwtService.signAsync({
@@ -29,16 +29,16 @@ export class AuthService {
   async signin(email: string, password: string) {
     const [foundUser] = await this.userService.find({ email } as QueryUserDto);
     if (!foundUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     const isPasswordValid = await this.userService.comparePasswords(
       foundUser.password,
-      password,
+      password
     );
 
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid password');
+      throw new BadRequestException("Invalid password");
     }
 
     const token = await this.jwtService.signAsync({

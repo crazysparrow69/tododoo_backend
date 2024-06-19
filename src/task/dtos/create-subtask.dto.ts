@@ -1,14 +1,14 @@
-import { Transform } from 'class-transformer';
+import { BadRequestException } from "@nestjs/common";
+import { Transform } from "class-transformer";
 import {
-  IsString,
-  IsOptional,
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsDate,
-  IsArray,
+  IsOptional,
+  IsString,
   Length,
-  ArrayMaxSize,
-} from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
+} from "class-validator";
 
 export class CreateSubtaskDto {
   @IsString()
@@ -38,8 +38,8 @@ export class CreateSubtaskDto {
       return null;
     }
     const date = new Date(value);
-    if (typeof value !== 'string' || isNaN(date.getTime())) {
-      throw new BadRequestException('Invalid date format for deadline');
+    if (typeof value !== "string" || isNaN(date.getTime())) {
+      throw new BadRequestException("Invalid date format for deadline");
     }
 
     return date;

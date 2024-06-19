@@ -1,7 +1,7 @@
-import { IsOptional, IsArray, IsNumber } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { BadRequestException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { BadRequestException } from "@nestjs/common";
+import { Transform } from "class-transformer";
+import { IsArray, IsNumber, IsOptional } from "class-validator";
+import { Types } from "mongoose";
 
 export class QueryTaskDto {
   @IsArray()
@@ -10,12 +10,12 @@ export class QueryTaskDto {
     try {
       const parsed = JSON.parse(value);
       for (const id of parsed) {
-        if (typeof id !== 'string' || !Types.ObjectId.isValid(id))
+        if (typeof id !== "string" || !Types.ObjectId.isValid(id))
           throw new Error();
       }
       return parsed;
     } catch (err) {
-      throw new BadRequestException('categories must be an array of ObjectId');
+      throw new BadRequestException("categories must be an array of ObjectId");
     }
   })
   categories: string[];
@@ -24,10 +24,10 @@ export class QueryTaskDto {
   @Transform(({ value }) => {
     try {
       const parsed = JSON.parse(value);
-      if (typeof parsed !== 'boolean') throw new Error();
+      if (typeof parsed !== "boolean") throw new Error();
       return parsed;
     } catch (err) {
-      throw new BadRequestException('isCompleted must be boolean');
+      throw new BadRequestException("isCompleted must be boolean");
     }
   })
   isCompleted: boolean;
@@ -35,18 +35,18 @@ export class QueryTaskDto {
   @IsOptional()
   @Transform(({ value }) => {
     const deadlines = [
-      'day',
-      'week',
-      'month',
-      'year',
-      'outdated',
-      'all',
-      'nodeadline',
+      "day",
+      "week",
+      "month",
+      "year",
+      "outdated",
+      "all",
+      "nodeadline",
     ];
     for (const deadline of deadlines) {
       if (value === deadline) return value;
     }
-    throw new BadRequestException('deadline is invalid');
+    throw new BadRequestException("deadline is invalid");
   })
   deadline: string;
 

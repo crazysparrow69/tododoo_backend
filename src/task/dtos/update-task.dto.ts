@@ -1,16 +1,16 @@
-import { Transform } from 'class-transformer';
+import { BadRequestException } from "@nestjs/common";
+import { Transform } from "class-transformer";
 import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsArray,
-  Length,
   ArrayMaxSize,
-} from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
-import { Types } from 'mongoose';
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsString,
+  Length,
+} from "class-validator";
+import { Types } from "mongoose";
 
-import { Category } from '../../category/category.schema';
+import { Category } from "../../category/category.schema";
 
 export class UpdateTaskDto {
   @IsString()
@@ -28,9 +28,9 @@ export class UpdateTaskDto {
   @IsOptional()
   @Transform(({ value }) => {
     for (const id of value) {
-      if (typeof id !== 'string' || !Types.ObjectId.isValid(id))
+      if (typeof id !== "string" || !Types.ObjectId.isValid(id))
         throw new BadRequestException(
-          'categories must be an array of ObjectId',
+          "categories must be an array of ObjectId"
         );
     }
     return value;
@@ -52,8 +52,8 @@ export class UpdateTaskDto {
       return null;
     }
     const date = new Date(value);
-    if (typeof value !== 'string' || isNaN(date.getTime())) {
-      throw new BadRequestException('Invalid date format for deadline');
+    if (typeof value !== "string" || isNaN(date.getTime())) {
+      throw new BadRequestException("Invalid date format for deadline");
     }
 
     return date;

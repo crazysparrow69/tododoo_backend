@@ -1,20 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { User, Task } from '../test/interfaces';
+import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { Test, TestingModule } from "@nestjs/testing";
+import * as request from "supertest";
 
-describe('Notification/Task controller (e2e)', () => {
+import { AppModule } from "../src/app.module";
+import { Task, User } from "../test/interfaces";
+
+describe("Notification/Task controller (e2e)", () => {
   let app: INestApplication;
   let userData: Partial<User> | Promise<User> = {
-    username: 'clownNotification',
-    email: 'clownNotification@circus.com',
-    password: '123456',
+    username: "clownNotification",
+    email: "clownNotification@circus.com",
+    password: "123456",
   };
   let userData2: Partial<User> | Promise<User> = {
-    username: 'clownNotification2',
-    email: 'clownNotification2@circus.com',
-    password: '123456',
+    username: "clownNotification2",
+    email: "clownNotification2@circus.com",
+    password: "123456",
   };
   let token: string;
   let token2: string;
@@ -27,35 +28,35 @@ describe('Notification/Task controller (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
-      new ValidationPipe({ transform: true, whitelist: true }),
+      new ValidationPipe({ transform: true, whitelist: true })
     );
     await app.init();
 
     const notificationPostSignUpResponse = await request(app.getHttpServer())
-      .post('/user/signup')
+      .post("/user/signup")
       .send(userData);
 
     const notificationPostSignUpResponse2 = await request(app.getHttpServer())
-      .post('/user/signup')
+      .post("/user/signup")
       .send(userData2);
 
     token = notificationPostSignUpResponse.body.token;
     token2 = notificationPostSignUpResponse2.body.token;
 
     const notificationGetResonse = await request(app.getHttpServer())
-      .get('/user/me')
-      .set('Authorization', `Bearer ${token}`);
+      .get("/user/me")
+      .set("Authorization", `Bearer ${token}`);
 
     const notificationGetResonse2 = await request(app.getHttpServer())
-      .get('/user/me')
-      .set('Authorization', `Bearer ${token2}`);
+      .get("/user/me")
+      .set("Authorization", `Bearer ${token2}`);
 
     userData = notificationGetResonse.body;
     userData2 = notificationGetResonse2.body;
 
     const taskData = {
-      title: 'task',
-      description: 'description',
+      title: "task",
+      description: "description",
       categories: [],
       isCompleted: false,
       dateOfCompletion: null,
@@ -65,20 +66,20 @@ describe('Notification/Task controller (e2e)', () => {
     };
 
     const notificationTaskPostResponse = await request(app.getHttpServer())
-      .post('/task')
+      .post("/task")
       .send(taskData)
-      .set('Authorization', `Bearer ${token}`);
+      .set("Authorization", `Bearer ${token}`);
 
     task = notificationTaskPostResponse.body;
 
     return [token, token2];
   });
 
-  describe('/notification/ (GET)', () => {
-    it('should create a subtask for other user and return it with 201 status code and GET notification', async () => {
+  describe("/notification/ (GET)", () => {
+    it("should create a subtask for other user and return it with 201 status code and GET notification", async () => {
       const subtaskData = {
-        title: 'subtask',
-        description: 'description',
+        title: "subtask",
+        description: "description",
         categories: [],
         isCompleted: false,
         dateOfCompletion: null,
@@ -90,15 +91,15 @@ describe('Notification/Task controller (e2e)', () => {
       const notificationSubtaskPostResponse = await request(app.getHttpServer())
         .post(`/task/${task._id}/subtask`)
         .send(subtaskData)
-        .set('Authorization', `Bearer ${token}`);
+        .set("Authorization", `Bearer ${token}`);
 
       const notificationGetResponse = await request(app.getHttpServer())
-        .get('/notification/')
-        .set('Authorization', `Bearer ${token2}`);
+        .get("/notification/")
+        .set("Authorization", `Bearer ${token2}`);
 
       for (const key in subtaskData) {
         expect(notificationSubtaskPostResponse.body[key]).toEqual(
-          subtaskData[key],
+          subtaskData[key]
         );
       }
       expect(notificationSubtaskPostResponse.statusCode).toBe(201);
@@ -106,18 +107,18 @@ describe('Notification/Task controller (e2e)', () => {
 
       await request(app.getHttpServer())
         .delete(`/task/subtask/${notificationSubtaskPostResponse.body._id}`)
-        .set('Authorization', `Bearer ${token}`);
+        .set("Authorization", `Bearer ${token}`);
     });
   });
 
   afterAll(async () => {
     await request(app.getHttpServer())
-      .delete('/user')
-      .set('Authorization', `Bearer ${token}`);
+      .delete("/user")
+      .set("Authorization", `Bearer ${token}`);
 
     await request(app.getHttpServer())
-      .delete('/user')
-      .set('Authorization', `Bearer ${token2}`);
+      .delete("/user")
+      .set("Authorization", `Bearer ${token2}`);
 
     await app.close();
   });

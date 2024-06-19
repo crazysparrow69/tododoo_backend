@@ -1,13 +1,13 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { NotificationGateway } from './notification.gateway';
-import { MongooseModule } from '@nestjs/mongoose';
+import { forwardRef, Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
 
-import { AuthModule } from '../auth/auth.module';
-import { TaskModule } from '../task/task.module';
-import { ConfirmationModule } from './../confirmation/confirmation.module';
-import { NotificationService } from './notification.service';
-import { NotificationController } from './notification.controller';
-import { User, UserSchema } from '../user/user.schema';
+import { ConfirmationModule } from "./../confirmation/confirmation.module";
+import { NotificationController } from "./notification.controller";
+import { NotificationGateway } from "./notification.gateway";
+import { NotificationService } from "./notification.service";
+import { AuthModule } from "../auth/auth.module";
+import { TaskModule } from "../task/task.module";
+import { User, UserSchema } from "../user/user.schema";
 
 @Module({
   imports: [
