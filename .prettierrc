@@ -1,10 +1,8 @@
 {
   "arrowParens": "always",
-  "bracketSameLine": false,
   "bracketSpacing": true,
-  "endOfLine": "crlf",
+  "endOfLine": "auto",
   "semi": true,
-  "singleAttributePerLine": false,
   "singleQuote": false,
   "tabWidth": 2,
   "trailingComma": "es5",

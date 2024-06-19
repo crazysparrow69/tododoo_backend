@@ -10,7 +10,6 @@ import { CreateSubtaskDto, CreateTaskDto, QueryTaskDto } from "./dtos";
 import { Subtask } from "./subtask.schema";
 import {
   CheckStatusForSubtask,
-  CreatedTaskDoc,
   QueryParamsSubtask,
   QueryParamsTask,
 } from "./task.interface";
@@ -135,10 +134,7 @@ export class TaskService {
 
     await createdTask.populate("categories");
 
-    const { __v, ...createdTaskData } =
-      createdTask.toObject() as CreatedTaskDoc;
-
-    return createdTaskData;
+    return createdTask.toObject();
   }
 
   async updateTask(
