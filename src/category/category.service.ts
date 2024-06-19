@@ -6,7 +6,6 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
-import { createdCategoryDoc } from "./category.interface";
 import { Category } from "./category.schema";
 import { CreateCategoryDto, QueryCategoryDto } from "./dtos";
 import { Task } from "../task/task.schema";
@@ -33,10 +32,7 @@ export class CategoryService {
       $push: { categories: createdCategory._id },
     });
 
-    const { __v, ...createdCategoryData } =
-      createdCategory.toObject() as createdCategoryDoc;
-
-    return createdCategoryData;
+    return createdCategory.toObject();
   }
 
   async findOne(userId: string, id: string): Promise<Category> {

@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-
 import { UserModule } from "src/user/user.module";
 
 import { AuthController } from "./auth.controller";
