@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 
+import { CategoryMapperService } from "./category-mapper.service";
 import { CategoryController } from "./category.controller";
 import { Category, CategorySchema } from "./category.schema";
 import { CategoryService } from "./category.service";
@@ -18,7 +19,7 @@ import { User, UserSchema } from "../user/user.schema";
     ]),
     AuthModule,
   ],
-  providers: [CategoryService, AuthGuard],
+  providers: [AuthGuard, CategoryService, CategoryMapperService],
   controllers: [CategoryController],
 })
 export class CategoryModule {}
