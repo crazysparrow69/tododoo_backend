@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 
+import { UserMapperService } from "./user-mapper.service";
 import { UserController } from "./user.controller";
 import { User, UserSchema } from "./user.schema";
 import { UserService } from "./user.service";
@@ -17,7 +18,7 @@ import { Task, TaskSchema } from "../task/task.schema";
       { name: Category.name, schema: CategorySchema },
     ]),
   ],
-  providers: [UserService, ImageService, AuthGuard],
+  providers: [UserService, UserMapperService, ImageService, AuthGuard],
   exports: [UserService],
   controllers: [UserController],
 })
