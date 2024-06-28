@@ -1,9 +1,10 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { CategoryModule } from "src/category/category.module";
 
-import { Subtask, SubtaskSchema } from "./subtask.schema";
+import { Subtask, SubtaskSchema, Task, TaskSchema } from "./schemas";
+import { TaskMapperService } from "./task-mapper.service";
 import { TaskController } from "./task.controller";
-import { Task, TaskSchema } from "./task.schema";
 import { TaskService } from "./task.service";
 import { AuthModule } from "../auth/auth.module";
 import { AuthGuard } from "../auth/guards/auth.guard";
@@ -20,9 +21,10 @@ import { User, UserSchema } from "../user/user.schema";
       { name: Subtask.name, schema: SubtaskSchema },
     ]),
     AuthModule,
+    CategoryModule,
     forwardRef(() => NotificationModule),
   ],
-  providers: [TaskService, AuthGuard],
+  providers: [TaskService, TaskMapperService, AuthGuard],
   exports: [TaskService],
   controllers: [TaskController],
 })

@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
+import { Task } from "src/task/schemas";
 
 import { CategoryMapperService } from "./category-mapper.service";
 import { Category } from "./category.schema";
@@ -14,7 +15,6 @@ import {
   CreateCategoryDto,
   QueryCategoryDto,
 } from "./dtos";
-import { Task } from "../task/task.schema";
 import { User } from "../user/user.schema";
 
 @Injectable()
