@@ -6,21 +6,22 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
-import { CreateSubtaskDto, CreateTaskDto, QueryTaskDto } from "./dtos";
-import { Subtask } from "./subtask.schema";
+import {
+  CreateSubtaskDto,
+  CreateTaskDto,
+  QueryTaskDto,
+  TaskResponseDto,
+} from "./dtos";
+import { Subtask, Task } from "./schemas";
+import { TaskMapperService } from "./task-mapper.service";
 import {
   CheckStatusForSubtask,
   QueryParamsSubtask,
   QueryParamsTask,
 } from "./task.interface";
-import { Task } from "./task.schema";
+import { UserTasksStats } from "./types";
 import { Category } from "../category/category.schema";
 import { User } from "../user/user.schema";
-
-type Stats = {
-  date: Date;
-  counter: number;
-}[];
 
 @Injectable()
 export class TaskService {
@@ -28,31 +29,45 @@ export class TaskService {
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
-    @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>
+    @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
+    private readonly taskMapperService: TaskMapperService
   ) {}
 
-  async findOne(userId: string, id: string): Promise<Task> {
+  async findOne(userId: string, id: string): Promise<TaskResponseDto> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
     const foundTask = await this.taskModel
-      .findOne({ _id: id, userId })
-      .select(["-__v"]);
+      .findOne(
+        { _id: id, userId },
+        {
+          _id: 1,
+          title: 1,
+          description: 1,
+          isCompleted: 1,
+          categories: 1,
+          links: 1,
+          subtasks: 1,
+          dateOfCompletion: 1,
+          deadline: 1,
+        }
+      )
+      .lean();
     if (!foundTask) throw new NotFoundException("Task not found");
 
-    return foundTask;
+    return this.taskMapperService.toTaskResponse(foundTask);
   }
 
-  async findTasksByQuery(
+  async findByQuery(
     userId: string,
     query: QueryTaskDto
   ): Promise<
     | {
-        tasks: Task[];
+        tasks: TaskResponseDto[];
         currentPage: number;
         totalPages: number;
       }
-    | Task[]
+    | TaskResponseDto[]
   > {
     const {
       page = 1,
@@ -78,7 +93,6 @@ export class TaskService {
       queryParams.deadline = this.getDeadlineFilter(deadline);
     }
 
-    let foundTasks: Task[];
     const populateParams = [
       {
         path: "categories",
@@ -94,37 +108,60 @@ export class TaskService {
       },
     ];
 
+    let foundTasks: Task[];
+
     if (query.page || query.limit) {
       const count = await this.taskModel.countDocuments(queryParams);
 
       const totalPages = Math.ceil(count / limit);
-
-      foundTasks = await this.taskModel
-        .find(queryParams)
+      const foundTasks = await this.taskModel
+        .find(queryParams, {
+          _id: 1,
+          title: 1,
+          description: 1,
+          isCompleted: 1,
+          categories: 1,
+          links: 1,
+          subtasks: 1,
+          dateOfCompletion: 1,
+          deadline: 1,
+        })
+        .lean()
         .populate(populateParams)
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .select(["-__v"])
-        .exec();
+        .limit(limit)
+        .skip((page - 1) * limit);
 
-      return { tasks: foundTasks, currentPage: page, totalPages };
+      return {
+        tasks: this.taskMapperService.toTasks(foundTasks),
+        currentPage: page,
+        totalPages,
+      };
     } else {
       foundTasks = await this.taskModel
-        .find(queryParams)
-        .populate(populateParams)
-        .select("-__v");
+        .find(queryParams, {
+          _id: 1,
+          title: 1,
+          description: 1,
+          isCompleted: 1,
+          categories: 1,
+          links: 1,
+          subtasks: 1,
+          dateOfCompletion: 1,
+          deadline: 1,
+        })
+        .lean()
+        .populate(populateParams);
 
-      return foundTasks;
+      return this.taskMapperService.toTasks(foundTasks);
     }
   }
 
-  async createTask(
+  async create(
     userId: string,
     createTaskDto: CreateTaskDto
-  ): Promise<Task> {
+  ): Promise<TaskResponseDto> {
     const createdTask = await this.taskModel.create({
       userId,
-      dateOfCompletion: createTaskDto.isCompleted ? new Date() : null,
       ...createTaskDto,
     });
 
@@ -134,14 +171,14 @@ export class TaskService {
 
     await createdTask.populate("categories");
 
-    return createdTask.toObject();
+    return this.taskMapperService.toTaskResponse(createdTask);
   }
 
-  async updateTask(
+  async update(
     userId: string,
     id: string,
     attrs: Partial<Task>
-  ): Promise<Task> {
+  ): Promise<TaskResponseDto> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
@@ -164,21 +201,34 @@ export class TaskService {
 
     const updatedTask = await this.taskModel
       .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
+      .lean()
       .populate("categories")
-      .select(["-__v"]);
+      .select([
+        "_id",
+        "title",
+        "description",
+        "isCompleted",
+        "categories",
+        "links",
+        "subtasks",
+        "dateOfCompletion",
+        "deadline",
+      ]);
     if (!updatedTask) throw new NotFoundException("Task not found");
 
-    return updatedTask;
+    return this.taskMapperService.toTaskResponse(updatedTask);
   }
 
-  async removeTask(userId: string, id: string): Promise<Task> {
+  async remove(userId: string, id: string): Promise<Task> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
-    const deletedTask = await this.taskModel.findOneAndDelete({
-      _id: id,
-      userId,
-    });
+    const deletedTask = await this.taskModel
+      .findOneAndDelete({
+        _id: id,
+        userId,
+      })
+      .lean();
 
     if (deletedTask) {
       await this.userModel.findByIdAndUpdate(userId, {
@@ -392,7 +442,7 @@ export class TaskService {
     }
   }
 
-  async getStats(userId: string): Promise<Stats> {
+  async getStats(userId: string): Promise<UserTasksStats[]> {
     const date = new Date();
     const year = date.getFullYear();
     const month =

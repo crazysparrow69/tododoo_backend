@@ -1,4 +1,4 @@
-import { Subtask, SubtaskDocument } from "./subtask.schema";
+import { Subtask, SubtaskDocument } from "./schemas";
 import { Category } from "../category/category.schema";
 import { User } from "../user/user.schema";
 
