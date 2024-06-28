@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { Task, TaskSchema } from "src/task/schemas";
 
 import { UserMapperService } from "./user-mapper.service";
 import { UserController } from "./user.controller";
@@ -8,7 +9,6 @@ import { UserService } from "./user.service";
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { Category, CategorySchema } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
-import { Task, TaskSchema } from "../task/task.schema";
 
 @Module({
   imports: [
