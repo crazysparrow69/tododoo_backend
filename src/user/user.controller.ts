@@ -10,6 +10,7 @@ import {
   Request,
   UseGuards,
 } from "@nestjs/common";
+import { CurrentUser } from "src/auth/decorators";
 
 import {
   ChangePasswordDto,
@@ -20,7 +21,6 @@ import {
 } from "./dtos";
 import { UserService } from "./user.service";
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("user")
 export class UserController {

@@ -36,13 +36,14 @@ export class SubtaskConfirmService {
     return createdSubtConf.populate(populateParams);
   }
 
-  getSubtaskConfirmations(
+  async getSubtaskConfirmations(
     userId: Types.ObjectId
   ): Promise<SubtaskConfirmation[]> {
-    return this.subtaskConfirmationModel
+    const foundConfirmations = await this.subtaskConfirmationModel
       .find({
         assigneeId: userId,
       })
+      .lean()
       .select(["-__v", "-updatedAt"])
       .populate([
         {
@@ -54,6 +55,15 @@ export class SubtaskConfirmService {
           select: "username avatar",
         },
       ]);
+
+    return foundConfirmations.map((c) => ({
+      ...c,
+      creator: {
+        _id: c.userId._id.toString(),
+        username: (c.userId as any).username,
+        avatar: (c.userId as any)?.avatar.url || "",
+      },
+    }));
   }
 
   removeSubtaskConfirmation(subtaskId: string): Promise<SubtaskConfirmation> {

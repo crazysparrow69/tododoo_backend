@@ -53,10 +53,10 @@ export class QueryTaskDto {
   @IsNumber()
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
-  page: number;
+  page?: number;
 
   @IsNumber()
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
-  limit: number;
+  limit?: number;
 }

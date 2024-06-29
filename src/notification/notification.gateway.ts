@@ -11,10 +11,10 @@ import {
 } from "@nestjs/websockets";
 import { Model, Types } from "mongoose";
 import { Namespace, Socket } from "socket.io";
+import { SubtaskService } from "src/task/subtask.service";
 
 import { UserConnection } from "./notification.interface";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
-import { TaskService } from "../task/task.service";
 import { User } from "../user/user.schema";
 
 @WebSocketGateway({
@@ -30,7 +30,7 @@ export class NotificationGateway
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
     private subtConfService: SubtaskConfirmService,
-    private taskService: TaskService,
+    private subtaskService: SubtaskService,
     private readonly configService: ConfigService
   ) {}
 
@@ -73,7 +73,7 @@ export class NotificationGateway
   ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
-    await this.taskService.updateSubtaskIsConf(userId, subtaskId, true);
+    await this.subtaskService.updateSubtaskIsConf(userId, subtaskId, true);
   }
 
   @SubscribeMessage("subtask:reject")
@@ -83,7 +83,7 @@ export class NotificationGateway
   ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
-    await this.taskService.updateSubtaskIsConf(userId, subtaskId, false);
+    await this.subtaskService.updateSubtaskIsConf(userId, subtaskId, false);
   }
 
   private addUserConnection(

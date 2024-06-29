@@ -15,12 +15,10 @@ import {
   CreateCategoryDto,
   QueryCategoryDto,
 } from "./dtos";
-import { User } from "../user/user.schema";
 
 @Injectable()
 export class CategoryService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     private readonly categoryMapperService: CategoryMapperService
@@ -34,10 +32,6 @@ export class CategoryService {
       const createdCategory = await this.categoryModel.create({
         userId,
         ...createCategoryDto,
-      });
-
-      await this.userModel.findByIdAndUpdate(userId, {
-        $push: { categories: createdCategory._id },
       });
 
       return this.categoryMapperService.toCategoryResponse(createdCategory);
@@ -120,9 +114,6 @@ export class CategoryService {
     if (!deletedCategory) {
       throw new NotFoundException("Cannot delete non-existent category");
     } else {
-      await this.userModel.findByIdAndUpdate(userId, {
-        $pull: { categories: deletedCategory._id },
-      });
       await this.taskModel.updateMany(
         { categories: deletedCategory._id },
         {

@@ -1,8 +1,8 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { Types } from "mongoose";
+import { CurrentUser } from "src/auth/decorators";
 
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 import { NotificationService } from "../notification/notification.service";
 
 @UseGuards(AuthGuard)

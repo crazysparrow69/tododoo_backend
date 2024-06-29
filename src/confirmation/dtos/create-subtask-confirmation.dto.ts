@@ -14,5 +14,5 @@ export class CreateSubtaskConfirmationDto {
     }
     return value;
   })
-  subtaskId: Types.ObjectId;
+  subtaskId: string;
 }

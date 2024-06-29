@@ -3,15 +3,13 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { Types } from "mongoose";
+import { CurrentUser } from "src/auth/decorators";
 
 import { NotificationService } from "./../notification/notification.service";
 import {
@@ -19,21 +17,22 @@ import {
   CreateTaskDto,
   QueryTaskDto,
   TaskResponseDto,
-  UpdateSubtaskDto,
   UpdateTaskDto,
 } from "./dtos";
-import { Subtask } from "./schemas";
+import { SubtaskAssignedDto } from "./dtos/response";
+import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
+import { SubtaskService } from "./subtask.service";
 import { TaskService } from "./task.service";
 import { UserTasksStats } from "./types";
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 
 @Controller("task")
 @UseGuards(AuthGuard)
 export class TaskController {
   constructor(
-    private taskService: TaskService,
-    private notificationService: NotificationService
+    private readonly taskService: TaskService,
+    private readonly subtaskService: SubtaskService,
+    private readonly notificationService: NotificationService
   ) {}
 
   @Get(":id")
@@ -50,13 +49,12 @@ export class TaskController {
 
     const foundTasks = (await this.taskService.findByQuery(
       userId,
-      queryParams as QueryTaskDto
+      queryParams
     )) as TaskResponseDto[];
-
-    const foundSubtasks = (await this.taskService.findSubtasksByQuery(
+    const foundSubtasks = (await this.subtaskService.findByQuery(
       userId,
-      queryParams as QueryTaskDto
-    )) as Subtask[];
+      queryParams
+    )) as SubtaskResponseDto[];
 
     const tasks = [...foundTasks, ...foundSubtasks]
       .sort((a, b) => {
@@ -110,13 +108,12 @@ export class TaskController {
   }
 
   @Post(":taskId/subtask")
-  @HttpCode(HttpStatus.CREATED)
   async createSubtask(
     @CurrentUser() userId: string,
     @Param("taskId") taskId: string,
     @Body() body: CreateSubtaskDto
-  ) {
-    const createdSubtask = await this.taskService.addSubtask(
+  ): Promise<SubtaskAssignedDto> {
+    const createdSubtask = await this.subtaskService.create(
       userId,
       taskId,
       body
@@ -130,32 +127,5 @@ export class TaskController {
     }
 
     return createdSubtask;
-  }
-
-  @Patch("subtask/:id")
-  updateSubtask(
-    @CurrentUser() userId: Types.ObjectId,
-    @Param("id") id: string,
-    @Body() body: UpdateSubtaskDto
-  ) {
-    return this.taskService.updateSubtask(userId, id, body);
-  }
-
-  @Delete("subtask/:id")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async removeSubtask(
-    @CurrentUser() userId: Types.ObjectId,
-    @Param("id") id: string
-  ) {
-    const removedSubtask = await this.taskService.removeSubtask(userId, id);
-    const assigneeId = removedSubtask.assigneeId;
-    if (
-      userId !== assigneeId &&
-      !removedSubtask.isConfirmed &&
-      !removedSubtask.rejected
-    ) {
-      await this.notificationService.deleteSubtaskConf(id);
-    }
-    return removedSubtask;
   }
 }

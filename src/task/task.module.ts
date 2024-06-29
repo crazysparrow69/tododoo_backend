@@ -3,6 +3,9 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { CategoryModule } from "src/category/category.module";
 
 import { Subtask, SubtaskSchema, Task, TaskSchema } from "./schemas";
+import { SubtaskMapperService } from "./subtask-mapper.service";
+import { SubtaskController } from "./subtask.controller";
+import { SubtaskService } from "./subtask.service";
 import { TaskMapperService } from "./task-mapper.service";
 import { TaskController } from "./task.controller";
 import { TaskService } from "./task.service";
@@ -24,8 +27,14 @@ import { User, UserSchema } from "../user/user.schema";
     CategoryModule,
     forwardRef(() => NotificationModule),
   ],
-  providers: [TaskService, TaskMapperService, AuthGuard],
-  exports: [TaskService],
-  controllers: [TaskController],
+  providers: [
+    TaskService,
+    TaskMapperService,
+    SubtaskService,
+    SubtaskMapperService,
+    AuthGuard,
+  ],
+  exports: [TaskService, SubtaskService],
+  controllers: [TaskController, SubtaskController],
 })
 export class TaskModule {}

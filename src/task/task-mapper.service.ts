@@ -3,10 +3,15 @@ import { CategoryMapperService } from "src/category/category-mapper.service";
 
 import { TaskResponseDto } from "./dtos";
 import { Task } from "./schemas";
+import { SubtaskMapperService } from "./subtask-mapper.service";
+import { TaskTypes } from "./types";
 
 @Injectable()
 export class TaskMapperService {
-  constructor(private readonly categoryMapperService: CategoryMapperService) {}
+  constructor(
+    private readonly categoryMapperService: CategoryMapperService,
+    private readonly subtaskMapperService: SubtaskMapperService
+  ) {}
   toTaskResponse(task: Task): TaskResponseDto {
     return {
       _id: task._id.toString(),
@@ -15,9 +20,10 @@ export class TaskMapperService {
       isCompleted: task.isCompleted,
       categories: this.categoryMapperService.toCategories(task.categories),
       links: task.links,
-      subtasks: task.subtasks,
+      subtasks: this.subtaskMapperService.toAssignedSubtasks(task.subtasks),
       dateOfCompletion: task.dateOfCompletion || null,
       deadline: task.deadline || null,
+      type: TaskTypes.TASK,
     };
   }
 

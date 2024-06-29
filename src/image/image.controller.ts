@@ -6,10 +6,10 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { CurrentUser } from "src/auth/decorators";
 
 import { ImageService } from "./image.service";
 import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
 
 @UseGuards(AuthGuard)
 @Controller("image")
