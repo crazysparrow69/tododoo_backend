@@ -1,10 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { HydratedDocument } from "mongoose";
+import { HydratedDocument } from "mongoose";
 import { AbstractDocument } from "src/database";
-import { Task } from "src/task/schemas";
 
 import { Avatar } from "./user.interface";
-import { Category } from "../category/category.schema";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -19,25 +17,13 @@ export class User extends AbstractDocument {
   @Prop({ required: true, unique: true, index: true, type: String })
   email: string;
 
-  @Prop({
-    required: false,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
-  })
-  tasks: Task[];
-
-  @Prop({
-    required: false,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
-  })
-  categories: Category[];
-
-  @Prop({ default: null, type: Object })
+  @Prop({ type: Object })
   avatar: Avatar;
 
-  @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date;
 
-  @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   updatedAt: Date;
 }
 

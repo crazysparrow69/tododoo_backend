@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { HydratedDocument, Types } from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 import { Category } from "src/category/category.schema";
+import { AbstractDocument } from "src/database";
 import { User } from "src/user/user.schema";
 
 import { Task } from "./task.schema";
@@ -8,33 +9,30 @@ import { Task } from "./task.schema";
 export type SubtaskDocument = HydratedDocument<Subtask>;
 
 @Schema()
-export class Subtask {
-  @Prop()
-  _id: mongoose.Types.ObjectId;
-
-  @Prop({ required: true })
+export class Subtask extends AbstractDocument {
+  @Prop({ required: true, type: String })
   title: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   description: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }] })
-  categories: Category[];
-
-  @Prop({ default: false })
+  @Prop({ default: false, type: Boolean })
   isCompleted: boolean;
 
-  @Prop({ default: null })
-  dateOfCompletion: null | Date;
+  @Prop({ required: true, type: Boolean })
+  isConfirmed: boolean;
 
-  @Prop({ default: null })
-  links: Array<string>;
+  @Prop({ default: false, type: Boolean })
+  isRejected: boolean;
 
-  @Prop({ default: null })
-  deadline: null | Date;
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
+    default: [],
+  })
+  categories: Category[];
 
-  @Prop({ default: false })
-  rejected: boolean;
+  @Prop({ type: [String], default: [] })
+  links: string[];
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" })
   userId: User;
@@ -43,15 +41,18 @@ export class Subtask {
   taskId: Task;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" })
-  assigneeId: User | Types.ObjectId;
+  assigneeId: User;
 
-  @Prop({ required: true })
-  isConfirmed: boolean;
+  @Prop({ type: Date })
+  dateOfCompletion: Date;
 
-  @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
+  @Prop({ type: Date })
+  deadline: Date;
+
+  @Prop({ default: Date.now, type: Date })
   createdAt: Date;
 
-  @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
+  @Prop({ default: Date.now, type: Date })
   updatedAt: Date;
 }
 

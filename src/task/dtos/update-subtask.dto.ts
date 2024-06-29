@@ -48,7 +48,7 @@ export class UpdateSubtaskDto {
 
   @IsBoolean()
   @IsOptional()
-  rejected: boolean;
+  isRejected: boolean;
 
   @IsOptional()
   @Transform(({ value }) => {
