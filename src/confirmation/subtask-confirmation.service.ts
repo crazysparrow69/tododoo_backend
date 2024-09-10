@@ -21,6 +21,7 @@ export class SubtaskConfirmService {
       userId,
       ...dto,
       assigneeId: new Types.ObjectId(dto.assigneeId),
+      subtaskId: new Types.ObjectId(dto.subtaskId),
     });
     const populateParams = [
       {
@@ -67,6 +68,7 @@ export class SubtaskConfirmService {
   }
 
   removeSubtaskConfirmation(subtaskId: string): Promise<SubtaskConfirmation> {
+    console.log(subtaskId);
     return this.subtaskConfirmationModel.findOneAndDelete({
       subtaskId: new Types.ObjectId(subtaskId),
     });
