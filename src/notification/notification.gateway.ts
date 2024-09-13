@@ -1,3 +1,4 @@
+import { forwardRef, Inject } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
@@ -9,11 +10,17 @@ import {
   WebSocketServer,
   WsException,
 } from "@nestjs/websockets";
-import { Model, Types } from "mongoose";
+import mongoose, { Model, Types } from "mongoose";
 import { Namespace, Socket } from "socket.io";
 import { SubtaskService } from "src/task/subtask.service";
 
 import { UserConnection } from "./notification.interface";
+import { NotificationService } from "./notification.service";
+import {
+  NotificationServerEvents,
+  NotificationClientEvents,
+  NotificationTypes,
+} from "./types";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
 import { User } from "../user/user.schema";
 
@@ -28,10 +35,12 @@ export class NotificationGateway
 {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private jwtService: JwtService,
-    private subtConfService: SubtaskConfirmService,
-    private subtaskService: SubtaskService,
-    private readonly configService: ConfigService
+    private readonly jwtService: JwtService,
+    private readonly subtConfService: SubtaskConfirmService,
+    private readonly subtaskService: SubtaskService,
+    private readonly configService: ConfigService,
+    @Inject(forwardRef(() => NotificationService))
+    private readonly notificationService: NotificationService
   ) {}
 
   @WebSocketServer() io: Namespace;
@@ -52,7 +61,7 @@ export class NotificationGateway
       console.log(`Number of connected sockets: ${sockets.size}`);
       console.log(this.connections);
     } catch (err) {
-      client.emit("errorServer", err.message);
+      client.emit(NotificationServerEvents.ERROR, err.message);
       client.disconnect();
     }
   }
@@ -66,24 +75,42 @@ export class NotificationGateway
     console.log(this.connections);
   }
 
-  @SubscribeMessage("subtask:confirm")
+  @SubscribeMessage(NotificationClientEvents.SUBTASK_CONFIRM)
   async handleSubtaskConfirmation(
     client: Socket,
-    subtaskId: string
+    { subtaskId, receiverId }: { subtaskId: string; receiverId: string }
   ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.subtaskService.updateSubtaskIsConf(userId, subtaskId, true);
+    const notification = await this.notificationService.create({
+      actionByUserId: userId,
+      userId: new Types.ObjectId(receiverId),
+      subtaskId: new Types.ObjectId(subtaskId),
+      type: NotificationTypes.SUBTASK_CONFIRMED,
+    });
+    this.io
+      .to(this.findConnectionByUserId(receiverId))
+      .emit(NotificationServerEvents.NEW_NOTIFICATION, notification);
   }
 
-  @SubscribeMessage("subtask:reject")
+  @SubscribeMessage(NotificationClientEvents.SUBTASK_REJECT)
   async handleSubtaskRejection(
     client: Socket,
-    subtaskId: string
+    { subtaskId, receiverId }: { subtaskId: string; receiverId: string }
   ): Promise<void> {
     const userId = this.findUserIdByConnection(client.id);
     await this.subtConfService.removeSubtaskConfirmation(subtaskId);
     await this.subtaskService.updateSubtaskIsConf(userId, subtaskId, false);
+    const notification = await this.notificationService.create({
+      actionByUserId: userId,
+      userId: new mongoose.Types.ObjectId(receiverId),
+      subtaskId: new Types.ObjectId(subtaskId),
+      type: NotificationTypes.SUBTASK_REJECTED,
+    });
+    this.io
+      .to(this.findConnectionByUserId(receiverId))
+      .emit(NotificationServerEvents.NEW_NOTIFICATION, notification);
   }
 
   private addUserConnection(

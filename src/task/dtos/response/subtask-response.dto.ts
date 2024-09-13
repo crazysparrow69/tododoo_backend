@@ -1,5 +1,6 @@
-import { CategoryResponseDto } from "src/category/dtos";
-import { TaskTypes, UserReference } from "src/task/types";
+import { CategoryResponseDto } from "../../../category/dtos";
+import { UserReference } from "../../../common/types";
+import { TaskTypes } from "../../../task/types";
 
 export class SubtaskResponseDto {
   _id: string;
