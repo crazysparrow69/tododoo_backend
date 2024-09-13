@@ -37,9 +37,7 @@ export class SubtaskConfirmService {
     return createdSubtConf.populate(populateParams);
   }
 
-  async getSubtaskConfirmations(
-    userId: Types.ObjectId
-  ): Promise<SubtaskConfirmation[]> {
+  async getSubtaskConfirmations(userId: Types.ObjectId): Promise<any[]> {
     const foundConfirmations = await this.subtaskConfirmationModel
       .find({
         assigneeId: userId,
@@ -58,17 +56,20 @@ export class SubtaskConfirmService {
       ]);
 
     return foundConfirmations.map((c) => ({
-      ...c,
+      _id: c._id.toString(),
       creator: {
         _id: c.userId._id.toString(),
         username: (c.userId as any).username,
-        avatar: (c.userId as any)?.avatar.url || "",
+        avatar: (c.userId as any)?.avatar?.url || "",
       },
+      assigneeId: c.assigneeId.toString(),
+      subtaskId: c.subtaskId,
+      type: c.type,
+      createdAt: c.createdAt,
     }));
   }
 
   removeSubtaskConfirmation(subtaskId: string): Promise<SubtaskConfirmation> {
-    console.log(subtaskId);
     return this.subtaskConfirmationModel.findOneAndDelete({
       subtaskId: new Types.ObjectId(subtaskId),
     });

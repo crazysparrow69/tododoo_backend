@@ -1,4 +1,4 @@
-import { UserReference } from "src/task/types";
+import { UserReference } from "../../../common/types";
 
 export class SubtaskAssignedDto {
   _id: string;
