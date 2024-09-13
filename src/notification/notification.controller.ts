@@ -1,7 +1,16 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { Types } from "mongoose";
 import { CurrentUser } from "src/auth/decorators";
 
+import { UpdateNotificationDto } from "./dtos";
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { NotificationService } from "../notification/notification.service";
 
@@ -22,5 +31,14 @@ export class NotificationController {
       +limit,
       +skip
     );
+  }
+
+  @Patch("/:id")
+  update(
+    @CurrentUser() userId: Types.ObjectId,
+    @Param("id") id: string,
+    @Body() body: UpdateNotificationDto
+  ) {
+    return this.notificationService.update(userId, id, body);
   }
 }
