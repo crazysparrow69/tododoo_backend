@@ -8,10 +8,10 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Types } from "mongoose";
-import { CurrentUser } from "src/auth/decorators";
 
 import { UpdateNotificationDto } from "./dtos";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard } from "../auth/guards";
 import { NotificationService } from "../notification/notification.service";
 
 @UseGuards(AuthGuard)

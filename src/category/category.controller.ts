@@ -11,7 +11,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { CurrentUser } from "src/auth/decorators";
 
 import { CategoryService } from "./category.service";
 import {
@@ -20,7 +19,8 @@ import {
   QueryCategoryDto,
   UpdateCategoryDto,
 } from "./dtos";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard } from "../auth/guards";
 
 @Controller("category")
 @UseGuards(AuthGuard)

@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
-import { AbstractDocument } from "src/database";
 
 import { Avatar } from "./user.interface";
+import { AbstractDocument } from "../database";
 
 export type UserDocument = HydratedDocument<User>;
 

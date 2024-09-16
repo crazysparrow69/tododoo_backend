@@ -1,11 +1,11 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { UserModule } from "src/user/user.module";
 
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "./guards/auth.guard";
+import { AuthGuard } from "./guards";
 import { Session, SessionSchema } from "./session.schema";
+import { UserModule } from "../user/user.module";
 import { User, UserSchema } from "../user/user.schema";
 
 @Module({

@@ -5,13 +5,6 @@ import {
 } from "@nestjs/common/exceptions";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { getDeadlineFilter } from "src/common";
-import { NotificationGateway } from "src/notification/notification.gateway";
-import { NotificationService } from "src/notification/notification.service";
-import {
-  NotificationServerEvents,
-  NotificationTypes,
-} from "src/notification/types";
 
 import { CreateSubtaskDto, QueryTaskDto } from "./dtos";
 import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
@@ -20,6 +13,13 @@ import { Subtask, Task } from "./schemas";
 import { SubtaskMapperService } from "./subtask-mapper.service";
 import { CheckStatusForSubtask, QueryParamsSubtask } from "./types";
 import { Category } from "../category/category.schema";
+import { getDeadlineFilter } from "../common";
+import { NotificationGateway } from "../notification/notification.gateway";
+import { NotificationService } from "../notification/notification.service";
+import {
+  NotificationServerEvents,
+  NotificationTypes,
+} from "../notification/types";
 
 @Injectable()
 export class SubtaskService {

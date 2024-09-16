@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
-import { AbstractDocument } from "src/database";
 
 import { NotificationTypes } from "./types";
+import { AbstractDocument } from "../database";
 import { Subtask } from "../task/schemas";
 import { User } from "../user/user.schema";
 

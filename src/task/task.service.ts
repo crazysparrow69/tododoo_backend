@@ -5,13 +5,13 @@ import {
 } from "@nestjs/common/exceptions";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { getDeadlineFilter } from "src/common";
 
 import { CreateTaskDto, QueryTaskDto, TaskResponseDto } from "./dtos";
 import { Subtask, Task } from "./schemas";
 import { TaskMapperService } from "./task-mapper.service";
 import { UserTasksStats, QueryParamsTask } from "./types";
 import { Category } from "../category/category.schema";
+import { getDeadlineFilter } from "../common";
 
 @Injectable()
 export class TaskService {
