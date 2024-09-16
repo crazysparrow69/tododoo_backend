@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { CategoryMapperService } from "src/category/category-mapper.service";
 
 import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
 import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { Subtask } from "./schemas";
 import { TaskTypes } from "./types";
+import { CategoryMapperService } from "../category/category-mapper.service";
 
 @Injectable()
 export class SubtaskMapperService {

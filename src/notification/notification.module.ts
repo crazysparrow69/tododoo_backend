@@ -1,6 +1,5 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { Session, SessionSchema } from "src/auth/session.schema";
 
 import { ConfirmationModule } from "./../confirmation/confirmation.module";
 import { NotificationMapperService } from "./notification-mapper.service";
@@ -9,6 +8,7 @@ import { NotificationGateway } from "./notification.gateway";
 import { Notification, NotificationSchema } from "./notification.schema";
 import { NotificationService } from "./notification.service";
 import { AuthModule } from "../auth/auth.module";
+import { Session, SessionSchema } from "../auth/session.schema";
 import { TaskModule } from "../task/task.module";
 import { User, UserSchema } from "../user/user.schema";
 

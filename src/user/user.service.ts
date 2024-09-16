@@ -8,8 +8,6 @@ import {
 } from "@nestjs/common/exceptions";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, ProjectionType, Types } from "mongoose";
-import { SignupUserDto } from "src/auth/dtos";
-import { Task } from "src/task/schemas";
 
 import {
   ChangePasswordDto,
@@ -19,8 +17,10 @@ import {
 } from "./dtos";
 import { UserMapperService } from "./user-mapper.service";
 import { User } from "./user.schema";
+import { SignupUserDto } from "../auth/dtos";
 import { Category } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
+import { Task } from "../task/schemas";
 
 const scrypt = promisify(_scrypt);
 

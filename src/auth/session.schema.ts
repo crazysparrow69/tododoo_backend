@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
-import { AbstractDocument } from "src/database";
 
+import { AbstractDocument } from "../database";
 import { User } from "../user/user.schema";
 
 export type SessionDocument = HydratedDocument<Session>;

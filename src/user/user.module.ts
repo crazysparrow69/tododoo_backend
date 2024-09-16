@@ -1,15 +1,15 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { AuthModule } from "src/auth/auth.module";
-import { Session, SessionSchema } from "src/auth/session.schema";
-import { Task, TaskSchema } from "src/task/schemas";
 
 import { UserMapperService } from "./user-mapper.service";
 import { UserController } from "./user.controller";
 import { User, UserSchema } from "./user.schema";
 import { UserService } from "./user.service";
+import { AuthModule } from "../auth/auth.module";
+import { Session, SessionSchema } from "../auth/session.schema";
 import { Category, CategorySchema } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
+import { Task, TaskSchema } from "../task/schemas";
 
 @Module({
   imports: [
