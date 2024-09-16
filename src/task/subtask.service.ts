@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import {
   BadRequestException,
   NotFoundException,
@@ -6,6 +6,12 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { getDeadlineFilter } from "src/common";
+import { NotificationGateway } from "src/notification/notification.gateway";
+import { NotificationService } from "src/notification/notification.service";
+import {
+  NotificationServerEvents,
+  NotificationTypes,
+} from "src/notification/types";
 
 import { CreateSubtaskDto, QueryTaskDto } from "./dtos";
 import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
@@ -21,7 +27,11 @@ export class SubtaskService {
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
-    private readonly subtaskMapperService: SubtaskMapperService
+    private readonly subtaskMapperService: SubtaskMapperService,
+    @Inject(forwardRef(() => NotificationGateway))
+    private notificationGateway: NotificationGateway,
+    @Inject(forwardRef(() => NotificationService))
+    private notificationService: NotificationService
   ) {}
 
   async findByQuery(
@@ -155,6 +165,22 @@ export class SubtaskService {
       }
 
       if ("isCompleted" in attrs) {
+        if (attrs.isCompleted) {
+          const notification = await this.notificationService.create({
+            actionByUserId: userId,
+            userId: new Types.ObjectId(
+              foundSubtask.userId as unknown as string
+            ),
+            subtaskId: new Types.ObjectId(foundSubtask._id),
+            type: NotificationTypes.SUBTASK_COMPLETED,
+          });
+          const socketId = this.notificationGateway.findConnectionByUserId(
+            foundSubtask.userId as unknown as string
+          );
+          this.notificationGateway.io
+            .to(socketId)
+            .emit(NotificationServerEvents.NEW_NOTIFICATION, notification);
+        }
         foundSubtask.isCompleted = attrs.isCompleted;
         foundSubtask.dateOfCompletion = attrs.isCompleted ? new Date() : null;
       }
