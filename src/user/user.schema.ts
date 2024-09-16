@@ -20,6 +20,9 @@ export class User extends AbstractDocument {
   @Prop({ type: Object })
   avatar: Avatar;
 
+  @Prop({ type: Boolean, default: false })
+  isBanned: boolean;
+
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
 
