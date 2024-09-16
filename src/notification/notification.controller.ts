@@ -11,7 +11,7 @@ import { Types } from "mongoose";
 
 import { UpdateNotificationDto } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 import { NotificationService } from "../notification/notification.service";
 
 @UseGuards(AuthGuard)
@@ -33,6 +33,7 @@ export class NotificationController {
     );
   }
 
+  @UseGuards(BannedUserGuard)
   @Patch("/:id")
   update(
     @CurrentUser() userId: Types.ObjectId,

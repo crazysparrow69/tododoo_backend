@@ -20,7 +20,7 @@ import {
   UpdateCategoryDto,
 } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @Controller("category")
 @UseGuards(AuthGuard)
@@ -47,6 +47,7 @@ export class CategoryController {
     return this.categoryService.find(userId, query);
   }
 
+  @UseGuards(BannedUserGuard)
   @Post("/")
   @HttpCode(HttpStatus.CREATED)
   createCategory(
@@ -56,6 +57,7 @@ export class CategoryController {
     return this.categoryService.create(userId, body);
   }
 
+  @UseGuards(BannedUserGuard)
   @Patch("/:id")
   updateCategory(
     @CurrentUser() userId: string,
@@ -65,6 +67,7 @@ export class CategoryController {
     return this.categoryService.update(userId, id, body);
   }
 
+  @UseGuards(BannedUserGuard)
   @Delete("/:id")
   removeCategory(
     @CurrentUser() userId: string,

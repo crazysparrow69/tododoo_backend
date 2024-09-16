@@ -20,7 +20,7 @@ import {
 } from "./dtos";
 import { UserService } from "./user.service";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @Controller("user")
 export class UserController {
@@ -48,6 +48,7 @@ export class UserController {
     return this.userService.findUsersByUsername(query);
   }
 
+  @UseGuards(BannedUserGuard)
   @Patch()
   @UseGuards(AuthGuard)
   updateUser(
@@ -57,12 +58,14 @@ export class UserController {
     return this.userService.update(userId, body);
   }
 
+  @UseGuards(BannedUserGuard)
   @Delete()
   @UseGuards(AuthGuard)
   removeUser(@CurrentUser() userId: string): Promise<{ success: boolean }> {
     return this.userService.remove(userId);
   }
 
+  @UseGuards(BannedUserGuard)
   @Post("password")
   @UseGuards(AuthGuard)
   changePassword(

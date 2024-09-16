@@ -85,6 +85,7 @@ export class TaskController {
     return this.taskService.create(userId, body);
   }
 
+  @UseGuards(BannedUserGuard)
   @Patch(":id")
   updateTask(
     @CurrentUser() userId: string,
@@ -94,6 +95,7 @@ export class TaskController {
     return this.taskService.update(userId, id, body);
   }
 
+  @UseGuards(BannedUserGuard)
   @Delete(":id")
   async removeTask(@CurrentUser() userId: string, @Param("id") id: string) {
     const removedTask = await this.taskService.remove(userId, id);
@@ -108,6 +110,7 @@ export class TaskController {
     return this.taskService.getStats(userId);
   }
 
+  @UseGuards(BannedUserGuard)
   @Post(":taskId/subtask")
   async createSubtask(
     @CurrentUser() userId: string,
