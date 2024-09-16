@@ -9,13 +9,14 @@ import { FileInterceptor } from "@nestjs/platform-express";
 
 import { ImageService } from "./image.service";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @UseGuards(AuthGuard)
 @Controller("image")
 export class ImageController {
   constructor(private imageService: ImageService) {}
 
+  @UseGuards(BannedUserGuard)
   @Post("/avatar")
   @UseInterceptors(FileInterceptor("image"))
   async createAvatar(@CurrentUser() userId: string, @UploadedFile() file: any) {
