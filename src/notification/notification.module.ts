@@ -1,5 +1,6 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { Session, SessionSchema } from "src/auth/session.schema";
 
 import { ConfirmationModule } from "./../confirmation/confirmation.module";
 import { NotificationMapperService } from "./notification-mapper.service";
@@ -16,6 +17,7 @@ import { User, UserSchema } from "../user/user.schema";
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Notification.name, schema: NotificationSchema },
+      { name: Session.name, schema: SessionSchema },
     ]),
     ConfirmationModule,
     AuthModule,

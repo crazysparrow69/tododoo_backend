@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { CurrentUser } from "src/auth/decorators";
+import { AuthGuard, BannedUserGuard } from "src/auth/guards";
 
 import { NotificationService } from "./../notification/notification.service";
 import {
@@ -24,7 +25,6 @@ import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { SubtaskService } from "./subtask.service";
 import { TaskService } from "./task.service";
 import { UserTasksStats } from "./types";
-import { AuthGuard } from "../auth/guards/auth.guard";
 
 @Controller("task")
 @UseGuards(AuthGuard)
@@ -76,6 +76,7 @@ export class TaskController {
     return { tasks, currentPage: page, totalPages };
   }
 
+  @UseGuards(BannedUserGuard)
   @Post("")
   createTask(
     @CurrentUser() userId: string,
