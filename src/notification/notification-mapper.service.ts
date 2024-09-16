@@ -11,7 +11,8 @@ export class NotificationMapperService {
   toNotificationResponse(notification: Notification): NotificationResponseDto {
     if (
       notification.type === NotificationTypes.SUBTASK_CONFIRMED ||
-      notification.type === NotificationTypes.SUBTASK_REJECTED
+      notification.type === NotificationTypes.SUBTASK_REJECTED ||
+      notification.type === NotificationTypes.SUBTASK_COMPLETED
     ) {
       return {
         _id: notification._id.toString(),
