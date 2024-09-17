@@ -50,6 +50,7 @@ export class UserService implements OnModuleInit {
         email: 1,
         "avatar.url": 1,
         createdAt: 1,
+        roles: 1,
       })
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
@@ -64,6 +65,7 @@ export class UserService implements OnModuleInit {
         username: 1,
         "avatar.url": 1,
         createdAt: 1,
+        isBanned: 1,
       })
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
