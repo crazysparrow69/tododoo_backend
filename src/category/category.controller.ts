@@ -47,8 +47,8 @@ export class CategoryController {
     return this.categoryService.find(userId, query);
   }
 
-  @UseGuards(BannedUserGuard)
   @Post("/")
+  @UseGuards(BannedUserGuard)
   @HttpCode(HttpStatus.CREATED)
   createCategory(
     @CurrentUser() userId: string,
@@ -57,8 +57,8 @@ export class CategoryController {
     return this.categoryService.create(userId, body);
   }
 
-  @UseGuards(BannedUserGuard)
   @Patch("/:id")
+  @UseGuards(BannedUserGuard)
   updateCategory(
     @CurrentUser() userId: string,
     @Param("id") id: string,
@@ -67,8 +67,8 @@ export class CategoryController {
     return this.categoryService.update(userId, id, body);
   }
 
-  @UseGuards(BannedUserGuard)
   @Delete("/:id")
+  @UseGuards(BannedUserGuard)
   removeCategory(
     @CurrentUser() userId: string,
     @Param("id") id: string

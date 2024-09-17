@@ -48,9 +48,9 @@ export class UserController {
     return this.userService.findUsersByUsername(query);
   }
 
-  @UseGuards(BannedUserGuard)
   @Patch()
   @UseGuards(AuthGuard)
+  @UseGuards(BannedUserGuard)
   updateUser(
     @CurrentUser() userId: string,
     @Body() body: UpdateUserDto
@@ -58,16 +58,16 @@ export class UserController {
     return this.userService.update(userId, body);
   }
 
-  @UseGuards(BannedUserGuard)
   @Delete()
   @UseGuards(AuthGuard)
+  @UseGuards(BannedUserGuard)
   removeUser(@CurrentUser() userId: string): Promise<{ success: boolean }> {
     return this.userService.remove(userId);
   }
 
-  @UseGuards(BannedUserGuard)
   @Post("password")
   @UseGuards(AuthGuard)
+  @UseGuards(BannedUserGuard)
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto

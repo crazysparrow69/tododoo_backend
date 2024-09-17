@@ -33,8 +33,8 @@ export class NotificationController {
     );
   }
 
-  @UseGuards(BannedUserGuard)
   @Patch("/:id")
+  @UseGuards(BannedUserGuard)
   update(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string,

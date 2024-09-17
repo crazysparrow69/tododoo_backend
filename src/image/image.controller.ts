@@ -16,8 +16,8 @@ import { AuthGuard, BannedUserGuard } from "../auth/guards";
 export class ImageController {
   constructor(private imageService: ImageService) {}
 
-  @UseGuards(BannedUserGuard)
   @Post("/avatar")
+  @UseGuards(BannedUserGuard)
   @UseInterceptors(FileInterceptor("image"))
   async createAvatar(@CurrentUser() userId: string, @UploadedFile() file: any) {
     return this.imageService.uploadAvatar(userId, file);
