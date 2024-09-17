@@ -6,6 +6,11 @@ import { AbstractDocument } from "../database";
 
 export type UserDocument = HydratedDocument<User>;
 
+export enum UserRoles {
+  USER = "user",
+  ADMIN = "admin",
+}
+
 @Schema()
 export class User extends AbstractDocument {
   @Prop({ required: true, index: true, type: String })
@@ -22,6 +27,9 @@ export class User extends AbstractDocument {
 
   @Prop({ type: Boolean, default: false })
   isBanned: boolean;
+
+  @Prop({ type: String, default: [UserRoles.USER] })
+  roles: UserRoles[];
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;

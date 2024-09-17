@@ -10,6 +10,7 @@ export class UserMapperService {
       _id: user._id.toString(),
       username: user.username,
       avatar: user.avatar?.url ? user.avatar.url : "",
+      isBanned: user.isBanned,
     };
   }
 
@@ -31,6 +32,7 @@ export class UserMapperService {
       email: user.email,
       avatar: user.avatar?.url ? user.avatar.url : "",
       createdAt: user.createdAt,
+      roles: user.roles,
     };
   }
 }
