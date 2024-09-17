@@ -23,8 +23,8 @@ export class SubtaskController {
     private readonly notificationService: NotificationService
   ) {}
 
-  @UseGuards(BannedUserGuard)
   @Patch(":id")
+  @UseGuards(BannedUserGuard)
   updateSubtask(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string,
@@ -33,8 +33,8 @@ export class SubtaskController {
     return this.subtaskService.update(userId, id, body);
   }
 
-  @UseGuards(BannedUserGuard)
   @Delete(":id")
+  @UseGuards(BannedUserGuard)
   async removeSubtask(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string
