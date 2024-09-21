@@ -203,7 +203,7 @@ export class UserService implements OnModuleInit {
   }
 
   find(
-    query: QueryUserDto,
+    query: Partial<User>,
     projection: ProjectionType<User> | null = null
   ): Promise<User[]> {
     return this.userModel.find(query, projection).lean();
