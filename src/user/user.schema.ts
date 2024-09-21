@@ -28,7 +28,7 @@ export class User extends AbstractDocument {
   @Prop({ type: Boolean, default: false })
   isBanned: boolean;
 
-  @Prop({ type: String, default: [UserRoles.USER] })
+  @Prop({ type: Array, default: [UserRoles.USER] })
   roles: UserRoles[];
 
   @Prop({ type: Date, default: Date.now })
