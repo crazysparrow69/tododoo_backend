@@ -26,7 +26,9 @@ export class AuthGuard implements CanActivate {
 
     try {
       const foundToken = await this.sessionModel.findOne({ token });
-      if (!foundToken || !foundToken.isValid) throw new UnauthorizedException();
+      const now = new Date();
+      if (!foundToken || !foundToken.isValid || foundToken.expiresAt < now)
+        throw new UnauthorizedException();
 
       const foundUser = await this.userModel.findById(foundToken.userId);
       if (!foundUser) throw new UnauthorizedException();
