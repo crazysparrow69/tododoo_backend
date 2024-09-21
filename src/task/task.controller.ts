@@ -9,7 +9,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { CurrentUser } from "src/auth/decorators";
 
 import { NotificationService } from "./../notification/notification.service";
 import {
@@ -24,7 +23,8 @@ import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { SubtaskService } from "./subtask.service";
 import { TaskService } from "./task.service";
 import { UserTasksStats } from "./types";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @Controller("task")
 @UseGuards(AuthGuard)
@@ -77,6 +77,7 @@ export class TaskController {
   }
 
   @Post("")
+  @UseGuards(BannedUserGuard)
   createTask(
     @CurrentUser() userId: string,
     @Body() body: CreateTaskDto
@@ -85,6 +86,7 @@ export class TaskController {
   }
 
   @Patch(":id")
+  @UseGuards(BannedUserGuard)
   updateTask(
     @CurrentUser() userId: string,
     @Param("id") id: string,
@@ -94,6 +96,7 @@ export class TaskController {
   }
 
   @Delete(":id")
+  @UseGuards(BannedUserGuard)
   async removeTask(@CurrentUser() userId: string, @Param("id") id: string) {
     const removedTask = await this.taskService.remove(userId, id);
     removedTask.subtasks.forEach((el) =>
@@ -108,6 +111,7 @@ export class TaskController {
   }
 
   @Post(":taskId/subtask")
+  @UseGuards(BannedUserGuard)
   async createSubtask(
     @CurrentUser() userId: string,
     @Param("taskId") taskId: string,

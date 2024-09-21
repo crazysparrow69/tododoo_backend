@@ -1,7 +1,6 @@
-import { CategoryResponseDto } from "src/category/dtos";
-import { TaskTypes } from "src/task/types";
-
 import { SubtaskAssignedDto } from "./subtask-assigned.dto";
+import { CategoryResponseDto } from "../../../category/dtos";
+import { TaskTypes } from "../../../task/types";
 
 export class TaskResponseDto {
   _id: string;

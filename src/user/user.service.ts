@@ -8,8 +8,6 @@ import {
 } from "@nestjs/common/exceptions";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, ProjectionType, Types } from "mongoose";
-import { SignupUserDto } from "src/auth/dtos";
-import { Task } from "src/task/schemas";
 
 import {
   ChangePasswordDto,
@@ -19,8 +17,10 @@ import {
 } from "./dtos";
 import { UserMapperService } from "./user-mapper.service";
 import { User } from "./user.schema";
+import { SignupUserDto } from "../auth/dtos";
 import { Category } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
+import { Task } from "../task/schemas";
 
 const scrypt = promisify(_scrypt);
 
@@ -50,6 +50,7 @@ export class UserService implements OnModuleInit {
         email: 1,
         "avatar.url": 1,
         createdAt: 1,
+        roles: 1,
       })
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
@@ -64,6 +65,7 @@ export class UserService implements OnModuleInit {
         username: 1,
         "avatar.url": 1,
         createdAt: 1,
+        isBanned: 1,
       })
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
@@ -201,7 +203,7 @@ export class UserService implements OnModuleInit {
   }
 
   find(
-    query: QueryUserDto,
+    query: Partial<User>,
     projection: ProjectionType<User> | null = null
   ): Promise<User[]> {
     return this.userModel.find(query, projection).lean();

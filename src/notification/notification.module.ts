@@ -8,6 +8,7 @@ import { NotificationGateway } from "./notification.gateway";
 import { Notification, NotificationSchema } from "./notification.schema";
 import { NotificationService } from "./notification.service";
 import { AuthModule } from "../auth/auth.module";
+import { Session, SessionSchema } from "../auth/session.schema";
 import { TaskModule } from "../task/task.module";
 import { User, UserSchema } from "../user/user.schema";
 
@@ -16,6 +17,7 @@ import { User, UserSchema } from "../user/user.schema";
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Notification.name, schema: NotificationSchema },
+      { name: Session.name, schema: SessionSchema },
     ]),
     ConfirmationModule,
     AuthModule,

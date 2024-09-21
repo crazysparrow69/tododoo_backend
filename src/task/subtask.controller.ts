@@ -7,13 +7,13 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Types } from "mongoose";
-import { CurrentUser } from "src/auth/decorators";
 
 import { NotificationService } from "./../notification/notification.service";
 import { UpdateSubtaskDto } from "./dtos";
 import { SubtaskFullDto } from "./dtos/response";
 import { SubtaskService } from "./subtask.service";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @Controller("subtask")
 @UseGuards(AuthGuard)
@@ -24,6 +24,7 @@ export class SubtaskController {
   ) {}
 
   @Patch(":id")
+  @UseGuards(BannedUserGuard)
   updateSubtask(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string,
@@ -33,6 +34,7 @@ export class SubtaskController {
   }
 
   @Delete(":id")
+  @UseGuards(BannedUserGuard)
   async removeSubtask(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string

@@ -1,10 +1,15 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
-import { AbstractDocument } from "src/database";
 
 import { Avatar } from "./user.interface";
+import { AbstractDocument } from "../database";
 
 export type UserDocument = HydratedDocument<User>;
+
+export enum UserRoles {
+  USER = "user",
+  ADMIN = "admin",
+}
 
 @Schema()
 export class User extends AbstractDocument {
@@ -19,6 +24,12 @@ export class User extends AbstractDocument {
 
   @Prop({ type: Object })
   avatar: Avatar;
+
+  @Prop({ type: Boolean, default: false })
+  isBanned: boolean;
+
+  @Prop({ type: Array, default: [UserRoles.USER] })
+  roles: UserRoles[];
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;

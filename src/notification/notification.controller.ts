@@ -8,10 +8,10 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Types } from "mongoose";
-import { CurrentUser } from "src/auth/decorators";
 
 import { UpdateNotificationDto } from "./dtos";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 import { NotificationService } from "../notification/notification.service";
 
 @UseGuards(AuthGuard)
@@ -34,6 +34,7 @@ export class NotificationController {
   }
 
   @Patch("/:id")
+  @UseGuards(BannedUserGuard)
   update(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string,

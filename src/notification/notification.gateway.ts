@@ -12,7 +12,6 @@ import {
 } from "@nestjs/websockets";
 import mongoose, { Model, Types } from "mongoose";
 import { Namespace, Socket } from "socket.io";
-import { SubtaskService } from "src/task/subtask.service";
 
 import { UserConnection } from "./notification.interface";
 import { NotificationService } from "./notification.service";
@@ -22,6 +21,7 @@ import {
   NotificationTypes,
 } from "./types";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
+import { SubtaskService } from "../task/subtask.service";
 import { User } from "../user/user.schema";
 
 @WebSocketGateway({

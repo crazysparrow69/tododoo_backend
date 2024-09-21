@@ -6,10 +6,10 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { CurrentUser } from "src/auth/decorators";
 
 import { ImageService } from "./image.service";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @UseGuards(AuthGuard)
 @Controller("image")
@@ -17,6 +17,7 @@ export class ImageController {
   constructor(private imageService: ImageService) {}
 
   @Post("/avatar")
+  @UseGuards(BannedUserGuard)
   @UseInterceptors(FileInterceptor("image"))
   async createAvatar(@CurrentUser() userId: string, @UploadedFile() file: any) {
     return this.imageService.uploadAvatar(userId, file);

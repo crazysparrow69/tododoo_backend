@@ -10,7 +10,6 @@ import {
   Request,
   UseGuards,
 } from "@nestjs/common";
-import { CurrentUser } from "src/auth/decorators";
 
 import {
   ChangePasswordDto,
@@ -20,7 +19,8 @@ import {
   UserProfileDto,
 } from "./dtos";
 import { UserService } from "./user.service";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @Controller("user")
 export class UserController {
@@ -50,6 +50,7 @@ export class UserController {
 
   @Patch()
   @UseGuards(AuthGuard)
+  @UseGuards(BannedUserGuard)
   updateUser(
     @CurrentUser() userId: string,
     @Body() body: UpdateUserDto
@@ -59,12 +60,14 @@ export class UserController {
 
   @Delete()
   @UseGuards(AuthGuard)
+  @UseGuards(BannedUserGuard)
   removeUser(@CurrentUser() userId: string): Promise<{ success: boolean }> {
     return this.userService.remove(userId);
   }
 
   @Post("password")
   @UseGuards(AuthGuard)
+  @UseGuards(BannedUserGuard)
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto

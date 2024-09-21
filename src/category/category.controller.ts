@@ -11,7 +11,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { CurrentUser } from "src/auth/decorators";
 
 import { CategoryService } from "./category.service";
 import {
@@ -20,7 +19,8 @@ import {
   QueryCategoryDto,
   UpdateCategoryDto,
 } from "./dtos";
-import { AuthGuard } from "../auth/guards/auth.guard";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
 
 @Controller("category")
 @UseGuards(AuthGuard)
@@ -48,6 +48,7 @@ export class CategoryController {
   }
 
   @Post("/")
+  @UseGuards(BannedUserGuard)
   @HttpCode(HttpStatus.CREATED)
   createCategory(
     @CurrentUser() userId: string,
@@ -57,6 +58,7 @@ export class CategoryController {
   }
 
   @Patch("/:id")
+  @UseGuards(BannedUserGuard)
   updateCategory(
     @CurrentUser() userId: string,
     @Param("id") id: string,
@@ -66,6 +68,7 @@ export class CategoryController {
   }
 
   @Delete("/:id")
+  @UseGuards(BannedUserGuard)
   removeCategory(
     @CurrentUser() userId: string,
     @Param("id") id: string

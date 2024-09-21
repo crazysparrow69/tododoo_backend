@@ -8,11 +8,11 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Request } from "express";
 import { Model } from "mongoose";
 
-import { User } from "../../user/user.schema";
+import { User, UserRoles } from "../../user/user.schema";
 import { Session } from "../session.schema";
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Session.name)
@@ -29,9 +29,10 @@ export class AuthGuard implements CanActivate {
       if (!foundToken || !foundToken.isValid) throw new UnauthorizedException();
 
       const foundUser = await this.userModel.findById(foundToken.userId);
-      if (!foundUser) throw new UnauthorizedException();
+      if (!foundUser || !foundUser.roles.includes(UserRoles.ADMIN))
+        throw new UnauthorizedException();
 
-      request.user = { sub: foundToken.userId, isBanned: foundUser.isBanned };
+      request.user = { sub: foundToken.userId };
     } catch (err) {
       throw new UnauthorizedException(err.message);
     }
