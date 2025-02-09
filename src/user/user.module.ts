@@ -10,18 +10,21 @@ import { Session, SessionSchema } from "../auth/session.schema";
 import { Category, CategorySchema } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
 import { Task, TaskSchema } from "../task/schemas";
+import { UserAvatar, UserAvatarSchema } from "../image/schemas/user-avatar.schema";
+import { UserAvatarMapperService } from "../image/mappers/user-avatar-mapper";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
+      { name: UserAvatar.name, schema: UserAvatarSchema },
       { name: Task.name, schema: TaskSchema },
       { name: Category.name, schema: CategorySchema },
       { name: Session.name, schema: SessionSchema },
     ]),
     forwardRef(() => AuthModule),
   ],
-  providers: [UserService, UserMapperService, ImageService],
+  providers: [UserService, UserMapperService, ImageService, UserAvatarMapperService],
   exports: [UserService],
   controllers: [UserController],
 })

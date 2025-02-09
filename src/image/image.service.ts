@@ -1,20 +1,24 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import * as cloudinary from "cloudinary";
 import { Model } from "mongoose";
 
-import { Avatar } from "../user/user.interface";
 import { User } from "../user/user.schema";
+import { UserAvatar } from "./schemas/user-avatar.schema";
+import { UserAvatarMapperService } from "./mappers/user-avatar-mapper";
+import { UserAvatarDto } from "./dtos/response/user-avatar-response.dto";
 
 @Injectable()
-export class ImageService {
+export class ImageService implements OnModuleInit {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private readonly configService: ConfigService
+    @InjectModel(UserAvatar.name) private userAvatarModel: Model<UserAvatar>,
+    private readonly configService: ConfigService,
+    private readonly userAvatarMapperService: UserAvatarMapperService,
   ) {
     cloudinary.v2.config({
       cloud_name: this.configService.get("CLOUDINARY_CLOUD_NAME"),
@@ -23,7 +27,15 @@ export class ImageService {
     });
   }
 
-  async uploadAvatar(userId: string, file: any): Promise<Avatar> {
+  async onModuleInit() {
+    try {
+      await this.userAvatarModel.syncIndexes();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async uploadAvatar(userId: string, file: any): Promise<UserAvatarDto> {
     if (!["image/jpeg", "image/png"].includes(file.mimetype)) {
       throw new BadRequestException("Invalid file mimetype");
     }
@@ -54,14 +66,17 @@ export class ImageService {
       });
       this.deleteFileLocal(destinationPath);
 
-      await this.userModel.findByIdAndUpdate(userId, {
-        avatar: {
-          url: result.secure_url,
-          public_id: result.public_id,
-        },
+      const newAvatar = await this.userAvatarModel.create({
+        userId: foundUser.id,
+        url: result.secure_url,
+        public_id: result.public_id
       });
 
-      return { url: result.secure_url, public_id: result.public_id };
+      await this.userModel.findByIdAndUpdate(userId, {
+        avatar: newAvatar.id,
+      });
+
+      return this.userAvatarMapperService.toUserAvatar(newAvatar);
     } catch (err) {
       throw new BadRequestException(err.message);
     }
