@@ -48,11 +48,12 @@ export class UserService implements OnModuleInit {
         _id: 1,
         username: 1,
         email: 1,
-        "avatar.url": 1,
         createdAt: 1,
         roles: 1,
       })
+      .populate("avatar", "url")
       .lean();
+
     if (!foundUser) throw new NotFoundException("User not found");
 
     return this.userMapperService.toUserProfile(foundUser);
@@ -63,10 +64,10 @@ export class UserService implements OnModuleInit {
       .findById(new Types.ObjectId(id), {
         _id: 1,
         username: 1,
-        "avatar.url": 1,
         createdAt: 1,
         isBanned: 1,
       })
+      .populate("avatar", "url")
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -96,7 +97,8 @@ export class UserService implements OnModuleInit {
     }
 
     const foundUsers = await this.userModel
-      .find(query, { username: 1, "avatar.url": 1 })
+      .find(query, { username: 1 })
+      .populate("avatar", "url")
       .lean()
       .limit(limit)
       .skip((page - 1) * limit)
@@ -133,6 +135,7 @@ export class UserService implements OnModuleInit {
       .findByIdAndUpdate(id, attrs, {
         new: true,
       })
+      .populate("avatar", "url")
       .lean()
       .select(["_id", "username", "email", "avatar.url", "createdAt"]);
     if (!updatedUser) throw new NotFoundException("User not found");
@@ -145,6 +148,7 @@ export class UserService implements OnModuleInit {
       .findByIdAndDelete(id, {
         "avatar.public_id": 1,
       })
+      .populate("avatar", "url")
       .lean();
     const avatarPublicId = deletedUser.avatar?.public_id;
     if (!deletedUser) {
