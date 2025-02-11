@@ -93,6 +93,10 @@ export class TaskService {
         populate: {
           path: "assigneeId",
           select: "username avatar",
+          populate: {
+            path: "avatar",
+            select: "-_id url"
+          }
         },
       },
     ];

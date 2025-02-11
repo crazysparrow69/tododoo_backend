@@ -79,6 +79,10 @@ export class SubtaskService {
       {
         path: "userId",
         select: "_id username avatar",
+        populate: {
+          path: "avatar",
+          select: "-_id url"
+        }
       },
     ];
     const projection = {
