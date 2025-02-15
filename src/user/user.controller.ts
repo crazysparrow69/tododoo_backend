@@ -49,8 +49,8 @@ export class UserController {
   }
 
   @Patch()
-  @UseGuards(AuthGuard)
   @UseGuards(BannedUserGuard)
+  @UseGuards(AuthGuard)
   updateUser(
     @CurrentUser() userId: string,
     @Body() body: UpdateUserDto
@@ -59,15 +59,15 @@ export class UserController {
   }
 
   @Delete()
-  @UseGuards(AuthGuard)
   @UseGuards(BannedUserGuard)
+  @UseGuards(AuthGuard)
   removeUser(@CurrentUser() userId: string): Promise<{ success: boolean }> {
     return this.userService.remove(userId);
   }
 
   @Post("password")
-  @UseGuards(AuthGuard)
   @UseGuards(BannedUserGuard)
+  @UseGuards(AuthGuard)
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto
