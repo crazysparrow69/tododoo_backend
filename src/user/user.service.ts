@@ -51,7 +51,7 @@ export class UserService implements OnModuleInit {
         createdAt: 1,
         roles: 1,
       })
-      .populate("avatar", "url")
+      .populate("avatarId", "url")
       .lean();
 
     if (!foundUser) throw new NotFoundException("User not found");
@@ -67,7 +67,7 @@ export class UserService implements OnModuleInit {
         createdAt: 1,
         isBanned: 1,
       })
-      .populate("avatar", "url")
+      .populate("avatarId", "url")
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -98,7 +98,7 @@ export class UserService implements OnModuleInit {
 
     const foundUsers = await this.userModel
       .find(query, { username: 1 })
-      .populate("avatar", "url")
+      .populate("avatarId", "url")
       .lean()
       .limit(limit)
       .skip((page - 1) * limit)
@@ -135,29 +135,25 @@ export class UserService implements OnModuleInit {
       .findByIdAndUpdate(id, attrs, {
         new: true,
       })
-      .populate("avatar", "url")
+      .populate("avatarId", "url")
       .lean()
-      .select(["_id", "username", "email", "avatar.url", "createdAt"]);
+      .select(["_id", "username", "email", "avatarId", "createdAt"]);
     if (!updatedUser) throw new NotFoundException("User not found");
 
     return this.userMapperService.toUserProfile(updatedUser);
   }
 
   async remove(id: string): Promise<{ success: boolean }> {
-    const deletedUser = await this.userModel
-      .findByIdAndDelete(id, {
-        "avatar.public_id": 1,
-      })
-      .populate("avatar", "url")
-      .lean();
-    const avatarPublicId = deletedUser.avatar?.public_id;
+    const deletedUser = await this.userModel.findByIdAndDelete(id).lean();
     if (!deletedUser) {
       throw new NotFoundException("User not found");
     }
 
     await this.taskModel.deleteMany({ userId: deletedUser._id });
     await this.categoryModel.deleteMany({ userId: deletedUser._id });
-    if (avatarPublicId) this.imageService.deleteAvatar(avatarPublicId);
+
+    if (deletedUser.avatarId)
+      this.imageService.deleteAvatar(deletedUser.avatarId._id.toString());
 
     return { success: true };
   }

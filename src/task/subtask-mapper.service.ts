@@ -22,7 +22,7 @@ export class SubtaskMapperService {
           ? {
               _id: subtask.userId._id.toString(),
               username: subtask.userId.username,
-              avatar: subtask.userId.avatar?.url ?? "",
+              avatar: subtask.userId.avatarId?.url ?? "",
             }
           : null,
       dateOfCompletion: subtask.dateOfCompletion || null,
@@ -54,7 +54,7 @@ export class SubtaskMapperService {
       assignee: {
         _id: subtask.assigneeId._id.toString(),
         username: subtask.assigneeId.username,
-        avatar: subtask.assigneeId.avatar?.url ?? "",
+        avatar: subtask.assigneeId.avatarId?.url ?? "",
       },
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
@@ -87,13 +87,13 @@ export class SubtaskMapperService {
           ? {
               _id: subtask.userId._id.toString(),
               username: subtask.userId.username,
-              avatar: subtask.userId.avatar?.url ?? "",
+              avatar: subtask.userId.avatarId?.url ?? "",
             }
           : null,
       assignee: {
         _id: subtask.assigneeId._id.toString(),
         username: subtask.assigneeId.username,
-        avatar: subtask.assigneeId.avatar?.url ?? "",
+        avatar: subtask.assigneeId.avatarId?.url ?? "",
       },
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,

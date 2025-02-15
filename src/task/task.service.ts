@@ -12,6 +12,7 @@ import { TaskMapperService } from "./task-mapper.service";
 import { UserTasksStats, QueryParamsTask } from "./types";
 import { Category } from "../category/category.schema";
 import { getDeadlineFilter } from "../common";
+import { populate } from "dotenv";
 
 @Injectable()
 export class TaskService {
@@ -92,11 +93,11 @@ export class TaskService {
         select: "-_v -createdAt -updatedAt -categories -links",
         populate: {
           path: "assigneeId",
-          select: "username avatar",
+          select: "username avatarId",
           populate: {
-            path: "avatar",
-            select: "-_id url"
-          }
+            path: "avatarId",
+            select: "-_id url",
+          },
         },
       },
     ];
@@ -185,7 +186,11 @@ export class TaskService {
           path: "subtasks",
           select:
             "_id title description isCompleted isConfirmed isRejected links assigneeId dateOfCompletion deadline",
-          populate: { path: "assigneeId", select: "_id username avatar.url" },
+          populate: {
+            path: "assigneeId",
+            select: "_id username avatarId",
+            populate: { path: "avatarId", select: "-_id url" },
+          },
         },
       ])
       .select([

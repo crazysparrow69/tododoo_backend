@@ -1,7 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { BadRequestException, Injectable, OnModuleInit } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import * as cloudinary from "cloudinary";
@@ -18,7 +23,7 @@ export class ImageService implements OnModuleInit {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(UserAvatar.name) private userAvatarModel: Model<UserAvatar>,
     private readonly configService: ConfigService,
-    private readonly userAvatarMapperService: UserAvatarMapperService,
+    private readonly userAvatarMapperService: UserAvatarMapperService
   ) {
     cloudinary.v2.config({
       cloud_name: this.configService.get("CLOUDINARY_CLOUD_NAME"),
@@ -40,41 +45,50 @@ export class ImageService implements OnModuleInit {
       throw new BadRequestException("Invalid file mimetype");
     }
 
-    const filename = `${Date.now()}-avatar`;
-    const destinationPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "/uploads",
-      filename
-    );
-
-    const foundUser = await this.userModel.findById(userId);
-    const publicId = foundUser.avatar?.public_id;
-
-    if (publicId) {
-      this.deleteAvatar(publicId);
-    }
-
     try {
-      this.saveFileLocal(file.buffer, destinationPath);
+      const foundUser = await this.userModel.findById(userId);
+      if (!foundUser) {
+        throw new NotFoundException("User not found");
+      }
 
+      if (foundUser.avatarId) {
+        const foundAvatar = await this.userAvatarModel.findById(
+          foundUser.avatarId
+        );
+        if (foundAvatar) {
+          await this.deleteAvatar(foundAvatar.public_id);
+          await foundAvatar.deleteOne();
+        }
+
+        foundUser.avatarId = undefined;
+      }
+
+      const filename = `${Date.now()}-avatar`;
+      const destinationPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "/uploads",
+        filename
+      );
+
+      await this.saveFileLocal(file.buffer, destinationPath);
       const result = await cloudinary.v2.uploader.upload(destinationPath, {
         use_filename: true,
         unique_filename: false,
         overwrite: true,
       });
-      this.deleteFileLocal(destinationPath);
+      await this.deleteFileLocal(destinationPath);
 
       const newAvatar = await this.userAvatarModel.create({
         userId: foundUser.id,
         url: result.secure_url,
-        public_id: result.public_id
+        public_id: result.public_id,
       });
 
-      await this.userModel.findByIdAndUpdate(userId, {
-        avatar: newAvatar.id,
-      });
+      foundUser.avatarId = newAvatar.id;
+
+      await foundUser.save();
 
       return this.userAvatarMapperService.toUserAvatar(newAvatar);
     } catch (err) {
@@ -82,20 +96,26 @@ export class ImageService implements OnModuleInit {
     }
   }
 
-  deleteAvatar(publicId: string): Promise<void> {
-    return cloudinary.v2.uploader.destroy(publicId);
+  async deleteAvatar(avatarId: string): Promise<void> {
+    const foundAvatar = await this.userAvatarModel.findById(avatarId);
+    if (foundAvatar) {
+      await cloudinary.v2.uploader.destroy(foundAvatar.public_id);
+      foundAvatar.deleteOne();
+    }
   }
 
-  saveFileLocal(fileData: any, filePath: string): string {
-    fs.writeFileSync(filePath, fileData);
+  async saveFileLocal(fileData: any, filePath: string): Promise<string> {
+    await fs.promises.writeFile(filePath, fileData);
     return filePath;
   }
 
-  deleteFileLocal(filePath: string): void {
-    fs.unlink(filePath, (err) => {
-      if (err) {
+  async deleteFileLocal(filePath: string): Promise<void> {
+    try {
+      await fs.promises.unlink(filePath);
+    } catch (err) {
+      if (err.code !== "ENOENT") {
         throw err;
       }
-    });
+    }
   }
 }
