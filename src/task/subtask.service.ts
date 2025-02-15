@@ -78,9 +78,9 @@ export class SubtaskService {
       },
       {
         path: "userId",
-        select: "_id username avatar",
+        select: "_id username avatarId",
         populate: {
-          path: "avatar",
+          path: "avatarId",
           select: "-_id url"
         }
       },
@@ -144,8 +144,14 @@ export class SubtaskService {
 
     await createdSubtask.populate({
       path: "assigneeId",
-      select: "_id username avatar",
+      select: "_id username avatarId",
+      populate: {
+        path: "avatarId",
+        select: "-_id url"
+      }
     });
+
+    console.log(createdSubtask);
 
     return this.subtaskMapperService.toAssignedSubtask(createdSubtask);
   }
@@ -220,11 +226,19 @@ export class SubtaskService {
       await foundSubtask.populate([
         {
           path: "userId",
-          select: "_id username avatar.url",
+          select: "_id username avatarId",
+          populate: {
+            path: "avatarId",
+            select: "-_id url"
+          }
         },
         {
           path: "assigneeId",
-          select: "_id username avatar.url",
+          select: "_id username avatarId",
+          populate: {
+            path: "avatarId",
+            select: "-_id url"
+          }
         },
       ]);
 

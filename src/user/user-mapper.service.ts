@@ -9,7 +9,7 @@ export class UserMapperService {
     return {
       _id: user._id.toString(),
       username: user.username,
-      avatar: user.avatar?.url ? user.avatar.url : "",
+      avatar: user.avatarId?.url ? user.avatarId.url : "",
       isBanned: user.isBanned,
     };
   }
@@ -30,7 +30,7 @@ export class UserMapperService {
       _id: user._id.toString(),
       username: user.username,
       email: user.email,
-      avatar: user.avatar?.url ? user.avatar.url : "",
+      avatar: user.avatarId?.url ? user.avatarId.url : "",
       createdAt: user.createdAt,
       roles: user.roles,
     };
