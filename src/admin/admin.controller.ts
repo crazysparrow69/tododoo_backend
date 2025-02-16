@@ -1,8 +1,9 @@
-import { Body, Controller, Param, Patch, UseGuards } from "@nestjs/common";
-
+import { Body, Controller, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import { UpdateUserBanStatusDto } from "./dtos";
 import { AdminGuard } from "../auth/guards";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import * as Multer from "multer";
 
 @Controller("admin")
 @UseGuards(AdminGuard)
@@ -15,5 +16,27 @@ export class AdminController {
     @Body() body: UpdateUserBanStatusDto
   ) {
     return this.adminService.updateUserBanStatus(id, body.isBanned);
+  }
+
+  @Post("/profile-effect")
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: "preview", maxCount: 1 },
+      { name: "sides", maxCount: 1 },
+      { name: "top", maxCount: 1 },
+      { name: "intro", maxCount: 1 },
+    ])
+  )
+  async uploadProfileEffect(
+    @UploadedFiles()
+    files: {
+      preview: Multer.File[]; 
+      sides: Multer.File[];
+      top?: Multer.File[];
+      intro?: Multer.File[];
+    },
+    @Body('title') title: string
+  ) {
+    return this.adminService.uploadProfileEffect(title, files);
   }
 }

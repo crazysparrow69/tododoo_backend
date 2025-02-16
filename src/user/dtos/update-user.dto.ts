@@ -10,4 +10,7 @@ export class UpdateUserDto {
   @Length(1, 100)
   @IsOptional()
   email: string;
+
+  @IsString()
+  profileEffectId: string;
 }

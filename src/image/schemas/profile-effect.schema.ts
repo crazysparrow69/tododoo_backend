@@ -5,8 +5,11 @@ import { CloudinaryMedia } from "../interfaces/cloudinary";
 
 @Schema()
 export class ProfileEffect extends AbstractDocument {
-  @Prop({ required: false, type: Object })
-  intro: CloudinaryMedia;
+  @Prop({ required: true, type: String })
+  title: string;
+
+  @Prop({ type: Object })
+  intro?: CloudinaryMedia;
 
   @Prop({ required: true, type: Object })
   preview: CloudinaryMedia;
@@ -14,8 +17,8 @@ export class ProfileEffect extends AbstractDocument {
   @Prop({ required: true, type: Object })
   sides: CloudinaryMedia;
 
-  @Prop({ required: false, type: Object })
-  top: CloudinaryMedia;
+  @Prop({ type: Object })
+  top?: CloudinaryMedia;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
@@ -24,4 +27,4 @@ export class ProfileEffect extends AbstractDocument {
   updatedAt: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(ProfileEffect);
+export const ProfileEffectSchema = SchemaFactory.createForClass(ProfileEffect);

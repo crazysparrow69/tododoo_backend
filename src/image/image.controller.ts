@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseGuards,
@@ -16,10 +17,15 @@ import { AuthGuard, BannedUserGuard } from "../auth/guards";
 export class ImageController {
   constructor(private imageService: ImageService) {}
 
-  @Post("/avatar")
+  @Post("avatar")
   @UseGuards(BannedUserGuard)
   @UseInterceptors(FileInterceptor("image"))
   async createAvatar(@CurrentUser() userId: string, @UploadedFile() file: any) {
     return this.imageService.uploadAvatar(userId, file);
+  }
+
+  @Get("profile-effect")
+  getProfileEffects() {
+    return this.imageService.findProfileEffects();
   }
 }
