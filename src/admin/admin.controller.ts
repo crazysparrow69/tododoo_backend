@@ -3,7 +3,6 @@ import { AdminService } from "./admin.service";
 import { UpdateUserBanStatusDto } from "./dtos";
 import { AdminGuard } from "../auth/guards";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
-import * as Multer from "multer";
 
 @Controller("admin")
 @UseGuards(AdminGuard)
@@ -30,10 +29,10 @@ export class AdminController {
   async uploadProfileEffect(
     @UploadedFiles()
     files: {
-      preview: Multer.File[]; 
-      sides: Multer.File[];
-      top?: Multer.File[];
-      intro?: Multer.File[];
+      preview: Express.Multer.File[];
+      sides: Express.Multer.File[];
+      top?: Express.Multer.File[];
+      intro?: Express.Multer.File[];
     },
     @Body('title') title: string
   ) {
