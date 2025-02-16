@@ -78,7 +78,7 @@ export class ImageService implements OnModuleInit {
 
       const newAvatar = await this.userAvatarModel.create({
         userId: foundUser.id,
-        ...result
+        ...result,
       });
 
       foundUser.avatarId = newAvatar.id;
@@ -96,12 +96,17 @@ export class ImageService implements OnModuleInit {
   }
 
   async findProfileEffects(): Promise<ProfileEffectResponseDto[]> {
-    const profileEffects = await this.profileEffectModel.find();
+    const profileEffects = await this.profileEffectModel
+      .find()
+      .sort({ createdAt: -1 });
 
     return this.profileEffectMapperService.toProfileEffectsFull(profileEffects);
   }
 
-  async uploadFileToCloudinary(file: any, name?: string): Promise<CloudinaryMedia> {
+  async uploadFileToCloudinary(
+    file: any,
+    name?: string
+  ): Promise<CloudinaryMedia> {
     let filename = `${Date.now()}`;
     if (name) {
       filename = filename + "-" + name;
