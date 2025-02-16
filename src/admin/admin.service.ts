@@ -33,14 +33,21 @@ export class AdminService {
     return { success: true };
   }
 
-  async uploadProfileEffect(title: string, files: {
-    preview: Multer.File[];
-    sides: Multer.File[];
-    top?: Multer.File[];
-    intro?: Multer.File[];
-  }, ): Promise<{ success: boolean }> {
+  async uploadProfileEffect(
+    title: string,
+    files: {
+      preview: Express.Multer.File[];
+      sides: Express.Multer.File[];
+      top?: Express.Multer.File[];
+      intro?: Express.Multer.File[];
+    }
+  ): Promise<{ success: boolean }> {
     try {
-      if (files.preview === undefined || files.sides === undefined || title === undefined) {
+      if (
+        files.preview === undefined ||
+        files.sides === undefined ||
+        title === undefined
+      ) {
         throw new BadRequestException("Title, preview and sides are required");
       }
 
