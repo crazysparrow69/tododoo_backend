@@ -3,6 +3,7 @@ import mongoose, { HydratedDocument } from "mongoose";
 
 import { AbstractDocument } from "../database";
 import { UserAvatar } from "../image/schemas/user-avatar.schema";
+import { ProfileEffect } from "src/image/schemas/profile-effect.schema";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -23,7 +24,10 @@ export class User extends AbstractDocument {
   email: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "UserAvatar" })
-  avatarId: UserAvatar;
+  avatarId?: UserAvatar;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "ProfileEffect" })
+  profileEffectId?: string | ProfileEffect;
 
   @Prop({ type: Boolean, default: false })
   isBanned: boolean;

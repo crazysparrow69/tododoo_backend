@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common/exceptions";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, ProjectionType, Types } from "mongoose";
+import { Model, PopulateOptions, ProjectionType, Types } from "mongoose";
 
 import {
   ChangePasswordDto,
@@ -26,13 +26,25 @@ const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService implements OnModuleInit {
+  populateParams: PopulateOptions[];
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     private imageService: ImageService,
     private userMapperService: UserMapperService
-  ) {}
+  ) {
+    this.populateParams = [
+      {
+        path: "avatarId",
+        select: "-_id url",
+      },
+      {
+        path: "profileEffectId",
+        select: "intro.url preview.url sides.url top.url",
+      },
+    ];
+  }
 
   async onModuleInit() {
     try {
@@ -48,12 +60,13 @@ export class UserService implements OnModuleInit {
         _id: 1,
         username: 1,
         email: 1,
+        avatarId: 1,
+        profileEffectId: 1,
         createdAt: 1,
         roles: 1,
       })
-      .populate("avatarId", "url")
+      .populate(this.populateParams)
       .lean();
-
     if (!foundUser) throw new NotFoundException("User not found");
 
     return this.userMapperService.toUserProfile(foundUser);
@@ -64,10 +77,12 @@ export class UserService implements OnModuleInit {
       .findById(new Types.ObjectId(id), {
         _id: 1,
         username: 1,
+        avatarId: 1,
+        profileEffectId: 1,
         createdAt: 1,
         isBanned: 1,
       })
-      .populate("avatarId", "url")
+      .populate(this.populateParams)
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -97,8 +112,8 @@ export class UserService implements OnModuleInit {
     }
 
     const foundUsers = await this.userModel
-      .find(query, { username: 1 })
-      .populate("avatarId", "url")
+      .find(query, { username: 1, avatarId: 1, profileEffectId: 1 })
+      .populate(this.populateParams)
       .lean()
       .limit(limit)
       .skip((page - 1) * limit)
@@ -135,9 +150,17 @@ export class UserService implements OnModuleInit {
       .findByIdAndUpdate(id, attrs, {
         new: true,
       })
-      .populate("avatarId", "url")
+      .populate(this.populateParams)
       .lean()
-      .select(["_id", "username", "email", "avatarId", "createdAt"]);
+      .select([
+        "_id",
+        "username",
+        "email",
+        "avatarId",
+        "profileEffectId",
+        "createdAt",
+      ]);
+    console.log(updatedUser);
     if (!updatedUser) throw new NotFoundException("User not found");
 
     return this.userMapperService.toUserProfile(updatedUser);
