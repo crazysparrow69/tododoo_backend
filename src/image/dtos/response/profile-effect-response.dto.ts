@@ -6,6 +6,7 @@ export class ProfileEffectResponseDto {
 }
 
 export class ProfileEffectFullResponseDto {
+  _id: string;
   title: string;
   intro?: string;
   preview: string;
