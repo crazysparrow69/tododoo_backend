@@ -10,10 +10,10 @@ import {
 export class ProfileEffectMapperService {
   toProfileEffect(profileEffect: ProfileEffect): ProfileEffectResponseDto {
     return {
-      intro: profileEffect.intro.url || "",
+      ...(profileEffect.intro ? { intro: profileEffect.intro.url } : {}),
       preview: profileEffect.preview.url,
       sides: profileEffect.sides.url,
-      top: profileEffect.top?.url || "",
+      ...(profileEffect.top ? { top: profileEffect.top.url } : {}),
     };
   }
 
@@ -21,11 +21,12 @@ export class ProfileEffectMapperService {
     profileEffect: ProfileEffect
   ): ProfileEffectFullResponseDto {
     return {
+      _id: profileEffect._id.toString(),
       title: profileEffect.title,
-      intro: profileEffect.intro.url || "",
+      ...(profileEffect.intro ? { intro: profileEffect.intro.url } : {}),
       preview: profileEffect.preview.url,
       sides: profileEffect.sides.url,
-      top: profileEffect.top?.url || "",
+      ...(profileEffect.top ? { top: profileEffect.top.url } : {}),
     };
   }
 
