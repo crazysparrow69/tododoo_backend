@@ -10,6 +10,7 @@ import {
 export class ProfileEffectMapperService {
   toProfileEffect(profileEffect: ProfileEffect): ProfileEffectResponseDto {
     return {
+      _id: profileEffect._id.toString(),
       ...(profileEffect.intro ? { intro: profileEffect.intro.url } : {}),
       preview: profileEffect.preview.url,
       sides: profileEffect.sides.url,
