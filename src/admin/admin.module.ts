@@ -8,10 +8,10 @@ import { AdminController } from "./admin.controller";
 import { AdminService } from "./admin.service";
 import { AuthModule } from "../auth/auth.module";
 import { ImageService } from "../image/image.service";
-import { UserAvatar, UserAvatarSchema } from "../image/schemas/user-avatar.schema";
-import { ProfileEffect, ProfileEffectSchema } from "../image/schemas/profile-effect.schema";
 import { UserAvatarMapperService } from "../image/mappers/user-avatar-mapper";
 import { ProfileEffectMapperService } from "../image/mappers/profile-effect-mapper";
+import { ProfileEffect, ProfileEffectSchema, UserAvatar, UserAvatarEffect, UserAvatarEffectSchema, UserAvatarSchema } from "../image/schemas";
+import { UserAvatarEffectMapperService } from "../image/mappers";
 
 @Module({
   imports: [
@@ -19,12 +19,13 @@ import { ProfileEffectMapperService } from "../image/mappers/profile-effect-mapp
       { name: User.name, schema: UserSchema },
       { name: UserAvatar.name, schema: UserAvatarSchema },
       { name: ProfileEffect.name, schema: ProfileEffectSchema },
+      { name: UserAvatarEffect.name, schema: UserAvatarEffectSchema },
       { name: Session.name, schema: SessionSchema },
     ]),
     forwardRef(() => AuthModule),
     UserModule,
   ],
-  providers: [AdminService, ImageService, UserAvatarMapperService, ProfileEffectMapperService],
+  providers: [AdminService, ImageService, UserAvatarMapperService, ProfileEffectMapperService, UserAvatarEffectMapperService],
   controllers: [AdminController],
 })
 export class AdminModule {}

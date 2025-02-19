@@ -2,8 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 
 import { AbstractDocument } from "../database";
-import { UserAvatar } from "../image/schemas/user-avatar.schema";
-import { ProfileEffect } from "src/image/schemas/profile-effect.schema";
+import { ProfileEffect, UserAvatar, UserAvatarEffect } from "../image/schemas";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -28,6 +27,9 @@ export class User extends AbstractDocument {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "ProfileEffect" })
   profileEffectId?: string | ProfileEffect;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "UserAvatarEffect" })
+  avatarEffectId?: string | UserAvatarEffect;
 
   @Prop({ type: Boolean, default: false })
   isBanned: boolean;

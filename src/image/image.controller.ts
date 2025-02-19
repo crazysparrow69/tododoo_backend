@@ -28,4 +28,9 @@ export class ImageController {
   getProfileEffects() {
     return this.imageService.findProfileEffects();
   }
+
+  @Get("user-avatar-effect")
+  getUserAvatarEffects() {
+    return this.imageService.findUserAvatarEffects();
+  }
 }
