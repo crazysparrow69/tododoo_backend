@@ -1,11 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Types } from "mongoose";
-import * as Multer from "multer";
 
 import { UserRoles } from "../user/user.schema";
 import { UserService } from "../user/user.service";
+import { CreateProfileEffectDto, CreateUserAvatarEffectDto } from "../image/dtos";
 import { ImageService } from "../image/image.service";
-import { CreateProfileEffectDto } from "../image/dtos/create-profile-effect.dto";
 
 @Injectable()
 export class AdminService {
@@ -80,6 +79,44 @@ export class AdminService {
       }
 
       await this.imageService.createProfileEffect(createProfileEffectDto);
+
+      return { success: true };
+    } catch (error) {
+      throw new BadRequestException(
+        "Error uploading profile effect: " + error.message
+      );
+    }
+  }
+
+  async uploadUserAvatarEffect(
+    title: string,
+    files: {
+      preview: Express.Multer.File[];
+      animated: Express.Multer.File[];
+    }
+  ): Promise<{ success: boolean }> {
+    try {
+      if (
+        files.preview === undefined ||
+        files.animated === undefined ||
+        title === undefined
+      ) {
+        throw new BadRequestException("Title, preview and animated are required");
+      }
+
+      const createUserAvatarEffectDto: CreateUserAvatarEffectDto = {
+        title,
+        preview: await this.imageService.uploadFileToCloudinary(
+          files.preview[0],
+          "user-avatar-effect"
+        ),
+        animated: await this.imageService.uploadFileToCloudinary(
+          files.animated[0],
+          "user-avatar-effect"
+        ),
+      };
+
+      await this.imageService.createUserAvatarEffect(createUserAvatarEffectDto);
 
       return { success: true };
     } catch (error) {

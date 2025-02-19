@@ -38,4 +38,22 @@ export class AdminController {
   ) {
     return this.adminService.uploadProfileEffect(title, files);
   }
+
+  @Post("/user-avatar-effect")
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: "preview", maxCount: 1 },
+      { name: "animated", maxCount: 1 },
+    ])
+  )
+  async uploadUserAvatarEffect(
+    @UploadedFiles()
+    files: {
+      preview: Express.Multer.File[];
+      animated: Express.Multer.File[];
+    },
+    @Body('title') title: string
+  ) {
+    return this.adminService.uploadUserAvatarEffect(title, files);
+  }
 }

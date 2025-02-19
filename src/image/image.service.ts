@@ -13,14 +13,10 @@ import * as cloudinary from "cloudinary";
 import { Model } from "mongoose";
 
 import { User } from "../user/user.schema";
-import { UserAvatar } from "./schemas/user-avatar.schema";
-import { UserAvatarMapperService } from "./mappers/user-avatar-mapper";
-import { UserAvatarDto } from "./dtos/response/user-avatar-response.dto";
-import { CreateProfileEffectDto } from "./dtos/create-profile-effect.dto";
-import { ProfileEffect } from "./schemas/profile-effect.schema";
 import { CloudinaryMedia } from "./interfaces/cloudinary";
-import { ProfileEffectResponseDto } from "./dtos/response/profile-effect-response.dto";
-import { ProfileEffectMapperService } from "./mappers/profile-effect-mapper";
+import { ProfileEffect, UserAvatar, UserAvatarEffect } from "./schemas";
+import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMapperService } from "./mappers";
+import { CreateProfileEffectDto, CreateUserAvatarEffectDto, ProfileEffectFullResponseDto, UserAvatarDto, UserAvatarEffectFullResponseDto } from "./dtos";
 
 @Injectable()
 export class ImageService implements OnModuleInit {
@@ -29,9 +25,12 @@ export class ImageService implements OnModuleInit {
     @InjectModel(UserAvatar.name) private userAvatarModel: Model<UserAvatar>,
     @InjectModel(ProfileEffect.name)
     private profileEffectModel: Model<ProfileEffect>,
+    @InjectModel(UserAvatarEffect.name)
+    private userAvatarEffectModel: Model<UserAvatarEffect>,
     private readonly configService: ConfigService,
     private readonly userAvatarMapperService: UserAvatarMapperService,
-    private readonly profileEffectMapperService: ProfileEffectMapperService
+    private readonly profileEffectMapperService: ProfileEffectMapperService,
+    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
   ) {
     cloudinary.v2.config({
       cloud_name: this.configService.get("CLOUDINARY_CLOUD_NAME"),
@@ -45,6 +44,7 @@ export class ImageService implements OnModuleInit {
       await Promise.all([
         this.userAvatarModel.syncIndexes(),
         this.profileEffectModel.syncIndexes(),
+        this.userAvatarEffectModel.syncIndexes()
       ]);
     } catch (error) {
       console.error("Error syncing indexes:", error);
@@ -95,12 +95,24 @@ export class ImageService implements OnModuleInit {
     return this.profileEffectModel.create(createProfileEffectDto);
   }
 
-  async findProfileEffects(): Promise<ProfileEffectResponseDto[]> {
+  async findProfileEffects(): Promise<ProfileEffectFullResponseDto[]> {
     const profileEffects = await this.profileEffectModel
       .find()
       .sort({ createdAt: -1 });
 
     return this.profileEffectMapperService.toProfileEffectsFull(profileEffects);
+  }
+
+  createUserAvatarEffect(createUserAvatarEffectDto: CreateUserAvatarEffectDto) {
+    return this.userAvatarEffectModel.create(createUserAvatarEffectDto);
+  }
+
+  async findUserAvatarEffects(): Promise<UserAvatarEffectFullResponseDto[]> {
+    const userAvatarEffects = await this.userAvatarEffectModel
+      .find()
+      .sort({ createdAt: -1 });
+
+    return this.userAvatarEffectMapperService.toUserAvatarEffectsFull(userAvatarEffects);
   }
 
   async uploadFileToCloudinary(

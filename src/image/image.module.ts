@@ -6,22 +6,33 @@ import { ImageService } from "./image.service";
 import { AuthModule } from "../auth/auth.module";
 import { Session, SessionSchema } from "../auth/session.schema";
 import { User, UserSchema } from "../user/user.schema";
-import { UserAvatarMapperService } from "./mappers/user-avatar-mapper";
-import { UserAvatar, UserAvatarSchema } from "./schemas/user-avatar.schema";
-import { ProfileEffect, ProfileEffectSchema } from "./schemas/profile-effect.schema";
-import { ProfileEffectMapperService } from "./mappers/profile-effect-mapper";
+import {
+  ProfileEffect,
+  ProfileEffectSchema,
+  UserAvatar,
+  UserAvatarEffect,
+  UserAvatarEffectSchema,
+  UserAvatarSchema,
+} from "./schemas";
+import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMapperService } from "./mappers";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
-      { name: UserAvatar.name,  schema: UserAvatarSchema },
-      { name: ProfileEffect.name,  schema: ProfileEffectSchema },
+      { name: UserAvatar.name, schema: UserAvatarSchema },
+      { name: ProfileEffect.name, schema: ProfileEffectSchema },
+      { name: UserAvatarEffect.name, schema: UserAvatarEffectSchema },
       { name: Session.name, schema: SessionSchema },
     ]),
     AuthModule,
   ],
-  providers: [ImageService, UserAvatarMapperService, ProfileEffectMapperService],
+  providers: [
+    ImageService,
+    UserAvatarMapperService,
+    ProfileEffectMapperService,
+    UserAvatarEffectMapperService
+  ],
   controllers: [ImageController],
 })
 export class ImageModule {}

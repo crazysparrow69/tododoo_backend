@@ -4,13 +4,20 @@ export class UpdateUserDto {
   @IsString()
   @Length(3, 20)
   @IsOptional()
-  username: string;
+  username?: string;
 
   @IsEmail()
   @Length(1, 100)
   @IsOptional()
-  email: string;
+  email?: string;
 
   @IsString()
-  profileEffectId: string;
+  @Length(24, 24)
+  @IsOptional()
+  profileEffectId?: string;
+
+  @IsString()
+  @Length(24, 24)
+  @IsOptional()
+  avatarEffectId?: string;
 }

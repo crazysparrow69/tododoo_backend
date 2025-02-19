@@ -43,6 +43,10 @@ export class UserService implements OnModuleInit {
         path: "profileEffectId",
         select: "intro.url preview.url sides.url top.url",
       },
+      {
+        path: "avatarEffectId",
+        select: "preview.url animated.url"
+      }
     ];
   }
 
@@ -62,6 +66,7 @@ export class UserService implements OnModuleInit {
         email: 1,
         avatarId: 1,
         profileEffectId: 1,
+        avatarEffectId: 1,
         createdAt: 1,
         roles: 1,
       })
@@ -79,6 +84,7 @@ export class UserService implements OnModuleInit {
         username: 1,
         avatarId: 1,
         profileEffectId: 1,
+        avatarEffectId: 1,
         createdAt: 1,
         isBanned: 1,
       })
@@ -112,7 +118,7 @@ export class UserService implements OnModuleInit {
     }
 
     const foundUsers = await this.userModel
-      .find(query, { username: 1, avatarId: 1, profileEffectId: 1 })
+      .find(query, { username: 1, avatarId: 1, avatarEffectId: 1, profileEffectId: 0 })
       .populate(this.populateParams)
       .lean()
       .limit(limit)
@@ -158,9 +164,9 @@ export class UserService implements OnModuleInit {
         "email",
         "avatarId",
         "profileEffectId",
+        "avatarEffectId",
         "createdAt",
       ]);
-    console.log(updatedUser);
     if (!updatedUser) throw new NotFoundException("User not found");
 
     return this.userMapperService.toUserProfile(updatedUser);

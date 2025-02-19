@@ -2,13 +2,17 @@ import { Injectable } from "@nestjs/common";
 
 import { UserBaseDto, UserProfileDto } from "./dtos";
 import { User } from "./user.schema";
-import { ProfileEffectMapperService } from "../image/mappers/profile-effect-mapper";
-import { ProfileEffect } from "src/image/schemas/profile-effect.schema";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+} from "../image/mappers";
+import { ProfileEffect, UserAvatarEffect } from "../image/schemas";
 
 @Injectable()
 export class UserMapperService {
   constructor(
-    private readonly profileEffectMapperService: ProfileEffectMapperService
+    private readonly profileEffectMapperService: ProfileEffectMapperService,
+    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
   ) {}
 
   toUserBase(user: User): UserBaseDto {
@@ -20,6 +24,13 @@ export class UserMapperService {
         ? {
             profileEffect: this.profileEffectMapperService.toProfileEffect(
               user.profileEffectId as ProfileEffect
+            ),
+          }
+        : {}),
+      ...(user.avatarEffectId
+        ? {
+            avatarEffect: this.userAvatarEffectMapperService.toUserAvatarEffect(
+              user.avatarEffectId as UserAvatarEffect
             ),
           }
         : {}),
@@ -48,6 +59,13 @@ export class UserMapperService {
         ? {
             profileEffect: this.profileEffectMapperService.toProfileEffect(
               user.profileEffectId as ProfileEffect
+            ),
+          }
+        : {}),
+      ...(user.avatarEffectId
+        ? {
+            avatarEffect: this.userAvatarEffectMapperService.toUserAvatarEffect(
+              user.avatarEffectId as UserAvatarEffect
             ),
           }
         : {}),
