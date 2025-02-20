@@ -78,11 +78,17 @@ export class SubtaskService {
       },
       {
         path: "userId",
-        select: "_id username avatarId",
-        populate: {
-          path: "avatarId",
-          select: "-_id url"
-        }
+        select: "_id username avatarId avatarEffectId",
+        populate: [
+          {
+            path: "avatarId",
+            select: "-_id url",
+          },
+          {
+            path: "avatarEffectId",
+            select: "preview.url animated.url",
+          },
+        ],
       },
     ];
     const projection = {
@@ -144,11 +150,17 @@ export class SubtaskService {
 
     await createdSubtask.populate({
       path: "assigneeId",
-      select: "_id username avatarId",
-      populate: {
-        path: "avatarId",
-        select: "-_id url"
-      }
+      select: "_id username avatarId avatarEffectId",
+      populate: [
+        {
+          path: "avatarId",
+          select: "-_id url",
+        },
+        {
+          path: "avatarEffectId",
+          select: "preview.url animated.url",
+        },
+      ],
     });
 
     console.log(createdSubtask);
@@ -226,19 +238,31 @@ export class SubtaskService {
       await foundSubtask.populate([
         {
           path: "userId",
-          select: "_id username avatarId",
-          populate: {
-            path: "avatarId",
-            select: "-_id url"
-          }
+          select: "_id username avatarId avatarEffectId",
+          populate: [
+            {
+              path: "avatarId",
+              select: "-_id url",
+            },
+            {
+              path: "avatarEffectId",
+              select: "preview.url animated.url",
+            },
+          ],
         },
         {
           path: "assigneeId",
-          select: "_id username avatarId",
-          populate: {
-            path: "avatarId",
-            select: "-_id url"
-          }
+          select: "_id username avatarId avatarEffectId",
+          populate: [
+            {
+              path: "avatarId",
+              select: "-_id url",
+            },
+            {
+              path: "avatarEffectId",
+              select: "preview.url animated.url",
+            },
+          ],
         },
       ]);
 
