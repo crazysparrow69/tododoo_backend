@@ -19,7 +19,7 @@ export class UserMapperService {
     return {
       _id: user._id.toString(),
       username: user.username,
-      avatar: user.avatarId?.url ? user.avatarId.url : "",
+      ...(user.avatarId ? { avatar: user.avatarId.url } : {}),
       ...(user.profileEffectId
         ? {
             profileEffect: this.profileEffectMapperService.toProfileEffect(
@@ -54,7 +54,7 @@ export class UserMapperService {
       _id: user._id.toString(),
       username: user.username,
       email: user.email,
-      avatar: user.avatarId?.url ? user.avatarId.url : "",
+      ...(user.avatarId ? { avatar: user.avatarId.url } : {}),
       ...(user.profileEffectId
         ? {
             profileEffect: this.profileEffectMapperService.toProfileEffect(

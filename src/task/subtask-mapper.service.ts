@@ -5,10 +5,15 @@ import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { Subtask } from "./schemas";
 import { TaskTypes } from "./types";
 import { CategoryMapperService } from "../category/category-mapper.service";
+import { UserAvatarEffectMapperService } from "src/image/mappers";
+import { UserAvatarEffect } from "src/image/schemas";
 
 @Injectable()
 export class SubtaskMapperService {
-  constructor(private readonly categoryMapperService: CategoryMapperService) {}
+  constructor(
+    private readonly categoryMapperService: CategoryMapperService,
+    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
+  ) {}
   toSubtaskResponse(subtask: Subtask): SubtaskResponseDto {
     return {
       _id: subtask._id.toString(),
@@ -22,7 +27,17 @@ export class SubtaskMapperService {
           ? {
               _id: subtask.userId._id.toString(),
               username: subtask.userId.username,
-              avatar: subtask.userId.avatarId?.url ?? "",
+              ...(subtask.userId.avatarId
+                ? { avatar: subtask.userId.avatarId.url }
+                : {}),
+              ...(subtask.userId.avatarEffectId
+                ? {
+                    avatarEffect:
+                      this.userAvatarEffectMapperService.toUserAvatarEffect(
+                        subtask.userId.avatarEffectId as UserAvatarEffect
+                      ),
+                  }
+                : {}),
             }
           : null,
       dateOfCompletion: subtask.dateOfCompletion || null,
@@ -54,7 +69,17 @@ export class SubtaskMapperService {
       assignee: {
         _id: subtask.assigneeId._id.toString(),
         username: subtask.assigneeId.username,
-        avatar: subtask.assigneeId.avatarId?.url ?? "",
+        ...(subtask.assigneeId.avatarId
+          ? { avatar: subtask.assigneeId.avatarId.url }
+          : {}),
+        ...(subtask.assigneeId.avatarEffectId
+          ? {
+              avatarEffect:
+                this.userAvatarEffectMapperService.toUserAvatarEffect(
+                  subtask.assigneeId.avatarEffectId as UserAvatarEffect
+                ),
+            }
+          : {}),
       },
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
@@ -87,13 +112,33 @@ export class SubtaskMapperService {
           ? {
               _id: subtask.userId._id.toString(),
               username: subtask.userId.username,
-              avatar: subtask.userId.avatarId?.url ?? "",
+              ...(subtask.userId.avatarId
+                ? { avatar: subtask.userId.avatarId.url }
+                : {}),
+              ...(subtask.userId.avatarEffectId
+                ? {
+                    avatarEffect:
+                      this.userAvatarEffectMapperService.toUserAvatarEffect(
+                        subtask.userId.avatarEffectId as UserAvatarEffect
+                      ),
+                  }
+                : {}),
             }
           : null,
       assignee: {
         _id: subtask.assigneeId._id.toString(),
         username: subtask.assigneeId.username,
-        avatar: subtask.assigneeId.avatarId?.url ?? "",
+        ...(subtask.assigneeId.avatarId
+          ? { avatar: subtask.assigneeId.avatarId.url }
+          : {}),
+        ...(subtask.assigneeId.avatarEffectId
+          ? {
+              avatarEffect:
+                this.userAvatarEffectMapperService.toUserAvatarEffect(
+                  subtask.assigneeId.avatarEffectId as UserAvatarEffect
+                ),
+            }
+          : {}),
       },
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
