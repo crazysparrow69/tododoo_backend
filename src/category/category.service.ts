@@ -4,8 +4,8 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import mongoose, { Model, Types } from "mongoose";
 
 import { CategoryMapperService } from "./category-mapper.service";
 import { Category } from "./category.schema";
@@ -15,13 +15,15 @@ import {
   QueryCategoryDto,
 } from "./dtos";
 import { Task } from "../task/schemas";
+import { transaction } from "src/common/transaction";
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
-    private readonly categoryMapperService: CategoryMapperService
+    private readonly categoryMapperService: CategoryMapperService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
   async create(
@@ -106,21 +108,27 @@ export class CategoryService {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
-    const deletedCategory = await this.categoryModel.findOneAndDelete({
-      _id: id,
-      userId,
-    });
-
-    if (!deletedCategory) {
-      throw new NotFoundException("Cannot delete non-existent category");
-    } else {
-      await this.taskModel.updateMany(
-        { categories: deletedCategory._id },
+    await transaction(this.connection, async (session) => {
+      const deletedCategory = await this.categoryModel.findOneAndDelete(
         {
-          $pull: { categories: deletedCategory._id },
-        }
+          _id: id,
+          userId,
+        },
+        { session }
       );
-    }
+
+      if (!deletedCategory) {
+        throw new NotFoundException("Cannot delete non-existent category");
+      } else {
+        await this.taskModel.updateMany(
+          { categories: deletedCategory._id },
+          {
+            $pull: { categories: deletedCategory._id },
+          },
+          { session }
+        );
+      }
+    });
 
     return { success: true };
   }

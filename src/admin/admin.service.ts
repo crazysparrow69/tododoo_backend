@@ -3,7 +3,10 @@ import { Types } from "mongoose";
 
 import { UserRoles } from "../user/user.schema";
 import { UserService } from "../user/user.service";
-import { CreateProfileEffectDto, CreateUserAvatarEffectDto } from "../image/dtos";
+import {
+  CreateProfileEffectDto,
+  CreateUserAvatarEffectDto,
+} from "../image/dtos";
 import { ImageService } from "../image/image.service";
 
 @Injectable()
@@ -101,7 +104,9 @@ export class AdminService {
         files.animated === undefined ||
         title === undefined
       ) {
-        throw new BadRequestException("Title, preview and animated are required");
+        throw new BadRequestException(
+          "Title, preview and animated are required"
+        );
       }
 
       const createUserAvatarEffectDto: CreateUserAvatarEffectDto = {

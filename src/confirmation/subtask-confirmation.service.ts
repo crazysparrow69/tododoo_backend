@@ -33,8 +33,8 @@ export class SubtaskConfirmService {
         select: "username avatarId",
         populate: {
           path: "avatarId",
-          select: "-_id url"
-        }
+          select: "-_id url",
+        },
       },
     ];
 
@@ -58,8 +58,8 @@ export class SubtaskConfirmService {
           select: "username avatarId",
           populate: {
             path: "avatarId",
-            select: "-_id url"
-          }
+            select: "-_id url",
+          },
         },
       ]);
 

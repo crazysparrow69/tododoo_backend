@@ -1,4 +1,7 @@
-import { ProfileEffectResponseDto, UserAvatarEffectResponseDto } from "../../../image/dtos";
+import {
+  ProfileEffectResponseDto,
+  UserAvatarEffectResponseDto,
+} from "../../../image/dtos";
 
 export class UserBaseDto {
   _id: string;

@@ -10,8 +10,19 @@ import { Session, SessionSchema } from "../auth/session.schema";
 import { Category, CategorySchema } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
 import { Task, TaskSchema } from "../task/schemas";
-import { ProfileEffect, ProfileEffectSchema, UserAvatar, UserAvatarEffect, UserAvatarEffectSchema, UserAvatarSchema } from "../image/schemas";
-import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMapperService } from "../image/mappers";
+import {
+  ProfileEffect,
+  ProfileEffectSchema,
+  UserAvatar,
+  UserAvatarEffect,
+  UserAvatarEffectSchema,
+  UserAvatarSchema,
+} from "../image/schemas";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+  UserAvatarMapperService,
+} from "../image/mappers";
 
 @Module({
   imports: [
@@ -32,7 +43,7 @@ import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMa
     ImageService,
     UserAvatarMapperService,
     ProfileEffectMapperService,
-    UserAvatarEffectMapperService
+    UserAvatarEffectMapperService,
   ],
   exports: [UserService],
   controllers: [UserController],

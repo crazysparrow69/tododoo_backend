@@ -21,4 +21,5 @@ export class UserAvatarEffect extends AbstractDocument {
   updatedAt: Date;
 }
 
-export const UserAvatarEffectSchema = SchemaFactory.createForClass(UserAvatarEffect);
+export const UserAvatarEffectSchema =
+  SchemaFactory.createForClass(UserAvatarEffect);

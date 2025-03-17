@@ -1,11 +1,16 @@
 import { Injectable } from "@nestjs/common";
 
 import { UserAvatarEffect } from "../schemas";
-import { UserAvatarEffectFullResponseDto, UserAvatarEffectResponseDto } from "../dtos";
+import {
+  UserAvatarEffectFullResponseDto,
+  UserAvatarEffectResponseDto,
+} from "../dtos";
 
 @Injectable()
 export class UserAvatarEffectMapperService {
-  toUserAvatarEffect(userAvatarEffect: UserAvatarEffect): UserAvatarEffectResponseDto {
+  toUserAvatarEffect(
+    userAvatarEffect: UserAvatarEffect
+  ): UserAvatarEffectResponseDto {
     return {
       _id: userAvatarEffect._id.toString(),
       preview: userAvatarEffect.preview.url,
@@ -30,7 +35,8 @@ export class UserAvatarEffectMapperService {
     const result: UserAvatarEffectFullResponseDto[] = [];
 
     for (const userAvatarEffect of userAvatarEffects) {
-      const mappedUserAvatarEffect = this.toUserAvatarEffectFull(userAvatarEffect);
+      const mappedUserAvatarEffect =
+        this.toUserAvatarEffectFull(userAvatarEffect);
       result.push(mappedUserAvatarEffect);
     }
 

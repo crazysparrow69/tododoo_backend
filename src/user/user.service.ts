@@ -6,8 +6,14 @@ import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common/exceptions";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, PopulateOptions, ProjectionType, Types } from "mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import mongoose, {
+  ClientSession,
+  Model,
+  PopulateOptions,
+  ProjectionType,
+  Types,
+} from "mongoose";
 
 import {
   ChangePasswordDto,
@@ -21,6 +27,8 @@ import { SignupUserDto } from "../auth/dtos";
 import { Category } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
 import { Task } from "../task/schemas";
+import { transaction } from "src/common/transaction";
+import { UserAvatar } from "src/image/schemas";
 
 const scrypt = promisify(_scrypt);
 
@@ -31,8 +39,10 @@ export class UserService implements OnModuleInit {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
+    @InjectModel(UserAvatar.name) private userAvatarModel: Model<UserAvatar>,
     private imageService: ImageService,
-    private userMapperService: UserMapperService
+    private userMapperService: UserMapperService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {
     this.populateParams = [
       {
@@ -45,8 +55,8 @@ export class UserService implements OnModuleInit {
       },
       {
         path: "avatarEffectId",
-        select: "preview.url animated.url"
-      }
+        select: "preview.url animated.url",
+      },
     ];
   }
 
@@ -118,7 +128,12 @@ export class UserService implements OnModuleInit {
     }
 
     const foundUsers = await this.userModel
-      .find(query, { username: 1, avatarId: 1, avatarEffectId: 1, profileEffectId: 0 })
+      .find(query, {
+        username: 1,
+        avatarId: 1,
+        avatarEffectId: 1,
+        profileEffectId: 0,
+      })
       .populate(this.populateParams)
       .lean()
       .limit(limit)
@@ -135,7 +150,10 @@ export class UserService implements OnModuleInit {
     };
   }
 
-  async create(createUserDto: SignupUserDto): Promise<User> {
+  async create(
+    createUserDto: SignupUserDto,
+    session?: ClientSession
+  ): Promise<User> {
     const foundUser = await this.userModel.findOne({
       email: createUserDto.email,
     });
@@ -145,10 +163,13 @@ export class UserService implements OnModuleInit {
 
     const hashedPassword = await this.hashPassword(createUserDto.password);
 
-    return this.userModel.create({
+    const newUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
     });
+    await newUser.save({ session });
+
+    return newUser;
   }
 
   async update(id: string, attrs: Partial<User>): Promise<UserProfileDto> {
@@ -173,16 +194,35 @@ export class UserService implements OnModuleInit {
   }
 
   async remove(id: string): Promise<{ success: boolean }> {
-    const deletedUser = await this.userModel.findByIdAndDelete(id).lean();
-    if (!deletedUser) {
-      throw new NotFoundException("User not found");
-    }
+    const deletedUser = await transaction<User>(
+      this.connection,
+      async (session) => {
+        const user = await this.userModel
+          .findByIdAndDelete(id, { session })
+          .lean();
+        if (!user) {
+          throw new NotFoundException("User not found");
+        }
 
-    await this.taskModel.deleteMany({ userId: deletedUser._id });
-    await this.categoryModel.deleteMany({ userId: deletedUser._id });
+        await this.taskModel.deleteMany({ userId: user._id }, { session });
+        await this.categoryModel.deleteMany({ userId: user._id }, { session });
 
-    if (deletedUser.avatarId)
-      this.imageService.deleteAvatar(deletedUser.avatarId._id.toString());
+        if (deletedUser.avatarId) {
+          const foundUserAvatar = await this.userAvatarModel.findById(
+            deletedUser.avatarId
+          );
+          if (foundUserAvatar) {
+            await foundUserAvatar.deleteOne({ session });
+          }
+
+          await this.imageService.deleteAvatarFromCloudinary(
+            foundUserAvatar.public_id
+          );
+        }
+
+        return user;
+      }
+    );
 
     return { success: true };
   }

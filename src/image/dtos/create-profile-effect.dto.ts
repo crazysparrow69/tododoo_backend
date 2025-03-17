@@ -21,4 +21,3 @@ export class CreateProfileEffectDto {
   @IsObject()
   top?: CloudinaryMedia;
 }
-
