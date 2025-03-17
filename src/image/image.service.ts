@@ -8,15 +8,26 @@ import {
   OnModuleInit,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { InjectModel } from "@nestjs/mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import * as cloudinary from "cloudinary";
-import { Model } from "mongoose";
+import mongoose, { ClientSession, Model } from "mongoose";
 
 import { User } from "../user/user.schema";
 import { CloudinaryMedia } from "./interfaces/cloudinary";
 import { ProfileEffect, UserAvatar, UserAvatarEffect } from "./schemas";
-import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMapperService } from "./mappers";
-import { CreateProfileEffectDto, CreateUserAvatarEffectDto, ProfileEffectFullResponseDto, UserAvatarDto, UserAvatarEffectFullResponseDto } from "./dtos";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+  UserAvatarMapperService,
+} from "./mappers";
+import {
+  CreateProfileEffectDto,
+  CreateUserAvatarEffectDto,
+  ProfileEffectFullResponseDto,
+  UserAvatarDto,
+  UserAvatarEffectFullResponseDto,
+} from "./dtos";
+import { transaction } from "src/common/transaction";
 
 @Injectable()
 export class ImageService implements OnModuleInit {
@@ -30,7 +41,8 @@ export class ImageService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly userAvatarMapperService: UserAvatarMapperService,
     private readonly profileEffectMapperService: ProfileEffectMapperService,
-    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
+    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {
     cloudinary.v2.config({
       cloud_name: this.configService.get("CLOUDINARY_CLOUD_NAME"),
@@ -44,7 +56,7 @@ export class ImageService implements OnModuleInit {
       await Promise.all([
         this.userAvatarModel.syncIndexes(),
         this.profileEffectModel.syncIndexes(),
-        this.userAvatarEffectModel.syncIndexes()
+        this.userAvatarEffectModel.syncIndexes(),
       ]);
     } catch (error) {
       console.error("Error syncing indexes:", error);
@@ -57,35 +69,49 @@ export class ImageService implements OnModuleInit {
     }
 
     try {
-      const foundUser = await this.userModel.findById(userId);
-      if (!foundUser) {
-        throw new NotFoundException("User not found");
-      }
-
-      if (foundUser.avatarId) {
-        const foundAvatar = await this.userAvatarModel.findById(
-          foundUser.avatarId
-        );
-        if (foundAvatar) {
-          await this.deleteAvatar(foundAvatar._id.toString());
-          await foundAvatar.deleteOne();
+      const result = await transaction<{
+        newAvatar: UserAvatar;
+        foundAvatarId?: string;
+      }>(this.connection, async (session) => {
+        const foundUser = await this.userModel.findById(userId);
+        if (!foundUser) {
+          throw new NotFoundException("User not found");
         }
 
-        foundUser.avatarId = undefined;
-      }
+        const uploadedAvatar = await this.uploadFileToCloudinary(file);
 
-      const result = await this.uploadFileToCloudinary(file);
+        const newAvatar = await this.userAvatarModel.create({
+          userId: foundUser.id,
+          ...uploadedAvatar,
+        });
 
-      const newAvatar = await this.userAvatarModel.create({
-        userId: foundUser.id,
-        ...result,
+        const result: { newAvatar: UserAvatar; foundAvatarId?: string } = {
+          newAvatar,
+        };
+
+        if (foundUser.avatarId) {
+          const foundAvatar = await this.userAvatarModel.findById(
+            foundUser.avatarId
+          );
+          if (foundAvatar) {
+            await foundAvatar.deleteOne({ session });
+
+            result.foundAvatarId = foundAvatar.id;
+          }
+        }
+
+        foundUser.avatarId = newAvatar.id;
+
+        await foundUser.save({ session });
+
+        return result;
       });
 
-      foundUser.avatarId = newAvatar.id;
+      if (result.foundAvatarId) {
+        await this.deleteAvatarFromCloudinary(result.foundAvatarId);
+      }
 
-      await foundUser.save();
-
-      return this.userAvatarMapperService.toUserAvatar(newAvatar);
+      return this.userAvatarMapperService.toUserAvatar(result.newAvatar);
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -112,7 +138,9 @@ export class ImageService implements OnModuleInit {
       .find()
       .sort({ createdAt: -1 });
 
-    return this.userAvatarEffectMapperService.toUserAvatarEffectsFull(userAvatarEffects);
+    return this.userAvatarEffectMapperService.toUserAvatarEffectsFull(
+      userAvatarEffects
+    );
   }
 
   async uploadFileToCloudinary(
@@ -148,12 +176,8 @@ export class ImageService implements OnModuleInit {
     };
   }
 
-  async deleteAvatar(avatarId: string): Promise<void> {
-    const foundAvatar = await this.userAvatarModel.findById(avatarId);
-    if (foundAvatar) {
-      await cloudinary.v2.uploader.destroy(foundAvatar.public_id);
-      foundAvatar.deleteOne();
-    }
+  async deleteAvatarFromCloudinary(public_id: string): Promise<void> {
+    await cloudinary.v2.uploader.destroy(public_id);
   }
 
   async saveFileLocal(fileData: any, filePath: string): Promise<string> {

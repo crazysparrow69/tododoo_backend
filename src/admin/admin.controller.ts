@@ -1,4 +1,13 @@
-import { Body, Controller, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import { UpdateUserBanStatusDto } from "./dtos";
 import { AdminGuard } from "../auth/guards";
@@ -34,7 +43,7 @@ export class AdminController {
       top?: Express.Multer.File[];
       intro?: Express.Multer.File[];
     },
-    @Body('title') title: string
+    @Body("title") title: string
   ) {
     return this.adminService.uploadProfileEffect(title, files);
   }
@@ -52,7 +61,7 @@ export class AdminController {
       preview: Express.Multer.File[];
       animated: Express.Multer.File[];
     },
-    @Body('title') title: string
+    @Body("title") title: string
   ) {
     return this.adminService.uploadUserAvatarEffect(title, files);
   }

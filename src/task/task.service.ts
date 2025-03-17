@@ -3,8 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common/exceptions";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import mongoose, { Model, Types } from "mongoose";
 
 import { CreateTaskDto, QueryTaskDto, TaskResponseDto } from "./dtos";
 import { Subtask, Task } from "./schemas";
@@ -12,6 +12,7 @@ import { TaskMapperService } from "./task-mapper.service";
 import { UserTasksStats, QueryParamsTask } from "./types";
 import { Category } from "../category/category.schema";
 import { getDeadlineFilter } from "../common";
+import { transaction } from "src/common/transaction";
 
 @Injectable()
 export class TaskService {
@@ -19,7 +20,8 @@ export class TaskService {
     @InjectModel(Task.name) private taskModel: Model<Task>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
-    private readonly taskMapperService: TaskMapperService
+    private readonly taskMapperService: TaskMapperService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
   async findOne(userId: string, id: string): Promise<TaskResponseDto> {
@@ -224,19 +226,32 @@ export class TaskService {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
-    const deletedTask = await this.taskModel
-      .findOneAndDelete({
-        _id: id,
-        userId,
-      })
-      .lean();
-    if (!deletedTask) {
-      throw new NotFoundException("Cannot delete non-existent task");
-    }
+    const deletedTask = await transaction<Task>(
+      this.connection,
+      async (session) => {
+        const task = await this.taskModel
+          .findOneAndDelete(
+            {
+              _id: id,
+              userId,
+            },
+            { session }
+          )
+          .lean();
+        if (!task) {
+          throw new NotFoundException("Cannot delete non-existent task");
+        }
 
-    await this.subtaskModel.deleteMany({
-      _id: { $in: deletedTask.subtasks },
-    });
+        await this.subtaskModel.deleteMany(
+          {
+            _id: { $in: task.subtasks },
+          },
+          { session }
+        );
+
+        return task;
+      }
+    );
 
     return deletedTask;
   }

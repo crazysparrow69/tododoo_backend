@@ -6,5 +6,5 @@ export interface UserReference {
     _id: string;
     preview: string;
     animated: string;
-  }
+  };
 }

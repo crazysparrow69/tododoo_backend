@@ -34,7 +34,7 @@ import { UserAvatarEffectMapperService } from "../image/mappers";
     TaskMapperService,
     SubtaskService,
     SubtaskMapperService,
-    UserAvatarEffectMapperService
+    UserAvatarEffectMapperService,
   ],
   exports: [TaskService, SubtaskService],
   controllers: [TaskController, SubtaskController],

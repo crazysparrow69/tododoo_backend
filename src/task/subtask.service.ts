@@ -3,8 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common/exceptions";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import mongoose, { Model, Types } from "mongoose";
 
 import { CreateSubtaskDto, QueryTaskDto } from "./dtos";
 import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
@@ -20,6 +20,7 @@ import {
   NotificationServerEvents,
   NotificationTypes,
 } from "../notification/types";
+import { transaction } from "src/common/transaction";
 
 @Injectable()
 export class SubtaskService {
@@ -31,7 +32,8 @@ export class SubtaskService {
     @Inject(forwardRef(() => NotificationGateway))
     private notificationGateway: NotificationGateway,
     @Inject(forwardRef(() => NotificationService))
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
   async findByQuery(
@@ -133,20 +135,32 @@ export class SubtaskService {
     taskId: string,
     createSubtaskDto: CreateSubtaskDto
   ): Promise<SubtaskAssignedDto> {
-    const createdSubtask = await this.subtaskModel.create({
-      userId,
-      taskId,
-      dateOfCompletion: createSubtaskDto.isCompleted ? new Date() : null,
-      isConfirmed:
-        userId.toString() === createSubtaskDto.assigneeId.toString()
-          ? true
-          : false,
-      ...createSubtaskDto,
-    });
+    const createdSubtask = await transaction<Subtask>(
+      this.connection,
+      async (session) => {
+        const subtask = new this.subtaskModel({
+          userId,
+          taskId,
+          dateOfCompletion: createSubtaskDto.isCompleted ? new Date() : null,
+          isConfirmed:
+            userId.toString() === createSubtaskDto.assigneeId.toString()
+              ? true
+              : false,
+          ...createSubtaskDto,
+        });
+        await subtask.save({ session });
 
-    await this.taskModel.findByIdAndUpdate(taskId, {
-      $push: { subtasks: createdSubtask._id },
-    });
+        await this.taskModel.findByIdAndUpdate(
+          taskId,
+          {
+            $push: { subtasks: subtask._id },
+          },
+          { session }
+        );
+
+        return createdSubtask;
+      }
+    );
 
     await createdSubtask.populate({
       path: "assigneeId",
@@ -162,8 +176,6 @@ export class SubtaskService {
         },
       ],
     });
-
-    console.log(createdSubtask);
 
     return this.subtaskMapperService.toAssignedSubtask(createdSubtask);
   }

@@ -10,7 +10,14 @@ import { AuthModule } from "../auth/auth.module";
 import { ImageService } from "../image/image.service";
 import { UserAvatarMapperService } from "../image/mappers/user-avatar-mapper";
 import { ProfileEffectMapperService } from "../image/mappers/profile-effect-mapper";
-import { ProfileEffect, ProfileEffectSchema, UserAvatar, UserAvatarEffect, UserAvatarEffectSchema, UserAvatarSchema } from "../image/schemas";
+import {
+  ProfileEffect,
+  ProfileEffectSchema,
+  UserAvatar,
+  UserAvatarEffect,
+  UserAvatarEffectSchema,
+  UserAvatarSchema,
+} from "../image/schemas";
 import { UserAvatarEffectMapperService } from "../image/mappers";
 
 @Module({
@@ -25,7 +32,13 @@ import { UserAvatarEffectMapperService } from "../image/mappers";
     forwardRef(() => AuthModule),
     UserModule,
   ],
-  providers: [AdminService, ImageService, UserAvatarMapperService, ProfileEffectMapperService, UserAvatarEffectMapperService],
+  providers: [
+    AdminService,
+    ImageService,
+    UserAvatarMapperService,
+    ProfileEffectMapperService,
+    UserAvatarEffectMapperService,
+  ],
   controllers: [AdminController],
 })
 export class AdminModule {}

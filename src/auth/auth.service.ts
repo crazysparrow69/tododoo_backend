@@ -4,13 +4,14 @@ import {
   NotFoundException,
 } from "@nestjs/common/exceptions";
 import { JwtService } from "@nestjs/jwt";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import mongoose, { Model } from "mongoose";
 
 import { SignupUserDto } from "./dtos";
 import { Session } from "./session.schema";
 import { QueryUserDto } from "../user/dtos";
 import { UserService } from "../user/user.service";
+import { transaction } from "src/common/transaction";
 
 @Injectable()
 export class AuthService {
@@ -18,19 +19,34 @@ export class AuthService {
     @InjectModel(Session.name)
     private sessionModel: Model<Session>,
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
   async signup(createUserDto: SignupUserDto) {
-    const createdUser = await this.userService.create(createUserDto);
+    const newToken = await transaction<string>(
+      this.connection,
+      async (session) => {
+        const createdUser = await this.userService.create(
+          createUserDto,
+          session
+        );
 
-    const token = await this.jwtService.signAsync({
-      sub: createdUser._id,
-    });
+        const token = await this.jwtService.signAsync({
+          sub: createdUser._id,
+        });
 
-    await this.sessionModel.create({ userId: createdUser._id, token });
+        const newSession = new this.sessionModel({
+          userId: createdUser._id,
+          token,
+        });
+        await newSession.save({ session });
 
-    return { token };
+        return token;
+      }
+    );
+
+    return { token: newToken };
   }
 
   async signin(email: string, password: string) {
@@ -50,21 +66,32 @@ export class AuthService {
       throw new BadRequestException("Invalid password");
     }
 
-    const foundToken = await this.sessionModel.findOne({
-      userId: foundUser._id,
-      isValid: true,
-    });
-    if (foundToken) {
-      foundToken.isValid = false;
-      await foundToken.save();
-    }
+    const newToken = await transaction<string>(
+      this.connection,
+      async (session) => {
+        const foundToken = await this.sessionModel.findOne({
+          userId: foundUser._id,
+          isValid: true,
+        });
+        if (foundToken) {
+          foundToken.isValid = false;
+          await foundToken.save({ session });
+        }
 
-    const token = await this.jwtService.signAsync({
-      sub: foundUser._id,
-    });
+        const token = await this.jwtService.signAsync({
+          sub: foundUser._id,
+        });
 
-    await this.sessionModel.create({ userId: foundUser._id, token });
+        const newSession = new this.sessionModel({
+          userId: foundUser._id,
+          token,
+        });
+        await newSession.save({ session });
 
-    return { token };
+        return token;
+      }
+    );
+
+    return { token: newToken };
   }
 }

@@ -14,7 +14,11 @@ import {
   UserAvatarEffectSchema,
   UserAvatarSchema,
 } from "./schemas";
-import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMapperService } from "./mappers";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+  UserAvatarMapperService,
+} from "./mappers";
 
 @Module({
   imports: [
@@ -31,7 +35,7 @@ import { ProfileEffectMapperService, UserAvatarEffectMapperService, UserAvatarMa
     ImageService,
     UserAvatarMapperService,
     ProfileEffectMapperService,
-    UserAvatarEffectMapperService
+    UserAvatarEffectMapperService,
   ],
   controllers: [ImageController],
 })
