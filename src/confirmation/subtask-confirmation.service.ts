@@ -30,7 +30,11 @@ export class SubtaskConfirmService {
       },
       {
         path: "userId",
-        select: "username avatar",
+        select: "username avatarId",
+        populate: {
+          path: "avatarId",
+          select: "-_id url",
+        },
       },
     ];
 
@@ -51,7 +55,11 @@ export class SubtaskConfirmService {
         },
         {
           path: "userId",
-          select: "username avatar",
+          select: "username avatarId",
+          populate: {
+            path: "avatarId",
+            select: "-_id url",
+          },
         },
       ]);
 
@@ -60,7 +68,7 @@ export class SubtaskConfirmService {
       creator: {
         _id: c.userId._id.toString(),
         username: (c.userId as any).username,
-        avatar: (c.userId as any)?.avatar?.url || "",
+        avatar: (c.userId as any)?.avatarId?.url || "",
       },
       assigneeId: c.assigneeId.toString(),
       subtaskId: c.subtaskId,

@@ -2,14 +2,38 @@ import { Injectable } from "@nestjs/common";
 
 import { UserBaseDto, UserProfileDto } from "./dtos";
 import { User } from "./user.schema";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+} from "../image/mappers";
+import { ProfileEffect, UserAvatarEffect } from "../image/schemas";
 
 @Injectable()
 export class UserMapperService {
+  constructor(
+    private readonly profileEffectMapperService: ProfileEffectMapperService,
+    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
+  ) {}
+
   toUserBase(user: User): UserBaseDto {
     return {
       _id: user._id.toString(),
       username: user.username,
-      avatar: user.avatar?.url ? user.avatar.url : "",
+      ...(user.avatarId ? { avatar: user.avatarId.url } : {}),
+      ...(user.profileEffectId
+        ? {
+            profileEffect: this.profileEffectMapperService.toProfileEffect(
+              user.profileEffectId as ProfileEffect
+            ),
+          }
+        : {}),
+      ...(user.avatarEffectId
+        ? {
+            avatarEffect: this.userAvatarEffectMapperService.toUserAvatarEffect(
+              user.avatarEffectId as UserAvatarEffect
+            ),
+          }
+        : {}),
       isBanned: user.isBanned,
     };
   }
@@ -30,7 +54,21 @@ export class UserMapperService {
       _id: user._id.toString(),
       username: user.username,
       email: user.email,
-      avatar: user.avatar?.url ? user.avatar.url : "",
+      ...(user.avatarId ? { avatar: user.avatarId.url } : {}),
+      ...(user.profileEffectId
+        ? {
+            profileEffect: this.profileEffectMapperService.toProfileEffect(
+              user.profileEffectId as ProfileEffect
+            ),
+          }
+        : {}),
+      ...(user.avatarEffectId
+        ? {
+            avatarEffect: this.userAvatarEffectMapperService.toUserAvatarEffect(
+              user.avatarEffectId as UserAvatarEffect
+            ),
+          }
+        : {}),
       createdAt: user.createdAt,
       roles: user.roles,
     };

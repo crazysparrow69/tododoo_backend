@@ -1,4 +1,4 @@
-import { UserRoles } from "src/user/user.schema";
+import { UserRoles } from "../../../user/user.schema";
 
 import { UserBaseDto } from "./user-base.dto";
 

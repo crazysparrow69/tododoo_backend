@@ -1,20 +1,48 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { InjectModel } from "@nestjs/mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import * as cloudinary from "cloudinary";
-import { Model } from "mongoose";
+import mongoose, { ClientSession, Model } from "mongoose";
 
-import { Avatar } from "../user/user.interface";
 import { User } from "../user/user.schema";
+import { CloudinaryMedia } from "./interfaces/cloudinary";
+import { ProfileEffect, UserAvatar, UserAvatarEffect } from "./schemas";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+  UserAvatarMapperService,
+} from "./mappers";
+import {
+  CreateProfileEffectDto,
+  CreateUserAvatarEffectDto,
+  ProfileEffectFullResponseDto,
+  UserAvatarDto,
+  UserAvatarEffectFullResponseDto,
+} from "./dtos";
+import { transaction } from "src/common/transaction";
 
 @Injectable()
-export class ImageService {
+export class ImageService implements OnModuleInit {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private readonly configService: ConfigService
+    @InjectModel(UserAvatar.name) private userAvatarModel: Model<UserAvatar>,
+    @InjectModel(ProfileEffect.name)
+    private profileEffectModel: Model<ProfileEffect>,
+    @InjectModel(UserAvatarEffect.name)
+    private userAvatarEffectModel: Model<UserAvatarEffect>,
+    private readonly configService: ConfigService,
+    private readonly userAvatarMapperService: UserAvatarMapperService,
+    private readonly profileEffectMapperService: ProfileEffectMapperService,
+    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {
     cloudinary.v2.config({
       cloud_name: this.configService.get("CLOUDINARY_CLOUD_NAME"),
@@ -23,12 +51,107 @@ export class ImageService {
     });
   }
 
-  async uploadAvatar(userId: string, file: any): Promise<Avatar> {
+  async onModuleInit() {
+    try {
+      await Promise.all([
+        this.userAvatarModel.syncIndexes(),
+        this.profileEffectModel.syncIndexes(),
+        this.userAvatarEffectModel.syncIndexes(),
+      ]);
+    } catch (error) {
+      console.error("Error syncing indexes:", error);
+    }
+  }
+
+  async uploadAvatar(userId: string, file: any): Promise<UserAvatarDto> {
     if (!["image/jpeg", "image/png"].includes(file.mimetype)) {
       throw new BadRequestException("Invalid file mimetype");
     }
 
-    const filename = `${Date.now()}-avatar`;
+    try {
+      const result = await transaction<{
+        newAvatar: UserAvatar;
+        foundAvatarId?: string;
+      }>(this.connection, async (session) => {
+        const foundUser = await this.userModel.findById(userId);
+        if (!foundUser) {
+          throw new NotFoundException("User not found");
+        }
+
+        const uploadedAvatar = await this.uploadFileToCloudinary(file);
+
+        const newAvatar = await this.userAvatarModel.create({
+          userId: foundUser.id,
+          ...uploadedAvatar,
+        });
+
+        const result: { newAvatar: UserAvatar; foundAvatarId?: string } = {
+          newAvatar,
+        };
+
+        if (foundUser.avatarId) {
+          const foundAvatar = await this.userAvatarModel.findById(
+            foundUser.avatarId
+          );
+          if (foundAvatar) {
+            await foundAvatar.deleteOne({ session });
+
+            result.foundAvatarId = foundAvatar.id;
+          }
+        }
+
+        foundUser.avatarId = newAvatar.id;
+
+        await foundUser.save({ session });
+
+        return result;
+      });
+
+      if (result.foundAvatarId) {
+        await this.deleteAvatarFromCloudinary(result.foundAvatarId);
+      }
+
+      return this.userAvatarMapperService.toUserAvatar(result.newAvatar);
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  createProfileEffect(createProfileEffectDto: CreateProfileEffectDto) {
+    return this.profileEffectModel.create(createProfileEffectDto);
+  }
+
+  async findProfileEffects(): Promise<ProfileEffectFullResponseDto[]> {
+    const profileEffects = await this.profileEffectModel
+      .find()
+      .sort({ createdAt: -1 });
+
+    return this.profileEffectMapperService.toProfileEffectsFull(profileEffects);
+  }
+
+  createUserAvatarEffect(createUserAvatarEffectDto: CreateUserAvatarEffectDto) {
+    return this.userAvatarEffectModel.create(createUserAvatarEffectDto);
+  }
+
+  async findUserAvatarEffects(): Promise<UserAvatarEffectFullResponseDto[]> {
+    const userAvatarEffects = await this.userAvatarEffectModel
+      .find()
+      .sort({ createdAt: -1 });
+
+    return this.userAvatarEffectMapperService.toUserAvatarEffectsFull(
+      userAvatarEffects
+    );
+  }
+
+  async uploadFileToCloudinary(
+    file: any,
+    name?: string
+  ): Promise<CloudinaryMedia> {
+    let filename = `${Date.now()}`;
+    if (name) {
+      filename = filename + "-" + name;
+    }
+
     const destinationPath = path.join(
       __dirname,
       "..",
@@ -37,50 +160,38 @@ export class ImageService {
       filename
     );
 
-    const foundUser = await this.userModel.findById(userId);
-    const publicId = foundUser.avatar?.public_id;
+    await this.saveFileLocal(file.buffer, destinationPath);
 
-    if (publicId) {
-      this.deleteAvatar(publicId);
-    }
+    const result = await cloudinary.v2.uploader.upload(destinationPath, {
+      use_filename: true,
+      unique_filename: false,
+      overwrite: true,
+    });
 
-    try {
-      this.saveFileLocal(file.buffer, destinationPath);
+    await this.deleteFileLocal(destinationPath);
 
-      const result = await cloudinary.v2.uploader.upload(destinationPath, {
-        use_filename: true,
-        unique_filename: false,
-        overwrite: true,
-      });
-      this.deleteFileLocal(destinationPath);
-
-      await this.userModel.findByIdAndUpdate(userId, {
-        avatar: {
-          url: result.secure_url,
-          public_id: result.public_id,
-        },
-      });
-
-      return { url: result.secure_url, public_id: result.public_id };
-    } catch (err) {
-      throw new BadRequestException(err.message);
-    }
+    return {
+      public_id: result.public_id,
+      url: result.secure_url,
+    };
   }
 
-  deleteAvatar(publicId: string): Promise<void> {
-    return cloudinary.v2.uploader.destroy(publicId);
+  async deleteAvatarFromCloudinary(public_id: string): Promise<void> {
+    await cloudinary.v2.uploader.destroy(public_id);
   }
 
-  saveFileLocal(fileData: any, filePath: string): string {
-    fs.writeFileSync(filePath, fileData);
+  async saveFileLocal(fileData: any, filePath: string): Promise<string> {
+    await fs.promises.writeFile(filePath, fileData);
     return filePath;
   }
 
-  deleteFileLocal(filePath: string): void {
-    fs.unlink(filePath, (err) => {
-      if (err) {
+  async deleteFileLocal(filePath: string): Promise<void> {
+    try {
+      await fs.promises.unlink(filePath);
+    } catch (err) {
+      if (err.code !== "ENOENT") {
         throw err;
       }
-    });
+    }
   }
 }
