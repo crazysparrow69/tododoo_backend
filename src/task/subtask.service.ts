@@ -9,7 +9,7 @@ import mongoose, { Model, Types } from "mongoose";
 import { CreateSubtaskDto, QueryTaskDto } from "./dtos";
 import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
 import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
-import { Subtask, Task } from "./schemas";
+import { Subtask, SubtaskDocument, Task } from "./schemas";
 import { SubtaskMapperService } from "./subtask-mapper.service";
 import { CheckStatusForSubtask, QueryParamsSubtask } from "./types";
 import { Category } from "../category/category.schema";
@@ -135,7 +135,7 @@ export class SubtaskService {
     taskId: string,
     createSubtaskDto: CreateSubtaskDto
   ): Promise<SubtaskAssignedDto> {
-    const createdSubtask = await transaction<Subtask>(
+    const createdSubtask = await transaction<SubtaskDocument>(
       this.connection,
       async (session) => {
         const subtask = new this.subtaskModel({
@@ -158,7 +158,7 @@ export class SubtaskService {
           { session }
         );
 
-        return createdSubtask;
+        return subtask;
       }
     );
 
