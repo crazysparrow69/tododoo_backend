@@ -9,4 +9,4 @@ else
     exit 1
 fi
 
-nest start --watch
+npm run start:prod
