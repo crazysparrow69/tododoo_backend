@@ -12,7 +12,7 @@ import { AdminService } from "./admin.service";
 import { UpdateUserBanStatusDto } from "./dtos";
 import { AdminGuard } from "../auth/guards";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
-import 'multer';
+import "multer";
 
 @Controller("admin")
 @UseGuards(AdminGuard)

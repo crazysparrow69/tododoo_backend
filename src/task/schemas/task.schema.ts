@@ -42,12 +42,6 @@ export class Task extends AbstractDocument {
 
   @Prop({ type: Date })
   deadline: Date;
-
-  @Prop({ default: Date.now, type: Date })
-  createdAt: Date;
-
-  @Prop({ default: Date.now, type: Date })
-  updatedAt: Date;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
