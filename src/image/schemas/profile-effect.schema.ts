@@ -19,12 +19,6 @@ export class ProfileEffect extends AbstractDocument {
 
   @Prop({ type: Object })
   top?: CloudinaryMedia;
-
-  @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
-
-  @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
 }
 
 export const ProfileEffectSchema = SchemaFactory.createForClass(ProfileEffect);

@@ -14,6 +14,7 @@ import { ImageModule } from "./image/image.module";
 import { NotificationModule } from "./notification/notification.module";
 import { TaskModule } from "./task/task.module";
 import { UserModule } from "./user/user.module";
+import { BoardModule } from "./board/board.module";
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { UserModule } from "./user/user.module";
     NotificationModule,
     ConfirmationModule,
     AdminModule,
+    BoardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

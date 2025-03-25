@@ -8,7 +8,7 @@ import {
   CreateUserAvatarEffectDto,
 } from "../image/dtos";
 import { ImageService } from "../image/image.service";
-import 'multer';
+import "multer";
 
 @Injectable()
 export class AdminService {
