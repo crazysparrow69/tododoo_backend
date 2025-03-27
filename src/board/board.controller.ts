@@ -12,6 +12,11 @@ import { BoardService } from "./board.service";
 import { AuthGuard, BannedUserGuard } from "src/auth/guards";
 import { CurrentUser } from "src/auth/decorators";
 import {
+  BoardBaseResponseDto,
+  BoardColumnResponseDto,
+  BoardResponseDto,
+  BoardTagResponseDto,
+  BoardTaskResponseDto,
   CreateBoardDto,
   CreateColumnDto,
   CreateTagDto,
@@ -21,6 +26,7 @@ import {
   UpdateTagDto,
   UpdateTaskDto,
 } from "./dtos";
+import { ApiResponseStatus } from "src/common/interfaces/response.interface";
 
 @Controller("board")
 @UseGuards(AuthGuard)
@@ -28,18 +34,24 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Get(":id")
-  getBoard(@CurrentUser() userId: string, @Param("id") id: string) {
+  getBoard(
+    @CurrentUser() userId: string,
+    @Param("id") id: string
+  ): Promise<BoardResponseDto> {
     return this.boardService.findBoard(userId, id);
   }
 
   @Get("")
-  getBoards(@CurrentUser() userId: string) {
+  getBoards(@CurrentUser() userId: string): Promise<BoardBaseResponseDto[]> {
     return this.boardService.findBoards(userId);
   }
 
   @Post("")
   @UseGuards(BannedUserGuard)
-  createBoard(@CurrentUser() userId: string, @Body() body: CreateBoardDto) {
+  createBoard(
+    @CurrentUser() userId: string,
+    @Body() body: CreateBoardDto
+  ): Promise<BoardBaseResponseDto> {
     return this.boardService.createBoard(userId, body);
   }
 
@@ -49,13 +61,16 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("id") id: string,
     @Body() body: UpdateBoardDto
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.updateBoard(userId, id, body);
   }
 
   @Delete("id")
   @UseGuards(BannedUserGuard)
-  removeBoard(@CurrentUser() userId: string, @Param("id") id: string) {
+  removeBoard(
+    @CurrentUser() userId: string,
+    @Param("id") id: string
+  ): Promise<ApiResponseStatus> {
     return this.boardService.deleteBoard(userId, id);
   }
 
@@ -65,7 +80,7 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Body() body: CreateColumnDto
-  ) {
+  ): Promise<BoardColumnResponseDto> {
     return this.boardService.createColumn(userId, boardId, body);
   }
 
@@ -76,7 +91,7 @@ export class BoardController {
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
     @Body() body: UpdateColumnDto
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.updateColumn(userId, boardId, columnId, body);
   }
 
@@ -86,7 +101,7 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.deleteColumn(userId, boardId, columnId);
   }
 
@@ -97,7 +112,7 @@ export class BoardController {
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
     @Body() body: CreateTaskDto
-  ) {
+  ): Promise<BoardTaskResponseDto> {
     return this.boardService.createTask(userId, boardId, columnId, body);
   }
 
@@ -109,7 +124,7 @@ export class BoardController {
     @Param("columnId") columnId: string,
     @Param("taskId") taskId: string,
     @Body() body: UpdateTaskDto
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.updateTask(
       userId,
       boardId,
@@ -126,7 +141,7 @@ export class BoardController {
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
     @Param("taskId") taskId: string
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.deleteTask(userId, boardId, columnId, taskId);
   }
 
@@ -136,7 +151,7 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Body() body: CreateTagDto
-  ) {
+  ): Promise<BoardTagResponseDto> {
     return this.boardService.createTag(userId, boardId, body);
   }
 
@@ -147,7 +162,7 @@ export class BoardController {
     @Param("boardId") boardId: string,
     @Param("tagId") tagId: string,
     @Body() body: UpdateTagDto
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.updateTag(userId, boardId, tagId, body);
   }
 
@@ -157,7 +172,7 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Param("tagId") tagId: string
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.boardService.deleteTag(userId, boardId, tagId);
   }
 }
