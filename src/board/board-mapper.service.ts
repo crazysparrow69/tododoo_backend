@@ -48,7 +48,7 @@ export class BoardMapperService {
       _id: board._id.toString(),
       title: board.title,
       description: board.description,
-      creator: board.userId.toString(),
+      creatorId: board.userId.toString(),
       members: board.userIds.length,
       updatedAt: board.updatedAt,
       columns: this.toColumns(board.columns),
@@ -61,6 +61,7 @@ export class BoardMapperService {
       _id: board._id.toString(),
       title: board.title,
       description: board.description,
+      creatorId: board.userId.toString(),
       members: board.userIds.length,
       updatedAt: board.updatedAt,
     };
