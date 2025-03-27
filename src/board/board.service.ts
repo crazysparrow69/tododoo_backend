@@ -1,5 +1,3 @@
-// board.service.ts
-
 import {
   BadRequestException,
   Injectable,
@@ -11,11 +9,9 @@ import mongoose, { Model, PopulateOptions } from "mongoose";
 
 import {
   Board,
-  BoardColumn,
   BoardDocument,
   BoardTag,
   BoardTagDocument,
-  BoardTask,
 } from "./board.schema";
 import {
   CreateBoardDto,
@@ -100,7 +96,6 @@ export class BoardService {
   async findBoards(userId: string): Promise<BoardBaseResponseDto[]> {
     const boards = await this.boardModel
       .find({ userIds: userId }, { __v: 0, columns: 0, tags: 0, createdAt: 0 })
-      .populate({ path: "userId" })
       .sort({ updatedAt: -1 })
       .lean();
 
