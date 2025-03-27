@@ -1,5 +1,5 @@
 import { CategoryResponseDto } from "../../../category/dtos";
-import { UserReference } from "../../../common/types";
+import { UserReference } from "../../../common/interfaces";
 import { TaskTypes } from "../../../task/types";
 
 export class SubtaskResponseDto {

@@ -11,6 +11,11 @@ import { AuthModule } from "../auth/auth.module";
 import { Session, SessionSchema } from "../auth/session.schema";
 import { TaskModule } from "../task/task.module";
 import { User, UserSchema } from "../user/user.schema";
+import { UserMapperService } from "src/user/user-mapper.service";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+} from "src/image/mappers";
 
 @Module({
   imports: [
@@ -27,6 +32,9 @@ import { User, UserSchema } from "../user/user.schema";
     NotificationGateway,
     NotificationService,
     NotificationMapperService,
+    UserMapperService,
+    ProfileEffectMapperService,
+    UserAvatarEffectMapperService,
   ],
   exports: [NotificationGateway, NotificationService],
   controllers: [NotificationController],

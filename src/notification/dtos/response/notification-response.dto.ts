@@ -1,4 +1,4 @@
-import { UserReference } from "../../../common/types";
+import { UserReference } from "../../../common/interfaces";
 import { NotificationTypes } from "../../../notification/types";
 
 export class NotificationResponseDto {

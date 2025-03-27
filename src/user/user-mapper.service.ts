@@ -7,6 +7,7 @@ import {
   UserAvatarEffectMapperService,
 } from "../image/mappers";
 import { ProfileEffect, UserAvatarEffect } from "../image/schemas";
+import { UserReferenceDto } from "./dtos/response";
 
 @Injectable()
 export class UserMapperService {
@@ -14,6 +15,21 @@ export class UserMapperService {
     private readonly profileEffectMapperService: ProfileEffectMapperService,
     private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
   ) {}
+
+  toUserReference(user: User): UserReferenceDto {
+    return {
+      _id: user._id.toString(),
+      username: user.username,
+      ...(user.avatarId ? { avatar: user.avatarId.url } : {}),
+      ...(user.avatarEffectId
+        ? {
+            avatarEffect: this.userAvatarEffectMapperService.toUserAvatarEffect(
+              user.avatarEffectId as UserAvatarEffect
+            ),
+          }
+        : {}),
+    };
+  }
 
   toUserBase(user: User): UserBaseDto {
     return {

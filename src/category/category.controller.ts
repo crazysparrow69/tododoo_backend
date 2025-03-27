@@ -21,6 +21,7 @@ import {
 } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { ApiResponseStatus } from "src/common/interfaces/response.interface";
 
 @Controller("category")
 @UseGuards(AuthGuard)
@@ -72,7 +73,7 @@ export class CategoryController {
   removeCategory(
     @CurrentUser() userId: string,
     @Param("id") id: string
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     return this.categoryService.remove(userId, id);
   }
 }

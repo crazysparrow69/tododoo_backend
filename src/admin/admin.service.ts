@@ -9,6 +9,7 @@ import {
 } from "../image/dtos";
 import { ImageService } from "../image/image.service";
 import "multer";
+import { ApiResponseStatus } from "src/common/interfaces/response.interface";
 
 @Injectable()
 export class AdminService {
@@ -20,7 +21,7 @@ export class AdminService {
   async updateUserBanStatus(
     userId: string,
     isBanned: boolean
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const foundUser = (
       await this.userService.find(
         { _id: new Types.ObjectId(userId) },
@@ -44,7 +45,7 @@ export class AdminService {
       top?: Express.Multer.File[];
       intro?: Express.Multer.File[];
     }
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     try {
       if (
         files.preview === undefined ||
@@ -98,7 +99,7 @@ export class AdminService {
       preview: Express.Multer.File[];
       animated: Express.Multer.File[];
     }
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     try {
       if (
         files.preview === undefined ||

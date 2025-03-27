@@ -21,6 +21,7 @@ import {
 import { UserService } from "./user.service";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { ApiResponseStatus } from "src/common/interfaces/response.interface";
 
 @Controller("user")
 export class UserController {
@@ -61,7 +62,7 @@ export class UserController {
   @Delete()
   @UseGuards(BannedUserGuard)
   @UseGuards(AuthGuard)
-  removeUser(@CurrentUser() userId: string): Promise<{ success: boolean }> {
+  removeUser(@CurrentUser() userId: string): Promise<ApiResponseStatus> {
     return this.userService.remove(userId);
   }
 
@@ -71,7 +72,7 @@ export class UserController {
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     return this.userService.changePassword(userId, passwords);
   }
 }

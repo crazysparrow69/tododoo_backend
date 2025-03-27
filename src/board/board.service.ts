@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, PopulateOptions } from "mongoose";
 
 import {
   Board,
@@ -28,50 +28,89 @@ import {
   UpdateTaskDto,
 } from "./dtos";
 import { transaction } from "src/common/transaction";
+import { BoardMapperService } from "./board-mapper.service";
+import { BoardBaseResponseDto } from "./dtos/response/board-base.dto";
+import {
+  BoardColumnResponseDto,
+  BoardResponseDto,
+  BoardTagResponseDto,
+  BoardTaskResponseDto,
+} from "./dtos";
+import { ApiResponseStatus } from "src/common/interfaces/response.interface";
 
 @Injectable()
 export class BoardService {
+  populateParams: PopulateOptions[];
   constructor(
     @InjectModel(Board.name) private readonly boardModel: Model<BoardDocument>,
     @InjectModel(BoardTag.name)
     private readonly boardTagModel: Model<BoardTagDocument>,
+    private readonly boardMapperService: BoardMapperService,
     @InjectConnection() private readonly connection: mongoose.Connection
-  ) {}
+  ) {
+    this.populateParams = [
+      {
+        path: "tags",
+        model: "BoardTag",
+        select: "-__v -createdAt -updatedAt",
+      },
+      {
+        path: "columns",
+        populate: {
+          path: "tasks",
+          populate: [
+            {
+              path: "tags",
+              model: "BoardTag",
+              select: "-__v -createdAt -updatedAt",
+            },
+            {
+              path: "assigneeId",
+              select: "_id username avatarId avatarEffectId",
+              populate: [
+                {
+                  path: "avatarId",
+                  select: "-_id url",
+                },
+                {
+                  path: "avatarEffectId",
+                  select: "preview.url animated.url",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ];
+  }
 
-  async createBoard(userId: string, dto: CreateBoardDto): Promise<Board> {
+  async createBoard(
+    userId: string,
+    dto: CreateBoardDto
+  ): Promise<BoardBaseResponseDto> {
     const newBoard = new this.boardModel({ ...dto, userId });
 
     newBoard.userIds.push(userId as any);
 
-    return newBoard.save();
+    await newBoard.save();
+
+    return this.boardMapperService.toBaseBoard(newBoard);
   }
 
-  async findBoards(userId: string): Promise<Board[]> {
-    return this.boardModel
-      .find({ userIds: userId }, { __v: 0, userIds: 0, columns: 0, tags: 0 })
+  async findBoards(userId: string): Promise<BoardBaseResponseDto[]> {
+    const boards = await this.boardModel
+      .find({ userIds: userId }, { __v: 0, columns: 0, tags: 0, createdAt: 0 })
+      .populate({ path: "userId" })
       .sort({ updatedAt: -1 })
       .lean();
+
+    return this.boardMapperService.toBaseBoards(boards);
   }
 
-  async findBoard(userId: string, boardId: string): Promise<Board> {
+  async findBoard(userId: string, boardId: string): Promise<BoardResponseDto> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
-      .populate([
-        {
-          path: "tags",
-          model: "BoardTag",
-        },
-        {
-          path: "columns",
-          populate: {
-            path: "tasks",
-            populate: {
-              path: "tags",
-              model: "BoardTag",
-            },
-          },
-        },
-      ])
+      .populate(this.populateParams)
       .lean();
     if (!board) {
       throw new NotFoundException("Board not found");
@@ -86,14 +125,14 @@ export class BoardService {
       });
     }
 
-    return board;
+    return this.boardMapperService.toBoard(board);
   }
 
   async updateBoard(
     userId: string,
     boardId: string,
     dto: UpdateBoardDto
-  ): Promise<Board> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOneAndUpdate(
         { _id: boardId, userId },
@@ -105,7 +144,7 @@ export class BoardService {
       throw new NotFoundException("Board not found");
     }
 
-    return board;
+    return { success: true };
   }
 
   async deleteBoard(
@@ -141,7 +180,7 @@ export class BoardService {
     userId: string,
     boardId: string,
     dto: CreateColumnDto
-  ): Promise<BoardColumn> {
+  ): Promise<BoardColumnResponseDto> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
       .exec();
@@ -158,7 +197,7 @@ export class BoardService {
 
     await board.save();
 
-    return newColumn;
+    return this.boardMapperService.toColumn(newColumn);
   }
 
   async updateColumn(
@@ -166,7 +205,7 @@ export class BoardService {
     boardId: string,
     columnId: string,
     dto: UpdateColumnDto
-  ): Promise<BoardColumn> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
       .exec();
@@ -196,14 +235,14 @@ export class BoardService {
 
     await board.save();
 
-    return column;
+    return { success: true };
   }
 
   async deleteColumn(
     userId: string,
     boardId: string,
     columnId: string
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
       .exec();
@@ -237,7 +276,7 @@ export class BoardService {
     boardId: string,
     columnId: string,
     dto: CreateTaskDto
-  ): Promise<BoardTask> {
+  ): Promise<BoardTaskResponseDto> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
       .exec();
@@ -264,7 +303,7 @@ export class BoardService {
 
     await board.save();
 
-    return newTask;
+    return this.boardMapperService.toTask(newTask);
   }
 
   async updateTask(
@@ -273,7 +312,7 @@ export class BoardService {
     columnId: string,
     taskId: string,
     dto: UpdateTaskDto
-  ): Promise<BoardTask> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
       .exec();
@@ -312,7 +351,7 @@ export class BoardService {
 
     await board.save();
 
-    return task;
+    return { success: true };
   }
 
   async deleteTask(
@@ -320,7 +359,7 @@ export class BoardService {
     boardId: string,
     columnId: string,
     taskId: string
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOneAndUpdate(
         {
@@ -347,7 +386,7 @@ export class BoardService {
     userId: string,
     boardId: string,
     dto: CreateTagDto
-  ): Promise<BoardTag> {
+  ): Promise<BoardTagResponseDto> {
     try {
       const board = await this.boardModel
         .findOne({ _id: boardId, userId })
@@ -370,7 +409,7 @@ export class BoardService {
         }
       );
 
-      return newTag;
+      return this.boardMapperService.toTag(newTag);
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
@@ -381,7 +420,7 @@ export class BoardService {
     boardId: string,
     tagId: string,
     dto: UpdateTagDto
-  ): Promise<BoardTag> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
       .lean();
@@ -399,14 +438,14 @@ export class BoardService {
       throw new NotFoundException("Tag not found");
     }
 
-    return updatedTag;
+    return { success: true };
   }
 
   async deleteTag(
     userId: string,
     boardId: string,
     tagId: string
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
       .exec();
