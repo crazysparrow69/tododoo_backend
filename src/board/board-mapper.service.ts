@@ -49,7 +49,7 @@ export class BoardMapperService {
       title: board.title,
       description: board.description,
       creatorId: board.userId.toString(),
-      members: board.userIds.length,
+      memberIds: board.userIds.map((id) => id.toString()),
       updatedAt: board.updatedAt,
       columns: this.toColumns(board.columns),
       tags: this.toTags(board.tags),
@@ -62,7 +62,7 @@ export class BoardMapperService {
       title: board.title,
       description: board.description,
       creatorId: board.userId.toString(),
-      members: board.userIds.length,
+      membersCount: board.userIds.length,
       updatedAt: board.updatedAt,
     };
   }

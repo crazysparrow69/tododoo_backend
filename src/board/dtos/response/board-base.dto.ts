@@ -3,6 +3,6 @@ export class BoardBaseResponseDto {
   title: string;
   description: string;
   creatorId: string;
-  members: number;
+  membersCount: number;
   updatedAt: Date;
 }
