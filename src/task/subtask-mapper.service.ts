@@ -5,15 +5,15 @@ import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { Subtask } from "./schemas";
 import { TaskTypes } from "./types";
 import { CategoryMapperService } from "../category/category-mapper.service";
-import { UserAvatarEffectMapperService } from "src/image/mappers";
-import { UserAvatarEffect } from "src/image/schemas";
+import { UserMapperService } from "src/user/user-mapper.service";
 
 @Injectable()
 export class SubtaskMapperService {
   constructor(
     private readonly categoryMapperService: CategoryMapperService,
-    private readonly userAvatarEffectMapperService: UserAvatarEffectMapperService
+    private readonly userMapperService: UserMapperService
   ) {}
+
   toSubtaskResponse(subtask: Subtask): SubtaskResponseDto {
     return {
       _id: subtask._id.toString(),
@@ -24,21 +24,7 @@ export class SubtaskMapperService {
       links: subtask.links,
       creator:
         subtask.assigneeId._id.toString() !== subtask.userId.toString()
-          ? {
-              _id: subtask.userId._id.toString(),
-              username: subtask.userId.username,
-              ...(subtask.userId.avatarId
-                ? { avatar: subtask.userId.avatarId.url }
-                : {}),
-              ...(subtask.userId.avatarEffectId
-                ? {
-                    avatarEffect:
-                      this.userAvatarEffectMapperService.toUserAvatarEffect(
-                        subtask.userId.avatarEffectId as UserAvatarEffect
-                      ),
-                  }
-                : {}),
-            }
+          ? this.userMapperService.toUserReference(subtask.userId)
           : null,
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
@@ -66,21 +52,7 @@ export class SubtaskMapperService {
       isConfirmed: subtask.isConfirmed,
       isRejected: subtask.isRejected,
       links: subtask.links,
-      assignee: {
-        _id: subtask.assigneeId._id.toString(),
-        username: subtask.assigneeId.username,
-        ...(subtask.assigneeId.avatarId
-          ? { avatar: subtask.assigneeId.avatarId.url }
-          : {}),
-        ...(subtask.assigneeId.avatarEffectId
-          ? {
-              avatarEffect:
-                this.userAvatarEffectMapperService.toUserAvatarEffect(
-                  subtask.assigneeId.avatarEffectId as UserAvatarEffect
-                ),
-            }
-          : {}),
-      },
+      assignee: this.userMapperService.toUserReference(subtask.assigneeId),
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
     };
@@ -107,39 +79,8 @@ export class SubtaskMapperService {
       isRejected: subtask.isRejected,
       categories: this.categoryMapperService.toCategories(subtask.categories),
       links: subtask.links,
-      creator:
-        subtask.assigneeId._id.toString() !== subtask.userId.toString()
-          ? {
-              _id: subtask.userId._id.toString(),
-              username: subtask.userId.username,
-              ...(subtask.userId.avatarId
-                ? { avatar: subtask.userId.avatarId.url }
-                : {}),
-              ...(subtask.userId.avatarEffectId
-                ? {
-                    avatarEffect:
-                      this.userAvatarEffectMapperService.toUserAvatarEffect(
-                        subtask.userId.avatarEffectId as UserAvatarEffect
-                      ),
-                  }
-                : {}),
-            }
-          : null,
-      assignee: {
-        _id: subtask.assigneeId._id.toString(),
-        username: subtask.assigneeId.username,
-        ...(subtask.assigneeId.avatarId
-          ? { avatar: subtask.assigneeId.avatarId.url }
-          : {}),
-        ...(subtask.assigneeId.avatarEffectId
-          ? {
-              avatarEffect:
-                this.userAvatarEffectMapperService.toUserAvatarEffect(
-                  subtask.assigneeId.avatarEffectId as UserAvatarEffect
-                ),
-            }
-          : {}),
-      },
+      creator: this.userMapperService.toUserReference(subtask.userId),
+      assignee: this.userMapperService.toUserReference(subtask.assigneeId),
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
       type: TaskTypes.SUBTASK,

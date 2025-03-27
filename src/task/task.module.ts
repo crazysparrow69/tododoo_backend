@@ -14,7 +14,11 @@ import { CategoryModule } from "../category/category.module";
 import { Category, CategorySchema } from "../category/category.schema";
 import { NotificationModule } from "../notification/notification.module";
 import { User, UserSchema } from "../user/user.schema";
-import { UserAvatarEffectMapperService } from "../image/mappers";
+import {
+  ProfileEffectMapperService,
+  UserAvatarEffectMapperService,
+} from "../image/mappers";
+import { UserMapperService } from "src/user/user-mapper.service";
 
 @Module({
   imports: [
@@ -35,6 +39,8 @@ import { UserAvatarEffectMapperService } from "../image/mappers";
     SubtaskService,
     SubtaskMapperService,
     UserAvatarEffectMapperService,
+    UserMapperService,
+    ProfileEffectMapperService,
   ],
   exports: [TaskService, SubtaskService],
   controllers: [TaskController, SubtaskController],

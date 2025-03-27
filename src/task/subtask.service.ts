@@ -21,6 +21,7 @@ import {
   NotificationTypes,
 } from "../notification/types";
 import { transaction } from "src/common/transaction";
+import { ApiResponseStatus } from "src/common/interfaces/response.interface";
 
 @Injectable()
 export class SubtaskService {
@@ -288,7 +289,7 @@ export class SubtaskService {
     userId: Types.ObjectId,
     subtaskId: string,
     value: boolean
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const foundSubtask = await this.subtaskModel.findById(
       new Types.ObjectId(subtaskId)
     );

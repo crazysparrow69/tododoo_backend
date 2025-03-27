@@ -6,3 +6,9 @@ export * from "./update-board.dto";
 export * from "./update-column.dto";
 export * from "./update-tag.dto";
 export * from "./update-task.dto";
+
+export * from "./response/board-base.dto";
+export * from "./response/board-column.dto";
+export * from "./response/board.dto";
+export * from "./response/board-tag.dto";
+export * from "./response/board-task.dto";

@@ -3,10 +3,11 @@ import { Injectable } from "@nestjs/common";
 import { NotificationResponseDto } from "./dtos/response/notification-response.dto";
 import { Notification } from "./notification.schema";
 import { NotificationTypes } from "./types";
+import { UserMapperService } from "src/user/user-mapper.service";
 
 @Injectable()
 export class NotificationMapperService {
-  constructor() {}
+  constructor(private readonly userMapperService: UserMapperService) {}
 
   toNotificationResponse(notification: Notification): NotificationResponseDto {
     if (
@@ -17,11 +18,9 @@ export class NotificationMapperService {
       return {
         _id: notification._id.toString(),
         userId: notification.userId.toString(),
-        actionByUser: {
-          _id: notification.actionByUserId._id.toString(),
-          username: notification.actionByUserId.username,
-          avatar: notification.actionByUserId.avatarId?.url ?? "",
-        },
+        actionByUser: this.userMapperService.toUserReference(
+          notification.actionByUserId
+        ),
         subtask: {
           _id: notification.subtaskId._id.toString(),
           title: notification.subtaskId.title,
