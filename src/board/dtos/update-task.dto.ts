@@ -22,7 +22,7 @@ export class UpdateTaskDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  tags?: string[];
+  tagIds?: string[];
 
   @IsOptional()
   @IsNumber()

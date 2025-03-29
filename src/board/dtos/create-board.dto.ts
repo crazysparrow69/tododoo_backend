@@ -6,9 +6,4 @@ export class CreateBoardDto {
 
   @IsString()
   description: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  userIds?: string[];
 }
