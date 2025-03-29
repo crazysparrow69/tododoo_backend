@@ -30,7 +30,7 @@ export class BoardMapperService {
       ...(task.assigneeId
         ? { assignee: this.userMapperService.toUserReference(task.assigneeId) }
         : {}),
-      tags: this.toTags(task.tags),
+      tags: this.toTags(task.tagIds),
       order: task.order,
     };
   }
@@ -49,10 +49,10 @@ export class BoardMapperService {
       title: board.title,
       description: board.description,
       creatorId: board.userId.toString(),
-      memberIds: board.userIds.map((id) => id.toString()),
-      updatedAt: board.updatedAt,
+      members: this.userMapperService.toUserReferences(board.userIds),
       columns: this.toColumns(board.columns),
-      tags: this.toTags(board.tags),
+      tags: this.toTags(board.tagIds),
+      updatedAt: board.updatedAt,
     };
   }
 
@@ -67,7 +67,7 @@ export class BoardMapperService {
     };
   }
 
-  toTags(tags: BoardTag[]): BoardTagResponseDto[] {
+  private toTags(tags: BoardTag[]): BoardTagResponseDto[] {
     const result: BoardTagResponseDto[] = [];
 
     for (const tag of tags) {
@@ -78,7 +78,7 @@ export class BoardMapperService {
     return result;
   }
 
-  toTasks(tasks: BoardTask[]): BoardTaskResponseDto[] {
+  private toTasks(tasks: BoardTask[]): BoardTaskResponseDto[] {
     const result: BoardTaskResponseDto[] = [];
 
     for (const task of tasks) {
@@ -89,7 +89,7 @@ export class BoardMapperService {
     return result;
   }
 
-  toColumns(columns: BoardColumn[]): BoardColumnResponseDto[] {
+  private toColumns(columns: BoardColumn[]): BoardColumnResponseDto[] {
     const result: BoardColumnResponseDto[] = [];
 
     for (const column of columns) {
