@@ -37,7 +37,6 @@ import { User, UserDocument } from "src/user/user.schema";
 
 @Injectable()
 export class BoardService {
-  populateParams: PopulateOptions[];
   constructor(
     @InjectModel(Board.name) private readonly boardModel: Model<BoardDocument>,
     @InjectModel(BoardTag.name)
@@ -45,42 +44,7 @@ export class BoardService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly boardMapperService: BoardMapperService,
     @InjectConnection() private readonly connection: mongoose.Connection
-  ) {
-    this.populateParams = [
-      {
-        path: "tags",
-        model: "BoardTag",
-        select: "-__v -createdAt -updatedAt",
-      },
-      {
-        path: "columns",
-        populate: {
-          path: "tasks",
-          populate: [
-            {
-              path: "tags",
-              model: "BoardTag",
-              select: "-__v -createdAt -updatedAt",
-            },
-            {
-              path: "assigneeId",
-              select: "_id username avatarId avatarEffectId",
-              populate: [
-                {
-                  path: "avatarId",
-                  select: "-_id url",
-                },
-                {
-                  path: "avatarEffectId",
-                  select: "preview.url animated.url",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    ];
-  }
+  ) {}
 
   async createBoard(
     userId: string,
@@ -105,9 +69,58 @@ export class BoardService {
   }
 
   async findBoard(userId: string, boardId: string): Promise<BoardResponseDto> {
+    const populateParams = [
+      {
+        path: "tagIds",
+        model: "BoardTag",
+        select: "-__v -createdAt -updatedAt",
+      },
+      {
+        path: "columns",
+        populate: {
+          path: "tasks",
+          populate: [
+            {
+              path: "tagIds",
+              model: "BoardTag",
+              select: "-__v -createdAt -updatedAt",
+            },
+            {
+              path: "assigneeId",
+              select: "_id username avatarId avatarEffectId",
+              populate: [
+                {
+                  path: "avatarId",
+                  select: "-_id url",
+                },
+                {
+                  path: "avatarEffectId",
+                  select: "preview.url animated.url",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        path: "userIds",
+        select: "_id username avatarId avatarEffectId",
+        populate: [
+          {
+            path: "avatarId",
+            select: "-_id url",
+          },
+          {
+            path: "avatarEffectId",
+            select: "preview.url animated.url",
+          },
+        ],
+      },
+    ];
+
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
-      .populate(this.populateParams)
+      .populate(populateParams)
       .lean();
     if (!board) {
       throw new NotFoundException("Board not found");

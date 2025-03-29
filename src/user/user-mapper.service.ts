@@ -31,6 +31,17 @@ export class UserMapperService {
     };
   }
 
+  toUserReferences(users: User[]): UserReferenceDto[] {
+    const result: UserReferenceDto[] = [];
+
+    for (const user of users) {
+      const mappedUser = this.toUserReference(user);
+      result.push(mappedUser);
+    }
+
+    return result;
+  }
+
   toUserBase(user: User): UserBaseDto {
     return {
       _id: user._id.toString(),
