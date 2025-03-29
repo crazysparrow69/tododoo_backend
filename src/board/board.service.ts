@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model, PopulateOptions } from "mongoose";
+import mongoose, { Model, PopulateOptions, Types } from "mongoose";
 
 import {
   Board,
@@ -33,6 +33,7 @@ import {
   BoardTaskResponseDto,
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
+import { User, UserDocument } from "src/user/user.schema";
 
 @Injectable()
 export class BoardService {
@@ -41,6 +42,7 @@ export class BoardService {
     @InjectModel(Board.name) private readonly boardModel: Model<BoardDocument>,
     @InjectModel(BoardTag.name)
     private readonly boardTagModel: Model<BoardTagDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly boardMapperService: BoardMapperService,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {
@@ -142,6 +144,61 @@ export class BoardService {
     return { success: true };
   }
 
+  async addUser(
+    userId: string,
+    boardId: string,
+    targetUserId: string
+  ): Promise<ApiResponseStatus> {
+    if (!Types.ObjectId.isValid(targetUserId)) {
+      throw new BadRequestException("Target user id is not a valid mongo id");
+    }
+
+    const targetUser = await this.userModel.findById(targetUserId).lean();
+    if (!targetUser) {
+      throw new NotFoundException("Target user not found");
+    }
+
+    const board = await this.boardModel
+      .findOneAndUpdate(
+        { _id: boardId, userId },
+        { $addToSet: { userIds: targetUserId } }
+      )
+      .lean();
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
+
+    return { success: true };
+  }
+
+  async removeUser(
+    userId: string,
+    boardId: string,
+    targetUserId: string
+  ): Promise<ApiResponseStatus> {
+    if (!Types.ObjectId.isValid(targetUserId)) {
+      throw new BadRequestException("Target user id is not a valid mongo id");
+    }
+
+    if (userId === targetUserId) {
+      throw new BadRequestException(
+        "The creator cannot remove himself from the board"
+      );
+    }
+
+    const board = await this.boardModel
+      .findOneAndUpdate(
+        { _id: boardId, userId },
+        { $pull: { userIds: targetUserId } }
+      )
+      .lean();
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
+
+    return { success: true };
+  }
+
   async deleteBoard(
     userId: string,
     boardId: string
@@ -155,10 +212,10 @@ export class BoardService {
           throw new NotFoundException("Board not found");
         }
 
-        if (board.tags.length > 0) {
+        if (board.tagIds.length > 0) {
           await this.boardTagModel.deleteMany(
             {
-              _id: { $in: board.tags },
+              _id: { $in: board.tagIds },
             },
             { session }
           );
@@ -272,6 +329,21 @@ export class BoardService {
     columnId: string,
     dto: CreateTaskDto
   ): Promise<BoardTaskResponseDto> {
+    if (dto.assigneeId) {
+      const assignee = await this.userModel.findById(dto.assigneeId);
+      if (!assignee) {
+        throw new BadRequestException(
+          "Assignee id should belong to an existing user"
+        );
+      }
+    }
+
+    if (dto.tagIds?.length > 0) {
+      if (!dto.tagIds.every((id) => Types.ObjectId.isValid(id))) {
+        throw new BadRequestException("One or several tag ids are ivalid");
+      }
+    }
+
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
       .exec();
@@ -284,8 +356,8 @@ export class BoardService {
       throw new NotFoundException("Column not found");
     }
 
-    if (dto.tags?.length > 0) {
-      this.validateTaskTags(board, dto.tags);
+    if (dto.tagIds?.length > 0) {
+      this.validateTaskTags(board, dto.tagIds);
     }
 
     const newTask = column.tasks.create({
@@ -308,6 +380,29 @@ export class BoardService {
     taskId: string,
     dto: UpdateTaskDto
   ): Promise<ApiResponseStatus> {
+    if (dto.assigneeId) {
+      const assignee = await this.userModel.findById(dto.assigneeId);
+      if (!assignee) {
+        throw new BadRequestException(
+          "Assignee id should belong to an existing user"
+        );
+      }
+    }
+
+    if (dto.tagIds?.length > 0) {
+      if (!dto.tagIds.every((id) => Types.ObjectId.isValid(id))) {
+        throw new BadRequestException("One or several tag ids are ivalid");
+      }
+
+      const existingTags = await this.boardTagModel
+        .find({ _id: { $in: dto.tagIds } })
+        .select("_id")
+        .lean();
+      if (existingTags.length !== dto.tagIds.length) {
+        throw new NotFoundException("One or several tag ids are ivalid");
+      }
+    }
+
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
       .exec();
@@ -336,13 +431,50 @@ export class BoardService {
       this.reorderItems(column.tasks, task.order, dto.order);
     }
 
-    if (dto.tags?.length > 0) {
-      this.validateTaskTags(board, dto.tags);
+    if (dto.tagIds?.length > 0) {
+      this.validateTaskTags(board, dto.tagIds);
     }
 
     Object.assign(task, dto, { updatedAt: new Date() });
     column.updatedAt = new Date();
     board.updatedAt = new Date();
+
+    await board.save();
+
+    return { success: true };
+  }
+
+  async moveTaskToColumn(
+    userId: string,
+    boardId: string,
+    columnId: string,
+    taskId: string,
+    toColumnId: string
+  ): Promise<ApiResponseStatus> {
+    const board = await this.boardModel
+      .findOne({ _id: boardId, userId })
+      .exec();
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
+
+    const fromColumn = board.columns.id(columnId);
+    if (!fromColumn) {
+      throw new NotFoundException("Column not found");
+    }
+
+    const toColumn = board.columns.id(toColumnId);
+    if (!toColumn) {
+      throw new NotFoundException("Column not found");
+    }
+
+    const task = fromColumn.tasks.id(taskId);
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
+
+    fromColumn.tasks.pull(taskId);
+    toColumn.tasks.push(task);
 
     await board.save();
 
@@ -396,7 +528,7 @@ export class BoardService {
           const tag = new this.boardTagModel(dto);
           await tag.save({ session });
 
-          board.tags.push(tag);
+          board.tagIds.push(tag);
           board.updatedAt = new Date();
           await board.save({ session });
 
@@ -422,7 +554,7 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-    if (!board.tags.includes(tagId as any)) {
+    if (!board.tagIds.includes(tagId as any)) {
       throw new NotFoundException("Tag doesn't exit on the board");
     }
 
@@ -447,7 +579,7 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-    if (!board.tags.includes(tagId as any)) {
+    if (!board.tagIds.includes(tagId as any)) {
       throw new NotFoundException("Tag doesn't exit on the board");
     }
 
@@ -463,7 +595,7 @@ export class BoardService {
           throw new NotFoundException("Tag not found");
         }
 
-        board.tags = board.tags.filter((tag) => (tag as any) !== tagId);
+        board.tagIds = board.tagIds.filter((tag) => (tag as any) !== tagId);
         await board.save({ session });
       });
 
@@ -471,43 +603,6 @@ export class BoardService {
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
-  }
-
-  async moveTaskToAnotherColumn(
-    userId: string,
-    boardId: string,
-    fromColumnId: string,
-    toColumnId: string,
-    taskId: string
-  ): Promise<ApiResponseStatus> {
-    const board = await this.boardModel
-      .findOne({ _id: boardId, userId })
-      .exec();
-    if (!board) {
-      throw new NotFoundException("Board not found");
-    }
-
-    const fromColumn = board.columns.id(fromColumnId);
-    if (!fromColumn) {
-      throw new NotFoundException("Column not found");
-    }
-
-    const toColumn = board.columns.id(toColumnId);
-    if (!toColumn) {
-      throw new NotFoundException("Column not found");
-    }
-
-    const task = fromColumn.tasks.id(taskId);
-    if (!task) {
-      throw new NotFoundException("Task not found");
-    }
-
-    fromColumn.tasks.pull(taskId);
-    toColumn.tasks.push(task);
-
-    await board.save();
-
-    return { success: true };
   }
 
   private reorderItems<T extends { [key: string]: number }>(
@@ -532,8 +627,8 @@ export class BoardService {
   }
 
   private validateTaskTags(board: BoardDocument, tagIds: string[]): void {
-    const boardTagIds = board.tags.map((tag) =>
-      typeof tag === "string" ? tag : tag._id.toString()
+    const boardTagIds = board.tagIds.map((tagId) =>
+      typeof tagId === "string" ? tagId : tagId._id.toString()
     );
 
     for (const tagId of tagIds) {

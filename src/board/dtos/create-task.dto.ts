@@ -21,7 +21,7 @@ export class CreateTaskDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  tags?: string[];
+  tagIds?: string[];
 
   @IsOptional()
   @IsNumber()

@@ -32,7 +32,7 @@ export class BoardTask extends AbstractDocument {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     default: [],
   })
-  tags: BoardTag[];
+  tagIds: BoardTag[];
 
   @Prop({ required: true, type: Number })
   order: number;
@@ -80,7 +80,7 @@ export class Board extends AbstractDocument {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     default: [],
   })
-  tags: BoardTag[];
+  tagIds: BoardTag[];
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);
