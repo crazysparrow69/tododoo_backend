@@ -21,7 +21,7 @@ import {
 import { UserService } from "./user.service";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Controller("user")
 export class UserController {

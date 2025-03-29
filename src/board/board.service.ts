@@ -14,6 +14,7 @@ import {
   BoardTagDocument,
 } from "./board.schema";
 import {
+  BoardBaseResponseDto,
   CreateBoardDto,
   CreateColumnDto,
   CreateTagDto,
@@ -25,14 +26,13 @@ import {
 } from "./dtos";
 import { transaction } from "src/common/transaction";
 import { BoardMapperService } from "./board-mapper.service";
-import { BoardBaseResponseDto } from "./dtos/response/board-base.dto";
 import {
   BoardColumnResponseDto,
   BoardResponseDto,
   BoardTagResponseDto,
   BoardTaskResponseDto,
 } from "./dtos";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Injectable()
 export class BoardService {
@@ -259,8 +259,8 @@ export class BoardService {
         col.order--;
       }
     });
-
     board.updatedAt = new Date();
+
     await board.save();
 
     return { success: true };
@@ -473,49 +473,42 @@ export class BoardService {
     }
   }
 
-  //   // ---------------------------
-  //   // Пример переноса задачи
-  //   // (если понадобится)
-  //   // ---------------------------
-  //   /**
-  //    * Перенести задачу из одной колонки в другую (пример)
-  //    */
-  //   async moveTaskToAnotherColumn(
-  //     boardId: string,
-  //     fromColumnId: string,
-  //     toColumnId: string,
-  //     taskId: string
-  //   ): Promise<Board> {
-  //     const board = await this.boardModel.findById(boardId).exec();
-  //     if (!board) {
-  //       throw new NotFoundException(`Board with id "${boardId}" not found`);
-  //     }
+  async moveTaskToAnotherColumn(
+    userId: string,
+    boardId: string,
+    fromColumnId: string,
+    toColumnId: string,
+    taskId: string
+  ): Promise<ApiResponseStatus> {
+    const board = await this.boardModel
+      .findOne({ _id: boardId, userId })
+      .exec();
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
 
-  //     const fromColumn = board.columns.id(fromColumnId);
-  //     if (!fromColumn) {
-  //       throw new NotFoundException(`Column with id "${fromColumnId}" not found`);
-  //     }
-  //     const toColumn = board.columns.id(toColumnId);
-  //     if (!toColumn) {
-  //       throw new NotFoundException(`Column with id "${toColumnId}" not found`);
-  //     }
+    const fromColumn = board.columns.id(fromColumnId);
+    if (!fromColumn) {
+      throw new NotFoundException("Column not found");
+    }
 
-  //     const task = fromColumn.tasks.id(taskId);
-  //     if (!task) {
-  //       throw new NotFoundException(`Task with id "${taskId}" not found`);
-  //     }
+    const toColumn = board.columns.id(toColumnId);
+    if (!toColumn) {
+      throw new NotFoundException("Column not found");
+    }
 
-  //     // Удаляем задачу из исходной колонки
-  //     task.remove();
-  //     // Добавляем её в новую
-  //     toColumn.tasks.push(task);
+    const task = fromColumn.tasks.id(taskId);
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
 
-  //     // При необходимости обновляем order
-  //     // toColumn.tasks[toColumn.tasks.length - 1].order = ...
+    fromColumn.tasks.pull(taskId);
+    toColumn.tasks.push(task);
 
-  //     await board.save();
-  //     return board;
-  //   }
+    await board.save();
+
+    return { success: true };
+  }
 
   private reorderItems<T extends { [key: string]: number }>(
     items: T[],

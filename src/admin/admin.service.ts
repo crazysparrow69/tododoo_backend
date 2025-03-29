@@ -9,7 +9,7 @@ import {
 } from "../image/dtos";
 import { ImageService } from "../image/image.service";
 import "multer";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Injectable()
 export class AdminService {

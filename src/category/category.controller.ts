@@ -21,7 +21,7 @@ import {
 } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Controller("category")
 @UseGuards(AuthGuard)
