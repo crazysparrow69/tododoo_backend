@@ -29,7 +29,7 @@ import { ImageService } from "../image/image.service";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
 import { UserAvatar } from "src/image/schemas";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 const scrypt = promisify(_scrypt);
 

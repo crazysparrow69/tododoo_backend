@@ -18,12 +18,9 @@ export class NotificationMapperService {
       return {
         _id: notification._id.toString(),
         userId: notification.userId.toString(),
-        // TODO: use userMapperService.toUserReference()
-        actionByUser: {
-          _id: notification.actionByUserId._id.toString(),
-          username: notification.actionByUserId.username,
-          avatar: notification.actionByUserId.avatarId?.url ?? "",
-        },
+        actionByUser: this.userMapperService.toUserReference(
+          notification.actionByUserId
+        ),
         subtask: {
           _id: notification.subtaskId._id.toString(),
           title: notification.subtaskId.title,

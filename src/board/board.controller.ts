@@ -26,7 +26,8 @@ import {
   UpdateTagDto,
   UpdateTaskDto,
 } from "./dtos";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
+import { MoveTaskToAnotherColumnDto } from "./dtos";
 
 @Controller("board")
 @UseGuards(AuthGuard)
@@ -131,6 +132,24 @@ export class BoardController {
       columnId,
       taskId,
       body
+    );
+  }
+
+  @Post(":boardId/column/:columnId/task/:taskId/move-to-another-column")
+  @UseGuards(BannedUserGuard)
+  moveTaskToAnotherColumn(
+    @CurrentUser() userId: string,
+    @Param("boardId") boardId: string,
+    @Param("columnId") columnId: string,
+    @Param("taskId") taskId: string,
+    @Body() body: MoveTaskToAnotherColumnDto
+  ): Promise<ApiResponseStatus> {
+    return this.boardService.moveTaskToAnotherColumn(
+      userId,
+      boardId,
+      columnId,
+      body.toColumnId,
+      taskId
     );
   }
 

@@ -16,7 +16,7 @@ import {
 } from "./dtos";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
-import { ApiResponseStatus } from "src/common/interfaces/response.interface";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Injectable()
 export class CategoryService {
