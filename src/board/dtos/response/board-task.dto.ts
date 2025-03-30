@@ -5,7 +5,7 @@ export class BoardTaskResponseDto {
   _id: string;
   title: string;
   description?: string;
-  assignee?: UserReference;
+  assignees?: UserReference[];
   tags: BoardTagResponseDto[];
   order: number;
 }
