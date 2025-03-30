@@ -38,6 +38,7 @@ export class BoardMapperService {
   toColumn(column: BoardColumn): BoardColumnResponseDto {
     return {
       _id: column._id.toString(),
+      title: column.title,
       order: column.order,
       tasks: this.toTasks(column.tasks),
     };
