@@ -4,6 +4,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
+  Min,
 } from "class-validator";
 
 export class CreateTaskDto {
@@ -15,15 +17,19 @@ export class CreateTaskDto {
   description?: string;
 
   @IsOptional()
-  @IsMongoId()
-  assigneeId?: string;
+  @IsArray()
+  @IsMongoId({ each: true })
+  @MaxLength(10)
+  assigneeIds?: string;
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
+  @MaxLength(10)
   tagIds?: string[];
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   order?: number;
 }

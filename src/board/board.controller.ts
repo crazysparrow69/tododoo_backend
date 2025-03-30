@@ -27,6 +27,7 @@ import {
   UpdateTaskDto,
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
+import { MoveTaskDto } from "./dtos/move-task.dto";
 
 @Controller("board")
 @UseGuards(AuthGuard)
@@ -154,21 +155,21 @@ export class BoardController {
     );
   }
 
-  @Post(":boardId/column/:columnId/task/:taskId/move-to-column/:toColumnId")
+  @Post(":boardId/column/:columnId/task/:taskId/move")
   @UseGuards(BannedUserGuard)
   moveTaskToAnotherColumn(
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
     @Param("taskId") taskId: string,
-    @Param("toColumnId") toColumnId: string
+    @Body() body: MoveTaskDto
   ): Promise<ApiResponseStatus> {
-    return this.boardService.moveTaskToColumn(
+    return this.boardService.moveTask(
       userId,
       boardId,
       columnId,
       taskId,
-      toColumnId
+      body
     );
   }
 
