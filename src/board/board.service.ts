@@ -172,14 +172,19 @@ export class BoardService {
     }
 
     const board = await this.boardModel
-      .findOneAndUpdate(
+      .findOne(
         { _id: boardId, userId },
-        { $addToSet: { userIds: targetUserId } }
-      )
-      .lean();
+      );
     if (!board) {
       throw new NotFoundException("Board not found");
     }
+    if (board.userIds.includes(targetUserId as any)) {
+      throw new BadRequestException("This user is already in the board")
+    }
+
+    board.userIds.push(targetUserId as any);
+
+    await board.save()
 
     return { success: true };
   }
