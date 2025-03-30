@@ -34,6 +34,7 @@ import {
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
+import { MoveTaskDto } from "./dtos/move-task.dto";
 
 @Injectable()
 export class BoardService {
@@ -171,20 +172,17 @@ export class BoardService {
       throw new NotFoundException("Target user not found");
     }
 
-    const board = await this.boardModel
-      .findOne(
-        { _id: boardId, userId },
-      );
+    const board = await this.boardModel.findOne({ _id: boardId, userId });
     if (!board) {
       throw new NotFoundException("Board not found");
     }
     if (board.userIds.includes(targetUserId as any)) {
-      throw new BadRequestException("This user is already in the board")
+      throw new BadRequestException("This user is already in the board");
     }
 
     board.userIds.push(targetUserId as any);
 
-    await board.save()
+    await board.save();
 
     return { success: true };
   }
@@ -347,18 +345,12 @@ export class BoardService {
     columnId: string,
     dto: CreateTaskDto
   ): Promise<BoardTaskResponseDto> {
-    if (dto.assigneeId) {
-      const assignee = await this.userModel.findById(dto.assigneeId);
-      if (!assignee) {
-        throw new BadRequestException(
-          "Assignee id should belong to an existing user"
-        );
-      }
-    }
-
-    if (dto.tagIds?.length > 0) {
-      if (!dto.tagIds.every((id) => Types.ObjectId.isValid(id))) {
-        throw new BadRequestException("One or several tag ids are ivalid");
+    if (dto.assigneeIds?.length > 0) {
+      const existingAssigneesCount = await this.userModel
+        .find({ _id: { $in: dto.assigneeIds } })
+        .countDocuments();
+      if (existingAssigneesCount !== dto.assigneeIds.length) {
+        throw new BadRequestException("One or several assignee ids are ivalid");
       }
     }
 
@@ -398,26 +390,12 @@ export class BoardService {
     taskId: string,
     dto: UpdateTaskDto
   ): Promise<ApiResponseStatus> {
-    if (dto.assigneeId) {
-      const assignee = await this.userModel.findById(dto.assigneeId);
-      if (!assignee) {
-        throw new BadRequestException(
-          "Assignee id should belong to an existing user"
-        );
-      }
-    }
-
-    if (dto.tagIds?.length > 0) {
-      if (!dto.tagIds.every((id) => Types.ObjectId.isValid(id))) {
-        throw new BadRequestException("One or several tag ids are ivalid");
-      }
-
-      const existingTags = await this.boardTagModel
-        .find({ _id: { $in: dto.tagIds } })
-        .select("_id")
-        .lean();
-      if (existingTags.length !== dto.tagIds.length) {
-        throw new NotFoundException("One or several tag ids are ivalid");
+    if (dto.assigneeIds?.length > 0) {
+      const existingAssigneesCount = await this.userModel
+        .find({ _id: { $in: dto.assigneeIds } })
+        .countDocuments();
+      if (existingAssigneesCount !== dto.assigneeIds.length) {
+        throw new BadRequestException("One or several assignee ids are ivalid");
       }
     }
 
@@ -426,6 +404,10 @@ export class BoardService {
       .exec();
     if (!board) {
       throw new NotFoundException("Board not found");
+    }
+
+    if (dto.tagIds?.length > 0) {
+      this.validateTaskTags(board, dto.tagIds);
     }
 
     const column = board.columns.id(columnId);
@@ -449,10 +431,6 @@ export class BoardService {
       this.reorderItems(column.tasks, task.order, dto.order);
     }
 
-    if (dto.tagIds?.length > 0) {
-      this.validateTaskTags(board, dto.tagIds);
-    }
-
     Object.assign(task, dto, { updatedAt: new Date() });
     column.updatedAt = new Date();
     board.updatedAt = new Date();
@@ -462,40 +440,67 @@ export class BoardService {
     return { success: true };
   }
 
-  async moveTaskToColumn(
+  async moveTask(
     userId: string,
     boardId: string,
     columnId: string,
     taskId: string,
-    toColumnId: string
+    dto: MoveTaskDto
   ): Promise<ApiResponseStatus> {
-    const board = await this.boardModel
-      .findOne({ _id: boardId, userId })
-      .exec();
+    const board = await this.boardModel.findOne({ _id: boardId, userId }).exec();
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-
+  
     const fromColumn = board.columns.id(columnId);
     if (!fromColumn) {
-      throw new NotFoundException("Column not found");
+      throw new NotFoundException("Source column not found");
     }
-
-    const toColumn = board.columns.id(toColumnId);
+  
+    const toColumn = board.columns.id(dto.targetColumnId);
     if (!toColumn) {
-      throw new NotFoundException("Column not found");
+      throw new NotFoundException("Target column not found");
     }
-
+  
     const task = fromColumn.tasks.id(taskId);
     if (!task) {
       throw new NotFoundException("Task not found");
     }
-
+  
+    const removedOrder = task.order;
     fromColumn.tasks.pull(taskId);
+    fromColumn.tasks.forEach((t) => {
+      if (t.order > removedOrder) {
+        t.order--;
+      }
+    });
+    fromColumn.updatedAt = new Date();
+  
+    let newOrder: number;
+
+    if (dto.order !== undefined) {
+      if (dto.order > toColumn.tasks.length) {
+        throw new BadRequestException(
+          `Order must be less than or equal to ${toColumn.tasks.length}`
+        );
+      }
+      newOrder = dto.order;
+      toColumn.tasks.forEach((t) => {
+        if (t.order >= newOrder) {
+          t.order++;
+        }
+      });
+    } else {
+      newOrder = toColumn.tasks.length;
+    }
+
+    task.order = newOrder;
     toColumn.tasks.push(task);
+    toColumn.updatedAt = new Date();
+    board.updatedAt = new Date();
 
     await board.save();
-
+  
     return { success: true };
   }
 
