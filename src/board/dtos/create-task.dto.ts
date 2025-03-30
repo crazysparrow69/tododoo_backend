@@ -1,10 +1,10 @@
 import {
+  ArrayMaxSize,
   IsArray,
   IsMongoId,
   IsNumber,
   IsOptional,
   IsString,
-  MaxLength,
   Min,
 } from "class-validator";
 
@@ -19,13 +19,13 @@ export class CreateTaskDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @MaxLength(10)
+  @ArrayMaxSize(10)
   assigneeIds?: string;
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @MaxLength(10)
+  @ArrayMaxSize(10)
   tagIds?: string[];
 
   @IsOptional()
