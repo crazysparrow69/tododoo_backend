@@ -87,7 +87,7 @@ export class BoardService {
               select: "-__v -createdAt -updatedAt",
             },
             {
-              path: "assigneeId",
+              path: "assigneeIds",
               select: "_id username avatarId avatarEffectId",
               populate: [
                 {
