@@ -544,6 +544,9 @@ export class BoardService {
       if (!board) {
         throw new NotFoundException("Board not found");
       }
+      if (board.tagIds.length > 20) {
+        throw new BadRequestException("Cannot create more than 20 tags on a board");
+      }
 
       const newTag = await transaction<BoardTag>(
         this.connection,
@@ -572,7 +575,7 @@ export class BoardService {
     dto: UpdateTagDto
   ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
-      .findOne({ _id: boardId, userId })
+      .findOne({ _id: boardId, userId }, { tagIds: 1 })
       .lean();
     if (!board) {
       throw new NotFoundException("Board not found");

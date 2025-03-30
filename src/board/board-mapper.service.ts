@@ -27,13 +27,7 @@ export class BoardMapperService {
       _id: task._id.toString(),
       title: task.title,
       ...(task.description ? { description: task.description } : {}),
-      ...(task.assigneeIds
-        ? {
-            assignees: this.userMapperService.toUserReferences(
-              task.assigneeIds
-            ),
-          }
-        : {}),
+      assignees: this.userMapperService.toUserReferences(task.assigneeIds),
       tags: this.toTags(task.tagIds),
       order: task.order,
     };
