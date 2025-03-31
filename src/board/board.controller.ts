@@ -86,7 +86,7 @@ export class BoardController {
     return this.boardService.removeUser(userId, id, targetUserId);
   }
 
-  @Delete("id")
+  @Delete(":id")
   @UseGuards(BannedUserGuard)
   removeBoard(
     @CurrentUser() userId: string,
