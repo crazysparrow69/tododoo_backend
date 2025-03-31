@@ -447,7 +447,7 @@ export class BoardService {
     taskId: string,
     dto: MoveTaskDto
   ): Promise<ApiResponseStatus> {
-    const board = await this.boardModel.findOne({ _id: boardId, userId }).exec();
+    const board = await this.boardModel.findOne({ _id: boardId, userIds: userId }).exec();
     if (!board) {
       throw new NotFoundException("Board not found");
     }
