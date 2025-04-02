@@ -580,8 +580,8 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-    if (!board.tagIds.includes(tagId as any)) {
-      throw new NotFoundException("Tag doesn't exit on the board");
+    if (!(board.tagIds as any).some((id: Types.ObjectId) => id.toString() === tagId)) {
+      throw new NotFoundException("Tag doesn't exist on the board");
     }
 
     const updatedTag = await this.boardTagModel
