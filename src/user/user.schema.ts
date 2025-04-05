@@ -16,7 +16,7 @@ export class User extends AbstractDocument {
   @Prop({ required: true, index: true, type: String })
   username: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ type: String })
   password: string;
 
   @Prop({ required: true, unique: true, index: true, type: String })
