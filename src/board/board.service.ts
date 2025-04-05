@@ -447,26 +447,28 @@ export class BoardService {
     taskId: string,
     dto: MoveTaskDto
   ): Promise<ApiResponseStatus> {
-    const board = await this.boardModel.findOne({ _id: boardId, userIds: userId }).exec();
+    const board = await this.boardModel
+      .findOne({ _id: boardId, userIds: userId })
+      .exec();
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-  
+
     const fromColumn = board.columns.id(columnId);
     if (!fromColumn) {
       throw new NotFoundException("Source column not found");
     }
-  
+
     const toColumn = board.columns.id(dto.targetColumnId);
     if (!toColumn) {
       throw new NotFoundException("Target column not found");
     }
-  
+
     const task = fromColumn.tasks.id(taskId);
     if (!task) {
       throw new NotFoundException("Task not found");
     }
-  
+
     const removedOrder = task.order;
     fromColumn.tasks.pull(taskId);
     fromColumn.tasks.forEach((t) => {
@@ -475,7 +477,7 @@ export class BoardService {
       }
     });
     fromColumn.updatedAt = new Date();
-  
+
     let newOrder: number;
 
     if (dto.order !== undefined) {
@@ -500,7 +502,7 @@ export class BoardService {
     board.updatedAt = new Date();
 
     await board.save();
-  
+
     return { success: true };
   }
 
@@ -515,16 +517,19 @@ export class BoardService {
         {
           _id: boardId,
           userIds: userId,
-          "columns._id": columnId,
         },
         {
           $pull: {
-            "columns.$.tasks": { _id: taskId },
+            "columns.$[col].tasks": { _id: taskId },
           },
         },
-        { new: true }
+        {
+          new: true,
+          arrayFilters: [{ "col._id": columnId }],
+        }
       )
       .lean();
+
     if (!board) {
       throw new NotFoundException("Board not found");
     }
@@ -545,7 +550,9 @@ export class BoardService {
         throw new NotFoundException("Board not found");
       }
       if (board.tagIds.length > 20) {
-        throw new BadRequestException("Cannot create more than 20 tags on a board");
+        throw new BadRequestException(
+          "Cannot create more than 20 tags on a board"
+        );
       }
 
       const newTag = await transaction<BoardTag>(
@@ -580,7 +587,11 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-    if (!(board.tagIds as any).some((id: Types.ObjectId) => id.toString() === tagId)) {
+    if (
+      !(board.tagIds as any).some(
+        (id: Types.ObjectId) => id.toString() === tagId
+      )
+    ) {
       throw new NotFoundException("Tag doesn't exist on the board");
     }
 

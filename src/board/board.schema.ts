@@ -27,7 +27,7 @@ export class BoardTask extends AbstractDocument {
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    default: []
+    default: [],
   })
   assigneeIds: User[];
 
