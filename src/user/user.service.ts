@@ -29,6 +29,7 @@ import { ImageService } from "../image/image.service";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
 import { UserAvatar } from "src/image/schemas";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 const scrypt = promisify(_scrypt);
 
@@ -193,7 +194,7 @@ export class UserService implements OnModuleInit {
     return this.userMapperService.toUserProfile(updatedUser);
   }
 
-  async remove(id: string): Promise<{ success: boolean }> {
+  async remove(id: string): Promise<ApiResponseStatus> {
     const deletedUser = await transaction<User>(
       this.connection,
       async (session) => {
@@ -230,7 +231,7 @@ export class UserService implements OnModuleInit {
   async changePassword(
     id: string,
     passwords: ChangePasswordDto
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const { oldPassword, newPassword } = passwords;
     if (oldPassword === newPassword)
       throw new BadRequestException("Passwords cannot be the same");

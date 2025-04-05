@@ -16,6 +16,7 @@ import {
 } from "./dtos";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Injectable()
 export class CategoryService {
@@ -104,7 +105,7 @@ export class CategoryService {
     return this.categoryMapperService.toCategoryResponse(updatedCategory);
   }
 
-  async remove(userId: string, id: string): Promise<{ success: boolean }> {
+  async remove(userId: string, id: string): Promise<ApiResponseStatus> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 

@@ -32,12 +32,6 @@ export class Notification extends AbstractDocument {
 
   @Prop({ required: true, type: Boolean, default: false })
   isRead: boolean;
-
-  @Prop({ default: Date.now, type: Date })
-  createdAt: Date;
-
-  @Prop({ default: Date.now, type: Date })
-  updatedAt: Date;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

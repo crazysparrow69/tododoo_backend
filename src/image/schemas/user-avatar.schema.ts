@@ -14,12 +14,6 @@ export class UserAvatar extends AbstractDocument {
 
   @Prop({ required: true, type: String })
   public_id: string;
-
-  @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
-
-  @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
 }
 
 export const UserAvatarSchema = SchemaFactory.createForClass(UserAvatar);

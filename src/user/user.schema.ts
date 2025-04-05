@@ -36,12 +36,6 @@ export class User extends AbstractDocument {
 
   @Prop({ type: Array, default: [UserRoles.USER] })
   roles: UserRoles[];
-
-  @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
-
-  @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
