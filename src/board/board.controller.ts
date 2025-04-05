@@ -164,13 +164,7 @@ export class BoardController {
     @Param("taskId") taskId: string,
     @Body() body: MoveTaskDto
   ): Promise<ApiResponseStatus> {
-    return this.boardService.moveTask(
-      userId,
-      boardId,
-      columnId,
-      taskId,
-      body
-    );
+    return this.boardService.moveTask(userId, boardId, columnId, taskId, body);
   }
 
   @Delete(":boardId/column/:columnId/task/:taskId")
