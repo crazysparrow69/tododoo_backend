@@ -17,6 +17,7 @@ import mongoose, {
 
 import {
   ChangePasswordDto,
+  OAuthUserDto,
   QueryUserDto,
   UserBaseDto,
   UserProfileDto,
@@ -168,6 +169,23 @@ export class UserService implements OnModuleInit {
       ...createUserDto,
       password: hashedPassword,
     });
+    await newUser.save({ session });
+
+    return newUser;
+  }
+
+  async createOAuthUser(
+    dto: OAuthUserDto,
+    session?: ClientSession
+  ): Promise<User> {
+    const foundUser = await this.userModel.findOne({
+      email: dto.email,
+    });
+    if (foundUser) {
+      throw new BadRequestException("Email already in use");
+    }
+
+    const newUser = new this.userModel(dto);
     await newUser.save({ session });
 
     return newUser;
