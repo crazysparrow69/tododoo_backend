@@ -5,6 +5,7 @@ import { Task } from "./schemas";
 import { SubtaskMapperService } from "./subtask-mapper.service";
 import { TaskTypes } from "./types";
 import { CategoryMapperService } from "../category/category-mapper.service";
+import { mapDocuments } from "src/common/mapDocuments";
 
 @Injectable()
 export class TaskMapperService {
@@ -12,6 +13,7 @@ export class TaskMapperService {
     private readonly categoryMapperService: CategoryMapperService,
     private readonly subtaskMapperService: SubtaskMapperService
   ) {}
+
   toTaskResponse(task: Task): TaskResponseDto {
     return {
       _id: task._id.toString(),
@@ -27,14 +29,10 @@ export class TaskMapperService {
     };
   }
 
-  toTasks(tasks: Task[]) {
-    const result: TaskResponseDto[] = [];
-
-    for (const task of tasks) {
-      const mappedTask = this.toTaskResponse(task);
-      result.push(mappedTask);
-    }
-
-    return result;
+  toTasks(tasks: Task[]): TaskResponseDto[] {
+    return mapDocuments<Task, TaskResponseDto>(
+      tasks,
+      this.toTaskResponse.bind(this)
+    );
   }
 }

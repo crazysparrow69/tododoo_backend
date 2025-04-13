@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-
 import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
 import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { Subtask } from "./schemas";
 import { TaskTypes } from "./types";
 import { CategoryMapperService } from "../category/category-mapper.service";
 import { UserMapperService } from "src/user/user-mapper.service";
+import { mapDocuments } from "src/common/mapDocuments";
 
 @Injectable()
 export class SubtaskMapperService {
@@ -32,17 +32,6 @@ export class SubtaskMapperService {
     };
   }
 
-  toSubtasks(subtasks: Subtask[]): SubtaskResponseDto[] {
-    const result: SubtaskResponseDto[] = [];
-
-    for (const subtask of subtasks) {
-      const mappedSubtask = this.toSubtaskResponse(subtask);
-      result.push(mappedSubtask);
-    }
-
-    return result;
-  }
-
   toAssignedSubtask(subtask: Subtask): SubtaskAssignedDto {
     return {
       _id: subtask._id.toString(),
@@ -56,17 +45,6 @@ export class SubtaskMapperService {
       dateOfCompletion: subtask.dateOfCompletion || null,
       deadline: subtask.deadline || null,
     };
-  }
-
-  toAssignedSubtasks(subtasks: Subtask[]): SubtaskAssignedDto[] {
-    const result: SubtaskAssignedDto[] = [];
-
-    for (const subtask of subtasks) {
-      const mappedSubtask = this.toAssignedSubtask(subtask);
-      result.push(mappedSubtask);
-    }
-
-    return result;
   }
 
   toFullSubtask(subtask: Subtask): SubtaskFullDto {
@@ -85,5 +63,19 @@ export class SubtaskMapperService {
       deadline: subtask.deadline || null,
       type: TaskTypes.SUBTASK,
     };
+  }
+
+  toSubtasks(subtasks: Subtask[]): SubtaskResponseDto[] {
+    return mapDocuments<Subtask, SubtaskResponseDto>(
+      subtasks,
+      this.toSubtaskResponse.bind(this)
+    );
+  }
+
+  toAssignedSubtasks(subtasks: Subtask[]): SubtaskAssignedDto[] {
+    return mapDocuments<Subtask, SubtaskAssignedDto>(
+      subtasks,
+      this.toAssignedSubtask.bind(this)
+    );
   }
 }
