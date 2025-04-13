@@ -67,21 +67,21 @@ export class BoardMapperService {
     };
   }
 
-  private toTags(tags: BoardTag[]): BoardTagResponseDto[] {
+  toTags(tags: BoardTag[]): BoardTagResponseDto[] {
     return mapDocuments<BoardTag, BoardTagResponseDto>(
       tags,
       this.toTag.bind(this)
     );
   }
 
-  private toTasks(tasks: BoardTask[]): BoardTaskResponseDto[] {
+  toTasks(tasks: BoardTask[]): BoardTaskResponseDto[] {
     return mapDocuments<BoardTask, BoardTaskResponseDto>(
       tasks,
       this.toTask.bind(this)
     );
   }
 
-  private toColumns(columns: BoardColumn[]): BoardColumnResponseDto[] {
+  toColumns(columns: BoardColumn[]): BoardColumnResponseDto[] {
     return mapDocuments<BoardColumn, BoardColumnResponseDto>(
       columns,
       this.toColumn.bind(this)

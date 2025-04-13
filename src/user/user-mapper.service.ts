@@ -8,6 +8,7 @@ import {
 } from "../image/mappers";
 import { ProfileEffect, UserAvatarEffect } from "../image/schemas";
 import { UserReferenceDto } from "./dtos/response";
+import { mapDocuments } from "src/common/mapDocuments";
 
 @Injectable()
 export class UserMapperService {
@@ -29,17 +30,6 @@ export class UserMapperService {
           }
         : {}),
     };
-  }
-
-  toUserReferences(users: User[]): UserReferenceDto[] {
-    const result: UserReferenceDto[] = [];
-
-    for (const user of users) {
-      const mappedUser = this.toUserReference(user);
-      result.push(mappedUser);
-    }
-
-    return result;
   }
 
   toUserBase(user: User): UserBaseDto {
@@ -65,17 +55,6 @@ export class UserMapperService {
     };
   }
 
-  toUsersBase(users: User[]): UserBaseDto[] {
-    const result: UserBaseDto[] = [];
-
-    for (const user of users) {
-      const mappedUser = this.toUserBase(user);
-      result.push(mappedUser);
-    }
-
-    return result;
-  }
-
   toUserProfile(user: User): UserProfileDto {
     return {
       _id: user._id.toString(),
@@ -99,5 +78,19 @@ export class UserMapperService {
       createdAt: user.createdAt,
       roles: user.roles,
     };
+  }
+
+  toUserReferences(users: User[]): UserReferenceDto[] {
+    return mapDocuments<User, UserReferenceDto>(
+      users,
+      this.toUserReference.bind(this)
+    );
+  }
+
+  toUsersBase(users: User[]): UserBaseDto[] {
+    return mapDocuments<User, UserBaseDto>(
+      users,
+      this.toUserBase.bind(this)
+    );
   }
 }
