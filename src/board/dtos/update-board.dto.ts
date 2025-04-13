@@ -1,11 +1,13 @@
-import { IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString, Length } from "class-validator";
 
 export class UpdateBoardDto {
   @IsOptional()
   @IsString()
+  @Length(1, 50)
   title?: string;
 
   @IsOptional()
   @IsString()
+  @Length(1, 1000)
   description?: string;
 }

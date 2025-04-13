@@ -1,4 +1,4 @@
-import { IsMongoId, IsNumber, IsOptional } from "class-validator";
+import { IsMongoId, IsNumber, IsOptional, Min } from "class-validator";
 
 export class MoveTaskDto {
   @IsMongoId()
@@ -6,5 +6,6 @@ export class MoveTaskDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   order?: number;
 }

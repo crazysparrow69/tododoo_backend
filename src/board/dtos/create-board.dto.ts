@@ -1,9 +1,11 @@
-import { IsArray, IsMongoId, IsOptional, IsString } from "class-validator";
+import { IsString, Length } from "class-validator";
 
 export class CreateBoardDto {
   @IsString()
+  @Length(1, 50)
   title: string;
 
   @IsString()
+  @Length(1, 1000)
   description: string;
 }
