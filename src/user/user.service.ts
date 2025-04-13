@@ -213,35 +213,32 @@ export class UserService implements OnModuleInit {
   }
 
   async remove(id: string): Promise<ApiResponseStatus> {
-    const deletedUser = await transaction<User>(
-      this.connection,
-      async (session) => {
-        const user = await this.userModel
-          .findByIdAndDelete(id, { session })
-          .lean();
-        if (!user) {
-          throw new NotFoundException("User not found");
-        }
+    await transaction<User>(this.connection, async (session) => {
+      const user = await this.userModel
+        .findByIdAndDelete(id, { session })
+        .lean();
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
 
-        await this.taskModel.deleteMany({ userId: user._id }, { session });
-        await this.categoryModel.deleteMany({ userId: user._id }, { session });
+      await this.taskModel.deleteMany({ userId: user._id }, { session });
+      await this.categoryModel.deleteMany({ userId: user._id }, { session });
 
-        if (deletedUser.avatarId) {
-          const foundUserAvatar = await this.userAvatarModel.findById(
-            deletedUser.avatarId
-          );
-          if (foundUserAvatar) {
-            await foundUserAvatar.deleteOne({ session });
-          }
+      if (user.avatarId) {
+        const foundUserAvatar = await this.userAvatarModel.findById(
+          user.avatarId
+        );
+        if (foundUserAvatar) {
+          await foundUserAvatar.deleteOne({ session });
 
           await this.imageService.deleteAvatarFromCloudinary(
             foundUserAvatar.public_id
           );
         }
-
-        return user;
       }
-    );
+
+      return user;
+    });
 
     return { success: true };
   }
