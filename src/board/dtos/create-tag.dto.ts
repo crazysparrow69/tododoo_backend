@@ -6,5 +6,6 @@ export class CreateTagDto {
   title: string;
 
   @IsString()
+  @Length(1, 20)
   color: string;
 }
