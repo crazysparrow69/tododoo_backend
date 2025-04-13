@@ -5,16 +5,19 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Length,
   Min,
 } from "class-validator";
 
 export class UpdateTaskDto {
   @IsOptional()
   @IsString()
+  @Length(1, 50)
   title?: string;
 
   @IsOptional()
   @IsString()
+  @Length(1, 1000)
   description?: string;
 
   @IsOptional()

@@ -1,8 +1,9 @@
-import { IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsNumber, IsOptional, IsString, Length, Min } from "class-validator";
 
 export class UpdateColumnDto {
   @IsOptional()
   @IsString()
+  @Length(1, 50)
   title?: string;
 
   @IsOptional()
