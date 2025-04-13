@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-
 import { Category } from "./category.schema";
 import { CategoryResponseDto } from "./dtos";
+import { mapDocuments } from "src/common/mapDocuments";
 
 @Injectable()
 export class CategoryMapperService {
@@ -14,13 +14,9 @@ export class CategoryMapperService {
   }
 
   toCategories(categories: Category[]): CategoryResponseDto[] {
-    const result: CategoryResponseDto[] = [];
-
-    for (const category of categories) {
-      const mappedCategory = this.toCategoryResponse(category);
-      result.push(mappedCategory);
-    }
-
-    return result;
+    return mapDocuments<Category, CategoryResponseDto>(
+      categories,
+      this.toCategoryResponse.bind(this)
+    );
   }
 }

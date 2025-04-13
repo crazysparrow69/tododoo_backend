@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-
 import { NotificationResponseDto } from "./dtos/response/notification-response.dto";
 import { Notification } from "./notification.schema";
 import { NotificationTypes } from "./types";
 import { UserMapperService } from "src/user/user-mapper.service";
+import { mapDocuments } from "src/common/mapDocuments";
 
 @Injectable()
 export class NotificationMapperService {
@@ -32,14 +32,10 @@ export class NotificationMapperService {
     }
   }
 
-  toNotifications(notifications: Notification[]) {
-    const result: NotificationResponseDto[] = [];
-
-    for (const notification of notifications) {
-      const mappedNotification = this.toNotificationResponse(notification);
-      result.push(mappedNotification);
-    }
-
-    return result;
+  toNotifications(notifications: Notification[]): NotificationResponseDto[] {
+    return mapDocuments<Notification, NotificationResponseDto>(
+      notifications,
+      this.toNotificationResponse.bind(this)
+    );
   }
 }

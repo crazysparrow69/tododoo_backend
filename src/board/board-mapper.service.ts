@@ -9,6 +9,7 @@ import {
   BoardTaskResponseDto,
 } from "./dtos";
 import { UserMapperService } from "src/user/user-mapper.service";
+import { mapDocuments } from "src/common/mapDocuments";
 
 @Injectable()
 export class BoardMapperService {
@@ -67,46 +68,30 @@ export class BoardMapperService {
   }
 
   private toTags(tags: BoardTag[]): BoardTagResponseDto[] {
-    const result: BoardTagResponseDto[] = [];
-
-    for (const tag of tags) {
-      const mappedTag = this.toTag(tag);
-      result.push(mappedTag);
-    }
-
-    return result;
+    return mapDocuments<BoardTag, BoardTagResponseDto>(
+      tags,
+      this.toTag.bind(this)
+    );
   }
 
   private toTasks(tasks: BoardTask[]): BoardTaskResponseDto[] {
-    const result: BoardTaskResponseDto[] = [];
-
-    for (const task of tasks) {
-      const mappedTasks = this.toTask(task);
-      result.push(mappedTasks);
-    }
-
-    return result;
+    return mapDocuments<BoardTask, BoardTaskResponseDto>(
+      tasks,
+      this.toTask.bind(this)
+    );
   }
 
   private toColumns(columns: BoardColumn[]): BoardColumnResponseDto[] {
-    const result: BoardColumnResponseDto[] = [];
-
-    for (const column of columns) {
-      const mappedColumns = this.toColumn(column);
-      result.push(mappedColumns);
-    }
-
-    return result;
+    return mapDocuments<BoardColumn, BoardColumnResponseDto>(
+      columns,
+      this.toColumn.bind(this)
+    );
   }
 
   toBaseBoards(boards: Board[]): BoardBaseResponseDto[] {
-    const result: BoardBaseResponseDto[] = [];
-
-    for (const board of boards) {
-      const mappedBoard = this.toBaseBoard(board);
-      result.push(mappedBoard);
-    }
-
-    return result;
+    return mapDocuments<Board, BoardBaseResponseDto>(
+      boards,
+      this.toBaseBoard.bind(this)
+    );
   }
 }

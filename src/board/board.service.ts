@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model, PopulateOptions, Types } from "mongoose";
+import mongoose, { Model, Types } from "mongoose";
 
 import {
   Board,
