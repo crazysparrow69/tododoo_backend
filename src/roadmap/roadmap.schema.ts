@@ -44,9 +44,6 @@ export class RoadmapCategoryRowTask extends AbstractDocument {
 
   @Prop({ required: true, type: Number })
   end: number;
-
-  @Prop({ required: true, type: String })
-  status: string;
 }
 
 export const RoadmapCategoryRowTaskSchema =
@@ -54,9 +51,6 @@ export const RoadmapCategoryRowTaskSchema =
 
 @Schema()
 export class RoadmapCategoryRow extends AbstractDocument {
-  @Prop({ required: true, type: String })
-  title: string;
-
   @Prop({ type: [RoadmapCategoryRowTaskSchema], default: [] })
   tasks: Types.DocumentArray<RoadmapCategoryRowTask>;
 }
