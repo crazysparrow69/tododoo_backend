@@ -17,7 +17,7 @@ export class UpdateTaskDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 1000)
+  @Length(0, 1000)
   description?: string;
 
   @IsOptional()
