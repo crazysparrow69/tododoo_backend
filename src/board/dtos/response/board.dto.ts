@@ -17,7 +17,7 @@ export class BoardResponseDto {
   description: string;
   creatorId: string;
   members: UserReference[];
-  updatedAt: Date;
   columns: BoardColumnResponseDto[];
   tags: BoardTagResponseDto[];
+  updatedAt: Date;
 }

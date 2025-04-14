@@ -15,7 +15,7 @@ import { NotificationModule } from "./notification/notification.module";
 import { TaskModule } from "./task/task.module";
 import { UserModule } from "./user/user.module";
 import { BoardModule } from "./board/board.module";
-import { RoadmapModule } from './roadmap/roadmap.module';
+import { RoadmapModule } from "./roadmap/roadmap.module";
 
 @Module({
   imports: [
