@@ -46,8 +46,9 @@ export class RoadmapCategoryRowTask extends AbstractDocument {
   end: number;
 }
 
-export const RoadmapCategoryRowTaskSchema =
-  SchemaFactory.createForClass(RoadmapCategoryRowTask);
+export const RoadmapCategoryRowTaskSchema = SchemaFactory.createForClass(
+  RoadmapCategoryRowTask
+);
 
 @Schema()
 export class RoadmapCategoryRow extends AbstractDocument {
