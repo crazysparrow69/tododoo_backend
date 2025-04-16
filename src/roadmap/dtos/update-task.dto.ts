@@ -21,9 +21,11 @@ export class UpdateTaskDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   start: number;
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   end: number;
 }

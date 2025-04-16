@@ -1,5 +1,6 @@
 import { UserReference } from "src/common/interfaces";
 import { RoadmapCategoryResponseDto } from "./roadmap-category.dto";
+import { RoadmapMilestoneResponseDto } from "./roadmap-milestone.dto";
 
 export class RoadmapResponseDto {
   _id: string;
@@ -8,7 +9,7 @@ export class RoadmapResponseDto {
   creatorId: string;
   members: UserReference[];
   quarters: any[];
-  milestones: any[];
+  milestones: RoadmapMilestoneResponseDto[];
   categories: RoadmapCategoryResponseDto[];
   updatedAt: Date;
 }
