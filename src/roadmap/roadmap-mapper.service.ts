@@ -4,19 +4,35 @@ import {
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
+  RoadmapTaskResponseDto,
 } from "./dtos";
 import { UserMapperService } from "src/user/user-mapper.service";
 import { mapDocuments } from "src/common/mapDocuments";
-import { Roadmap, RoadmapCategory, RoadmapCategoryRow } from "./roadmap.schema";
+import {
+  Roadmap,
+  RoadmapCategory,
+  RoadmapCategoryRow,
+  RoadmapCategoryRowTask,
+} from "./roadmap.schema";
 
 @Injectable()
 export class RoadmapMapperService {
   constructor(private readonly userMapperService: UserMapperService) {}
 
+  toTask(task: RoadmapCategoryRowTask): RoadmapTaskResponseDto {
+    return {
+      _id: task._id.toString(),
+      title: task.title,
+      progress: task.progress,
+      start: task.start,
+      end: task.end,
+    };
+  }
+
   toCategoryRow(row: RoadmapCategoryRow): RoadmapCategoryRowResponseDto {
     return {
       _id: row._id.toString(),
-      tasks: row.tasks,
+      tasks: this.toTasks(row.tasks),
     };
   }
 
@@ -52,6 +68,13 @@ export class RoadmapMapperService {
       membersCount: roadmap.userIds.length,
       updatedAt: roadmap.updatedAt,
     };
+  }
+
+  toTasks(tasks: RoadmapCategoryRowTask[]): RoadmapTaskResponseDto[] {
+    return mapDocuments<RoadmapCategoryRowTask, RoadmapTaskResponseDto>(
+      tasks,
+      this.toTask.bind(this)
+    );
   }
 
   toCategoryRows(rows: RoadmapCategoryRow[]): RoadmapCategoryRowResponseDto[] {

@@ -6,11 +6,14 @@ import { RoadmapMapperService } from "./roadmap-mapper.service";
 import {
   CreateCategoryDto,
   CreateRoadmapDto,
+  CreateTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
   RoadmapResponseDto,
+  RoadmapTaskResponseDto,
   UpdateCategoryDto,
+  UpdateTaskDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
 import { ApiResponseStatus } from "src/common/interfaces";
@@ -230,6 +233,93 @@ export class RoadmapService {
 
     row.deleteOne();
     category.updatedAt = new Date();
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async createTask(
+    userId: string,
+    roadmapId: string,
+    categoryId: string,
+    rowId: string,
+    dto: CreateTaskDto
+  ): Promise<RoadmapTaskResponseDto> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const category = roadmap.categories.id(categoryId);
+    if (!category) throw new NotFoundException("Category not found");
+
+    const row = category.rows.id(rowId);
+    if (!row) throw new NotFoundException("Row not found");
+
+    const newTask = row.tasks.create(dto);
+
+    row.tasks.push(newTask);
+    category.updatedAt = new Date();
+    row.updatedAt = new Date();
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return this.roadmapMapperService.toTask(newTask);
+  }
+
+  async updateTask(
+    userId: string,
+    roadmapId: string,
+    categoryId: string,
+    rowId: string,
+    taskId: string,
+    dto: UpdateTaskDto
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const category = roadmap.categories.id(categoryId);
+    if (!category) throw new NotFoundException("Category not found");
+
+    const row = category.rows.id(rowId);
+    if (!row) throw new NotFoundException("Row not found");
+
+    const task = row.tasks.id(taskId);
+    if (!task) throw new NotFoundException("Task not found");
+
+    Object.assign(task, dto, { updatedAt: new Date() });
+    category.updatedAt = new Date();
+    row.updatedAt = new Date();
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async deleteTask(
+    userId: string,
+    roadmapId: string,
+    categoryId: string,
+    rowId: string,
+    taskId: string
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const category = roadmap.categories.id(categoryId);
+    if (!category) throw new NotFoundException("Category not found");
+
+    const row = category.rows.id(rowId);
+    if (!row) throw new NotFoundException("Row not found");
+
+    const task = row.tasks.id(taskId);
+    if (!task) throw new NotFoundException("Task not found");
+
+    task.deleteOne();
+    category.updatedAt = new Date();
+    row.updatedAt = new Date();
     roadmap.updatedAt = new Date();
 
     await roadmap.save();

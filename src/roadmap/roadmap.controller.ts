@@ -14,11 +14,14 @@ import { CurrentUser } from "src/auth/decorators";
 import {
   CreateCategoryDto,
   CreateRoadmapDto,
+  CreateTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
   RoadmapResponseDto,
+  RoadmapTaskResponseDto,
   UpdateCategoryDto,
+  UpdateTaskDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
 import { ApiResponseStatus } from "src/common/interfaces";
@@ -130,6 +133,62 @@ export class RoadmapController {
       roadmapId,
       categoryId,
       rowId
+    );
+  }
+
+  @Post(":roadmapId/category/:categoryId/row/:rowId/task")
+  @UseGuards(BannedUserGuard)
+  createCategoryRowTask(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Param("rowId") rowId: string,
+    @Body() dto: CreateTaskDto
+  ): Promise<RoadmapTaskResponseDto> {
+    return this.roadmapService.createTask(
+      userId,
+      roadmapId,
+      categoryId,
+      rowId,
+      dto
+    );
+  }
+
+  @Patch(":roadmapId/category/:categoryId/row/:rowId/task/:taskId")
+  @UseGuards(BannedUserGuard)
+  updateCategoryRowTask(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Param("rowId") rowId: string,
+    @Param("taskId") taskId: string,
+    @Body() dto: UpdateTaskDto
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.updateTask(
+      userId,
+      roadmapId,
+      categoryId,
+      rowId,
+      taskId,
+      dto
+    );
+  }
+
+  @Delete(":roadmapId/category/:categoryId/row/:rowId/task/:taskId")
+  @UseGuards(BannedUserGuard)
+  deleteCategoryRowTask(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Param("rowId") rowId: string,
+    @Param("taskId") taskId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.deleteTask(
+      userId,
+      roadmapId,
+      categoryId,
+      rowId,
+      taskId
     );
   }
 }
