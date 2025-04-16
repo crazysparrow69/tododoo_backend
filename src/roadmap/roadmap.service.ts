@@ -4,11 +4,15 @@ import { Model } from "mongoose";
 import { Roadmap, RoadmapDocument } from "./roadmap.schema";
 import { RoadmapMapperService } from "./roadmap-mapper.service";
 import {
+  CreateCategoryDto,
   CreateRoadmapDto,
   RoadmapBaseResponseDto,
+  RoadmapCategoryResponseDto,
   RoadmapResponseDto,
+  UpdateCategoryDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Injectable()
 export class RoadmapService {
@@ -77,7 +81,7 @@ export class RoadmapService {
     userId: string,
     roadmapId: string,
     dto: UpdateRoadmapDto
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const roadmap = await this.roadmapModel
       .findOneAndUpdate(
         { _id: roadmapId, userId },
@@ -95,13 +99,86 @@ export class RoadmapService {
   async deleteRoadmap(
     userId: string,
     roadmapId: string
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     const roadmap = await this.roadmapModel
       .findOneAndDelete({ _id: roadmapId, userId })
       .lean();
     if (!roadmap) {
       throw new NotFoundException("Roadmap not found");
     }
+
+    return { success: true };
+  }
+
+  async createCategory(
+    userId: string,
+    roadmapId: string,
+    dto: CreateCategoryDto
+  ): Promise<RoadmapCategoryResponseDto> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) {
+      throw new NotFoundException("Roadmap not found");
+    }
+
+    const newCategory = roadmap.categories.create(dto);
+
+    roadmap.categories.push(newCategory);
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return this.roadmapMapperService.toCategory(newCategory);
+  }
+
+  async updateCategory(
+    userId: string,
+    roadmapId: string,
+    categoryId: string,
+    dto: UpdateCategoryDto
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({
+      _id: roadmapId,
+      userId,
+    });
+    if (!roadmap) {
+      throw new NotFoundException("Roadmap not found");
+    }
+
+    const category = roadmap.categories.id(categoryId);
+    if (!category) {
+      throw new NotFoundException("Category not found");
+    }
+
+    Object.assign(category, dto, { updatedAt: new Date() });
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async deleteCategory(
+    userId: string,
+    roadmapId: string,
+    categoryId: string
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({
+      _id: roadmapId,
+      userId,
+    });
+    if (!roadmap) {
+      throw new NotFoundException("Roadmap not found");
+    }
+
+    const category = roadmap.categories.id(categoryId);
+    if (!category) {
+      throw new NotFoundException("Category not found");
+    }
+
+    category.deleteOne();
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
 
     return { success: true };
   }
