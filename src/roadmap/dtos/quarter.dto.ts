@@ -18,15 +18,15 @@ export class UpdateRoadmapQuarterDto {
   @IsOptional()
   @IsString()
   @Length(1, 50)
-  title: string;
+  title?: string;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  start: number;
+  start?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  end: number;
+  end?: number;
 }

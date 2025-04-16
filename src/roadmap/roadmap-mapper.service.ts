@@ -4,7 +4,7 @@ import {
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
-  RoadmapTaskResponseDto,
+  RoadmapCategoryRowTaskResponseDto,
   RoadmapMilestoneResponseDto,
   RoadmapQuarterResponseDto,
 } from "./dtos";
@@ -40,7 +40,7 @@ export class RoadmapMapperService {
     };
   }
 
-  toTask(task: RoadmapCategoryRowTask): RoadmapTaskResponseDto {
+  toTask(task: RoadmapCategoryRowTask): RoadmapCategoryRowTaskResponseDto {
     return {
       _id: task._id.toString(),
       title: task.title,
@@ -105,8 +105,8 @@ export class RoadmapMapperService {
     );
   }
 
-  toTasks(tasks: RoadmapCategoryRowTask[]): RoadmapTaskResponseDto[] {
-    return mapDocuments<RoadmapCategoryRowTask, RoadmapTaskResponseDto>(
+  toTasks(tasks: RoadmapCategoryRowTask[]): RoadmapCategoryRowTaskResponseDto[] {
+    return mapDocuments<RoadmapCategoryRowTask, RoadmapCategoryRowTaskResponseDto>(
       tasks,
       this.toTask.bind(this)
     );
