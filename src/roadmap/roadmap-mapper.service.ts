@@ -6,6 +6,7 @@ import {
   RoadmapCategoryRowResponseDto,
   RoadmapTaskResponseDto,
   RoadmapMilestoneResponseDto,
+  RoadmapQuarterResponseDto,
 } from "./dtos";
 import { UserMapperService } from "src/user/user-mapper.service";
 import { mapDocuments } from "src/common/mapDocuments";
@@ -15,11 +16,21 @@ import {
   RoadmapCategoryRow,
   RoadmapCategoryRowTask,
   RoadmapMilestone,
+  RoadmapQuarter,
 } from "./roadmap.schema";
 
 @Injectable()
 export class RoadmapMapperService {
   constructor(private readonly userMapperService: UserMapperService) {}
+
+  toQuarter(quarter: RoadmapQuarter): RoadmapQuarterResponseDto {
+    return {
+      _id: quarter._id.toString(),
+      title: quarter.title,
+      start: quarter.start,
+      end: quarter.end,
+    };
+  }
 
   toMilestone(milestone: RoadmapMilestone): RoadmapMilestoneResponseDto {
     return {
@@ -62,7 +73,7 @@ export class RoadmapMapperService {
       description: roadmap.description,
       creatorId: roadmap.userId.toString(),
       members: this.userMapperService.toUserReferences(roadmap.userIds),
-      quarters: roadmap.quarters,
+      quarters: this.toQuarters(roadmap.quarters),
       milestones: this.toMilestones(roadmap.milestones),
       categories: this.toCategories(roadmap.categories),
       updatedAt: roadmap.updatedAt,
@@ -78,6 +89,13 @@ export class RoadmapMapperService {
       membersCount: roadmap.userIds.length,
       updatedAt: roadmap.updatedAt,
     };
+  }
+
+  toQuarters(quarters: RoadmapQuarter[]): RoadmapQuarterResponseDto[] {
+    return mapDocuments<RoadmapQuarter, RoadmapQuarterResponseDto>(
+      quarters,
+      this.toQuarters.bind(this)
+    );
   }
 
   toMilestones(milestones: RoadmapMilestone[]): RoadmapMilestoneResponseDto[] {

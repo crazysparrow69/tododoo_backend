@@ -6,16 +6,19 @@ import { RoadmapMapperService } from "./roadmap-mapper.service";
 import {
   CreateCategoryDto,
   CreateMilestoneDto,
+  CreateQuarterDto,
   CreateRoadmapDto,
   CreateTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
   RoadmapMilestoneResponseDto,
+  RoadmapQuarterResponseDto,
   RoadmapResponseDto,
   RoadmapTaskResponseDto,
   UpdateCategoryDto,
   UpdateMilestoneDto,
+  UpdateQuarterDto,
   UpdateTaskDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
@@ -379,6 +382,62 @@ export class RoadmapService {
     if (!milestone) throw new NotFoundException("Milestone not found");
 
     milestone.deleteOne();
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async createQuarter(
+    userId: string,
+    roadmapId: string,
+    dto: CreateQuarterDto
+  ): Promise<RoadmapQuarterResponseDto> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const quarter = roadmap.quarters.create(dto);
+    roadmap.quarters.push(quarter);
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return this.roadmapMapperService.toQuarter(quarter);
+  }
+
+  async updateQuarter(
+    userId: string,
+    roadmapId: string,
+    quarterId: string,
+    dto: UpdateQuarterDto
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const quarter = roadmap.quarters.id(quarterId);
+    if (!quarter) throw new NotFoundException("Quarter not found");
+
+    Object.assign(quarter, dto, { updatedAt: new Date() });
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async deleteQuarter(
+    userId: string,
+    roadmapId: string,
+    quarterId: string
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const quarter = roadmap.quarters.id(quarterId);
+    if (!quarter) throw new NotFoundException("Quarter not found");
+
+    quarter.deleteOne();
     roadmap.updatedAt = new Date();
 
     await roadmap.save();

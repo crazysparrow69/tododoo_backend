@@ -1,11 +1,15 @@
 import { IsNumber, IsString, Length, Min } from "class-validator";
 
-export class CreateMilestoneDto {
+export class CreateQuarterDto {
   @IsString()
   @Length(1, 50)
   title: string;
 
   @IsNumber()
   @Min(0)
-  position: number;
+  start: number;
+
+  @IsNumber()
+  @Min(0)
+  end: number;
 }
