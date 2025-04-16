@@ -14,10 +14,10 @@ export class UpdateRoadmapCategoryDto {
   @IsOptional()
   @IsString()
   @Length(1, 50)
-  title: string;
+  title?: string;
 
   @IsOptional()
   @IsString()
   @Length(1, 20)
-  color: string;
+  color?: string;
 }

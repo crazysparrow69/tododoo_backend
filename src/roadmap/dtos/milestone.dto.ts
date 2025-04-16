@@ -14,10 +14,10 @@ export class UpdateRoadmapMilestoneDto {
   @IsOptional()
   @IsString()
   @Length(1, 50)
-  title: string;
+  title?: string;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  position: string;
+  position?: string;
 }
