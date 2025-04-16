@@ -14,16 +14,19 @@ import { CurrentUser } from "src/auth/decorators";
 import {
   CreateCategoryDto,
   CreateMilestoneDto,
+  CreateQuarterDto,
   CreateRoadmapDto,
   CreateTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
   RoadmapMilestoneResponseDto,
+  RoadmapQuarterResponseDto,
   RoadmapResponseDto,
   RoadmapTaskResponseDto,
   UpdateCategoryDto,
   UpdateMilestoneDto,
+  UpdateQuarterDto,
   UpdateTaskDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
@@ -229,5 +232,36 @@ export class RoadmapController {
     @Param("milestoneId") milestoneId: string
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.deleteMilestone(userId, roadmapId, milestoneId);
+  }
+
+  @Post(":roadmapId/quarter")
+  @UseGuards(BannedUserGuard)
+  createQuarter(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Body() dto: CreateQuarterDto
+  ): Promise<RoadmapQuarterResponseDto> {
+    return this.roadmapService.createQuarter(userId, roadmapId, dto);
+  }
+
+  @Patch(":roadmapId/quarter/:quarterId")
+  @UseGuards(BannedUserGuard)
+  updateQuarter(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("quarterId") quarterId: string,
+    @Body() dto: UpdateQuarterDto
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.updateQuarter(userId, roadmapId, quarterId, dto);
+  }
+
+  @Delete(":roadmapId/quarter/:quarterId")
+  @UseGuards(BannedUserGuard)
+  deleteQuarter(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("quarterId") quarterId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.deleteQuarter(userId, roadmapId, quarterId);
   }
 }

@@ -6,6 +6,8 @@ export * from "./create-task.dto";
 export * from "./update-task.dto";
 export * from "./create-milestone.dto";
 export * from "./update-milestone.dto";
+export * from "./create-quarter.dto";
+export * from "./update-quarter.dto";
 
 export * from "./response/roadmap.dto";
 export * from "./response/roadmap-base.dto";
@@ -13,3 +15,4 @@ export * from "./response/roadmap-category.dto";
 export * from "./response/roadmap-category-row.dto";
 export * from "./response/roadmap-task.dto";
 export * from "./response/roadmap-milestone.dto";
+export * from "./response/roadmap-quarter.dto";
