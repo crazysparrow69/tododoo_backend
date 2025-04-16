@@ -181,6 +181,7 @@ export class BoardService {
     }
 
     board.userIds.push(targetUserId as any);
+    board.updatedAt = new Date();
 
     await board.save();
 
@@ -205,7 +206,7 @@ export class BoardService {
     const board = await this.boardModel
       .findOneAndUpdate(
         { _id: boardId, userId },
-        { $pull: { userIds: targetUserId } }
+        { $pull: { userIds: targetUserId }, updatedAt: new Date() }
       )
       .lean();
     if (!board) {
@@ -522,6 +523,7 @@ export class BoardService {
           $pull: {
             "columns.$[col].tasks": { _id: taskId },
           },
+          updatedAt: new Date(),
         },
         {
           new: true,
@@ -529,7 +531,6 @@ export class BoardService {
         }
       )
       .lean();
-
     if (!board) {
       throw new NotFoundException("Board not found");
     }
@@ -581,9 +582,10 @@ export class BoardService {
     tagId: string,
     dto: UpdateBoardTagDto
   ): Promise<ApiResponseStatus> {
-    const board = await this.boardModel
-      .findOne({ _id: boardId, userId }, { tagIds: 1 })
-      .lean();
+    const board = await this.boardModel.findOne(
+      { _id: boardId, userId },
+      { tagIds: 1 }
+    );
     if (!board) {
       throw new NotFoundException("Board not found");
     }
@@ -595,14 +597,28 @@ export class BoardService {
       throw new NotFoundException("Tag doesn't exist on the board");
     }
 
-    const updatedTag = await this.boardTagModel
-      .findOneAndUpdate({ _id: tagId }, { ...dto, updatedAt: new Date() })
-      .lean();
-    if (!updatedTag) {
-      throw new NotFoundException("Tag not found");
-    }
+    try {
+      await transaction(this.connection, async (session) => {
+        const updatedTag = await this.boardTagModel
+          .findOneAndUpdate(
+            { _id: tagId },
+            { ...dto, updatedAt: new Date() },
+            { session }
+          )
+          .lean();
+        if (!updatedTag) {
+          throw new NotFoundException("Tag not found");
+        }
 
-    return { success: true };
+        board.updatedAt = new Date();
+
+        await board.save({ session });
+      });
+
+      return { success: true };
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
   }
 
   async deleteTag(
