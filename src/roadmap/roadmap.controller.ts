@@ -13,14 +13,17 @@ import { AuthGuard, BannedUserGuard } from "src/auth/guards";
 import { CurrentUser } from "src/auth/decorators";
 import {
   CreateCategoryDto,
+  CreateMilestoneDto,
   CreateRoadmapDto,
   CreateTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
+  RoadmapMilestoneResponseDto,
   RoadmapResponseDto,
   RoadmapTaskResponseDto,
   UpdateCategoryDto,
+  UpdateMilestoneDto,
   UpdateTaskDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
@@ -190,5 +193,41 @@ export class RoadmapController {
       rowId,
       taskId
     );
+  }
+
+  @Post(":roadmapId/milestone")
+  @UseGuards(BannedUserGuard)
+  createMilestone(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Body() dto: CreateMilestoneDto
+  ): Promise<RoadmapMilestoneResponseDto> {
+    return this.roadmapService.createMilestone(userId, roadmapId, dto);
+  }
+
+  @Patch(":roadmapId/milestone/:milestoneId")
+  @UseGuards(BannedUserGuard)
+  updateMilestone(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("milestoneId") milestoneId: string,
+    @Body() dto: UpdateMilestoneDto
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.updateMilestone(
+      userId,
+      roadmapId,
+      milestoneId,
+      dto
+    );
+  }
+
+  @Delete(":roadmapId/milestone/:milestoneId")
+  @UseGuards(BannedUserGuard)
+  deleteMilestone(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("milestoneId") milestoneId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.deleteMilestone(userId, roadmapId, milestoneId);
   }
 }

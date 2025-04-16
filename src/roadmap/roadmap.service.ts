@@ -5,14 +5,17 @@ import { Roadmap, RoadmapDocument } from "./roadmap.schema";
 import { RoadmapMapperService } from "./roadmap-mapper.service";
 import {
   CreateCategoryDto,
+  CreateMilestoneDto,
   CreateRoadmapDto,
   CreateTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
+  RoadmapMilestoneResponseDto,
   RoadmapResponseDto,
   RoadmapTaskResponseDto,
   UpdateCategoryDto,
+  UpdateMilestoneDto,
   UpdateTaskDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
@@ -320,6 +323,62 @@ export class RoadmapService {
     task.deleteOne();
     category.updatedAt = new Date();
     row.updatedAt = new Date();
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async createMilestone(
+    userId: string,
+    roadmapId: string,
+    dto: CreateMilestoneDto
+  ): Promise<RoadmapMilestoneResponseDto> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const milestone = roadmap.milestones.create(dto);
+    roadmap.milestones.push(milestone);
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return this.roadmapMapperService.toMilestone(milestone);
+  }
+
+  async updateMilestone(
+    userId: string,
+    roadmapId: string,
+    milestoneId: string,
+    dto: UpdateMilestoneDto
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const milestone = roadmap.milestones.id(milestoneId);
+    if (!milestone) throw new NotFoundException("Milestone not found");
+
+    Object.assign(milestone, dto, { updatedAt: new Date() });
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async deleteMilestone(
+    userId: string,
+    roadmapId: string,
+    milestoneId: string
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const milestone = roadmap.milestones.id(milestoneId);
+    if (!milestone) throw new NotFoundException("Milestone not found");
+
+    milestone.deleteOne();
     roadmap.updatedAt = new Date();
 
     await roadmap.save();
