@@ -12,24 +12,24 @@ import { RoadmapService } from "./roadmap.service";
 import { AuthGuard, BannedUserGuard } from "src/auth/guards";
 import { CurrentUser } from "src/auth/decorators";
 import {
-  CreateCategoryDto,
-  CreateMilestoneDto,
-  CreateQuarterDto,
+  CreateRoadmapCategoryDto,
+  CreateRoadmapMilestoneDto,
+  CreateRoadmapQuarterDto,
   CreateRoadmapDto,
-  CreateTaskDto,
+  CreateRoadmapCategoryRowTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
   RoadmapMilestoneResponseDto,
   RoadmapQuarterResponseDto,
   RoadmapResponseDto,
-  RoadmapTaskResponseDto,
-  UpdateCategoryDto,
-  UpdateMilestoneDto,
-  UpdateQuarterDto,
-  UpdateTaskDto,
+  RoadmapCategoryRowTaskResponseDto,
+  UpdateRoadmapCategoryDto,
+  UpdateRoadmapMilestoneDto,
+  UpdateRoadmapQuarterDto,
+  UpdateRoadmapCategoryRowTaskDto,
+  UpdateRoadmapDto,
 } from "./dtos";
-import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
 import { ApiResponseStatus } from "src/common/interfaces";
 
 @Controller("roadmap")
@@ -85,7 +85,7 @@ export class RoadmapController {
   createCategory(
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
-    @Body() dto: CreateCategoryDto
+    @Body() dto: CreateRoadmapCategoryDto
   ): Promise<RoadmapCategoryResponseDto> {
     return this.roadmapService.createCategory(userId, roadmapId, dto);
   }
@@ -96,7 +96,7 @@ export class RoadmapController {
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
     @Param("categoryId") categoryId: string,
-    @Body() dto: UpdateCategoryDto
+    @Body() dto: UpdateRoadmapCategoryDto
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.updateCategory(
       userId,
@@ -149,8 +149,8 @@ export class RoadmapController {
     @Param("roadmapId") roadmapId: string,
     @Param("categoryId") categoryId: string,
     @Param("rowId") rowId: string,
-    @Body() dto: CreateTaskDto
-  ): Promise<RoadmapTaskResponseDto> {
+    @Body() dto: CreateRoadmapCategoryRowTaskDto
+  ): Promise<RoadmapCategoryRowTaskResponseDto> {
     return this.roadmapService.createTask(
       userId,
       roadmapId,
@@ -168,7 +168,7 @@ export class RoadmapController {
     @Param("categoryId") categoryId: string,
     @Param("rowId") rowId: string,
     @Param("taskId") taskId: string,
-    @Body() dto: UpdateTaskDto
+    @Body() dto: UpdateRoadmapCategoryRowTaskDto
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.updateTask(
       userId,
@@ -203,7 +203,7 @@ export class RoadmapController {
   createMilestone(
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
-    @Body() dto: CreateMilestoneDto
+    @Body() dto: CreateRoadmapMilestoneDto
   ): Promise<RoadmapMilestoneResponseDto> {
     return this.roadmapService.createMilestone(userId, roadmapId, dto);
   }
@@ -214,7 +214,7 @@ export class RoadmapController {
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
     @Param("milestoneId") milestoneId: string,
-    @Body() dto: UpdateMilestoneDto
+    @Body() dto: UpdateRoadmapMilestoneDto
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.updateMilestone(
       userId,
@@ -239,7 +239,7 @@ export class RoadmapController {
   createQuarter(
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
-    @Body() dto: CreateQuarterDto
+    @Body() dto: CreateRoadmapQuarterDto
   ): Promise<RoadmapQuarterResponseDto> {
     return this.roadmapService.createQuarter(userId, roadmapId, dto);
   }
@@ -250,7 +250,7 @@ export class RoadmapController {
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
     @Param("quarterId") quarterId: string,
-    @Body() dto: UpdateQuarterDto
+    @Body() dto: UpdateRoadmapQuarterDto
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.updateQuarter(userId, roadmapId, quarterId, dto);
   }
