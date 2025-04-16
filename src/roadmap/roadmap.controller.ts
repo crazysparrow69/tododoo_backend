@@ -12,11 +12,15 @@ import { RoadmapService } from "./roadmap.service";
 import { AuthGuard, BannedUserGuard } from "src/auth/guards";
 import { CurrentUser } from "src/auth/decorators";
 import {
+  CreateCategoryDto,
   CreateRoadmapDto,
   RoadmapBaseResponseDto,
+  RoadmapCategoryResponseDto,
   RoadmapResponseDto,
+  UpdateCategoryDto,
 } from "./dtos";
 import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Controller("roadmap")
 @UseGuards(AuthGuard)
@@ -53,7 +57,7 @@ export class RoadmapController {
     @CurrentUser() userId: string,
     @Param("id") id: string,
     @Body() dto: UpdateRoadmapDto
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     return this.roadmapService.updateRoadmap(userId, id, dto);
   }
 
@@ -62,7 +66,43 @@ export class RoadmapController {
   deleteRoadmap(
     @CurrentUser() userId: string,
     @Param("id") id: string
-  ): Promise<{ success: boolean }> {
+  ): Promise<ApiResponseStatus> {
     return this.roadmapService.deleteRoadmap(userId, id);
+  }
+
+  @Post(":roadmapId/category")
+  @UseGuards(BannedUserGuard)
+  createCategory(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Body() dto: CreateCategoryDto
+  ): Promise<RoadmapCategoryResponseDto> {
+    return this.roadmapService.createCategory(userId, roadmapId, dto);
+  }
+
+  @Patch(":roadmapId/category/:categoryId")
+  @UseGuards(BannedUserGuard)
+  updateCategory(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Body() dto: UpdateCategoryDto
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.updateCategory(
+      userId,
+      roadmapId,
+      categoryId,
+      dto
+    );
+  }
+
+  @Delete(":roadmapId/category/:categoryId")
+  @UseGuards(BannedUserGuard)
+  deleteCategory(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.deleteCategory(userId, roadmapId, categoryId);
   }
 }
