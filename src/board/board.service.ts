@@ -16,13 +16,14 @@ import {
 import {
   BoardBaseResponseDto,
   CreateBoardDto,
-  CreateColumnDto,
-  CreateTagDto,
-  CreateTaskDto,
+  CreateBoardColumnDto,
+  CreateBoardTagDto,
+  CreateBoardCategoryTaskDto,
   UpdateBoardDto,
-  UpdateColumnDto,
-  UpdateTagDto,
-  UpdateTaskDto,
+  UpdateBoardColumnDto,
+  UpdateBoardTagDto,
+  UpdateBoardCategoryTaskDto,
+  MoveBoardCategoryTaskDto,
 } from "./dtos";
 import { transaction } from "src/common/transaction";
 import { BoardMapperService } from "./board-mapper.service";
@@ -30,11 +31,10 @@ import {
   BoardColumnResponseDto,
   BoardResponseDto,
   BoardTagResponseDto,
-  BoardTaskResponseDto,
+  BoardColumnTaskResponseDto,
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
-import { MoveTaskDto } from "./dtos/move-task.dto";
 
 @Injectable()
 export class BoardService {
@@ -247,7 +247,7 @@ export class BoardService {
   async createColumn(
     userId: string,
     boardId: string,
-    dto: CreateColumnDto
+    dto: CreateBoardColumnDto
   ): Promise<BoardColumnResponseDto> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
@@ -272,7 +272,7 @@ export class BoardService {
     userId: string,
     boardId: string,
     columnId: string,
-    dto: UpdateColumnDto
+    dto: UpdateBoardColumnDto
   ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId })
@@ -343,8 +343,8 @@ export class BoardService {
     userId: string,
     boardId: string,
     columnId: string,
-    dto: CreateTaskDto
-  ): Promise<BoardTaskResponseDto> {
+    dto: CreateBoardCategoryTaskDto
+  ): Promise<BoardColumnTaskResponseDto> {
     if (dto.assigneeIds?.length > 0) {
       const existingAssigneesCount = await this.userModel
         .find({ _id: { $in: dto.assigneeIds } })
@@ -388,7 +388,7 @@ export class BoardService {
     boardId: string,
     columnId: string,
     taskId: string,
-    dto: UpdateTaskDto
+    dto: UpdateBoardCategoryTaskDto
   ): Promise<ApiResponseStatus> {
     if (dto.assigneeIds?.length > 0) {
       const existingAssigneesCount = await this.userModel
@@ -445,7 +445,7 @@ export class BoardService {
     boardId: string,
     columnId: string,
     taskId: string,
-    dto: MoveTaskDto
+    dto: MoveBoardCategoryTaskDto
   ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
@@ -540,7 +540,7 @@ export class BoardService {
   async createTag(
     userId: string,
     boardId: string,
-    dto: CreateTagDto
+    dto: CreateBoardTagDto
   ): Promise<BoardTagResponseDto> {
     try {
       const board = await this.boardModel
@@ -579,7 +579,7 @@ export class BoardService {
     userId: string,
     boardId: string,
     tagId: string,
-    dto: UpdateTagDto
+    dto: UpdateBoardTagDto
   ): Promise<ApiResponseStatus> {
     const board = await this.boardModel
       .findOne({ _id: boardId, userId }, { tagIds: 1 })
