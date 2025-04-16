@@ -16,6 +16,7 @@ import {
   CreateRoadmapDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
+  RoadmapCategoryRowResponseDto,
   RoadmapResponseDto,
   UpdateCategoryDto,
 } from "./dtos";
@@ -104,5 +105,31 @@ export class RoadmapController {
     @Param("categoryId") categoryId: string
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.deleteCategory(userId, roadmapId, categoryId);
+  }
+
+  @Post(":roadmapId/category/:categoryId/row")
+  @UseGuards(BannedUserGuard)
+  createCategoryRow(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string
+  ): Promise<RoadmapCategoryRowResponseDto> {
+    return this.roadmapService.createCategoryRow(userId, roadmapId, categoryId);
+  }
+
+  @Delete(":roadmapId/category/:categoryId/row/:rowId")
+  @UseGuards(BannedUserGuard)
+  deleteCategoryRow(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Param("rowId") rowId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.deleteCategoryRow(
+      userId,
+      roadmapId,
+      categoryId,
+      rowId
+    );
   }
 }
