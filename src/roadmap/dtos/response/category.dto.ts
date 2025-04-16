@@ -1,4 +1,4 @@
-import { RoadmapCategoryRowResponseDto } from "./roadmap-category-row.dto";
+import { RoadmapCategoryRowResponseDto } from "./row.dto";
 
 export class RoadmapCategoryResponseDto {
   _id: string;

@@ -7,7 +7,13 @@ import {
   Min,
 } from "class-validator";
 
-export class UpdateTaskDto {
+export class CreateRoadmapCategoryRowTaskDto {
+  @IsString()
+  @Length(1, 50)
+  title: string;
+}
+
+export class UpdateRoadmapCategoryRowTaskDto {
   @IsOptional()
   @IsString()
   @Length(1, 50)

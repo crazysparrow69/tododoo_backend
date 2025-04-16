@@ -1,4 +1,4 @@
-export class RoadmapTaskResponseDto {
+export class RoadmapCategoryRowTaskResponseDto {
   _id: string;
   title: string;
   progress: number;

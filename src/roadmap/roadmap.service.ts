@@ -4,24 +4,24 @@ import { Model } from "mongoose";
 import { Roadmap, RoadmapDocument } from "./roadmap.schema";
 import { RoadmapMapperService } from "./roadmap-mapper.service";
 import {
-  CreateCategoryDto,
-  CreateMilestoneDto,
-  CreateQuarterDto,
+  CreateRoadmapCategoryDto,
+  CreateRoadmapMilestoneDto,
+  CreateRoadmapQuarterDto,
   CreateRoadmapDto,
-  CreateTaskDto,
+  CreateRoadmapCategoryRowTaskDto,
   RoadmapBaseResponseDto,
   RoadmapCategoryResponseDto,
   RoadmapCategoryRowResponseDto,
   RoadmapMilestoneResponseDto,
   RoadmapQuarterResponseDto,
   RoadmapResponseDto,
-  RoadmapTaskResponseDto,
-  UpdateCategoryDto,
-  UpdateMilestoneDto,
-  UpdateQuarterDto,
-  UpdateTaskDto,
+  RoadmapCategoryRowTaskResponseDto,
+  UpdateRoadmapCategoryDto,
+  UpdateRoadmapMilestoneDto,
+  UpdateRoadmapQuarterDto,
+  UpdateRoadmapCategoryRowTaskDto,
+  UpdateRoadmapDto,
 } from "./dtos";
-import { UpdateRoadmapDto } from "./dtos/update-roadmap.dto";
 import { ApiResponseStatus } from "src/common/interfaces";
 
 @Injectable()
@@ -123,7 +123,7 @@ export class RoadmapService {
   async createCategory(
     userId: string,
     roadmapId: string,
-    dto: CreateCategoryDto
+    dto: CreateRoadmapCategoryDto
   ): Promise<RoadmapCategoryResponseDto> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) {
@@ -144,7 +144,7 @@ export class RoadmapService {
     userId: string,
     roadmapId: string,
     categoryId: string,
-    dto: UpdateCategoryDto
+    dto: UpdateRoadmapCategoryDto
   ): Promise<ApiResponseStatus> {
     const roadmap = await this.roadmapModel.findOne({
       _id: roadmapId,
@@ -251,8 +251,8 @@ export class RoadmapService {
     roadmapId: string,
     categoryId: string,
     rowId: string,
-    dto: CreateTaskDto
-  ): Promise<RoadmapTaskResponseDto> {
+    dto: CreateRoadmapCategoryRowTaskDto
+  ): Promise<RoadmapCategoryRowTaskResponseDto> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) throw new NotFoundException("Roadmap not found");
 
@@ -280,7 +280,7 @@ export class RoadmapService {
     categoryId: string,
     rowId: string,
     taskId: string,
-    dto: UpdateTaskDto
+    dto: UpdateRoadmapCategoryRowTaskDto
   ): Promise<ApiResponseStatus> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) throw new NotFoundException("Roadmap not found");
@@ -336,7 +336,7 @@ export class RoadmapService {
   async createMilestone(
     userId: string,
     roadmapId: string,
-    dto: CreateMilestoneDto
+    dto: CreateRoadmapMilestoneDto
   ): Promise<RoadmapMilestoneResponseDto> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) throw new NotFoundException("Roadmap not found");
@@ -354,7 +354,7 @@ export class RoadmapService {
     userId: string,
     roadmapId: string,
     milestoneId: string,
-    dto: UpdateMilestoneDto
+    dto: UpdateRoadmapMilestoneDto
   ): Promise<ApiResponseStatus> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) throw new NotFoundException("Roadmap not found");
@@ -392,7 +392,7 @@ export class RoadmapService {
   async createQuarter(
     userId: string,
     roadmapId: string,
-    dto: CreateQuarterDto
+    dto: CreateRoadmapQuarterDto
   ): Promise<RoadmapQuarterResponseDto> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) throw new NotFoundException("Roadmap not found");
@@ -410,7 +410,7 @@ export class RoadmapService {
     userId: string,
     roadmapId: string,
     quarterId: string,
-    dto: UpdateQuarterDto
+    dto: UpdateRoadmapQuarterDto
   ): Promise<ApiResponseStatus> {
     const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
     if (!roadmap) throw new NotFoundException("Roadmap not found");
