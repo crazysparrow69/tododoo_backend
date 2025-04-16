@@ -6,7 +6,7 @@ import {
   BoardColumnResponseDto,
   BoardResponseDto,
   BoardTagResponseDto,
-  BoardTaskResponseDto,
+  BoardColumnTaskResponseDto,
 } from "./dtos";
 import { UserMapperService } from "src/user/user-mapper.service";
 import { mapDocuments } from "src/common/mapDocuments";
@@ -23,7 +23,7 @@ export class BoardMapperService {
     };
   }
 
-  toTask(task: BoardTask): BoardTaskResponseDto {
+  toTask(task: BoardTask): BoardColumnTaskResponseDto {
     return {
       _id: task._id.toString(),
       title: task.title,
@@ -74,8 +74,8 @@ export class BoardMapperService {
     );
   }
 
-  toTasks(tasks: BoardTask[]): BoardTaskResponseDto[] {
-    return mapDocuments<BoardTask, BoardTaskResponseDto>(
+  toTasks(tasks: BoardTask[]): BoardColumnTaskResponseDto[] {
+    return mapDocuments<BoardTask, BoardColumnTaskResponseDto>(
       tasks,
       this.toTask.bind(this)
     );

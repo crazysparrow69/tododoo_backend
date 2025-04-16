@@ -1,7 +1,7 @@
 import { UserReference } from "src/common/interfaces";
-import { BoardTagResponseDto } from "./board-tag.dto";
+import { BoardTagResponseDto } from "./tag.dto";
 
-export class BoardTaskResponseDto {
+export class BoardColumnTaskResponseDto {
   _id: string;
   title: string;
   description?: string;

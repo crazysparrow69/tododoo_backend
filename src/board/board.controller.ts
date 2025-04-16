@@ -16,18 +16,18 @@ import {
   BoardColumnResponseDto,
   BoardResponseDto,
   BoardTagResponseDto,
-  BoardTaskResponseDto,
+  BoardColumnTaskResponseDto,
   CreateBoardDto,
-  CreateColumnDto,
-  CreateTagDto,
-  CreateTaskDto,
+  CreateBoardColumnDto,
+  CreateBoardTagDto,
+  CreateBoardCategoryTaskDto,
   UpdateBoardDto,
-  UpdateColumnDto,
-  UpdateTagDto,
-  UpdateTaskDto,
+  UpdateBoardColumnDto,
+  UpdateBoardTagDto,
+  UpdateBoardCategoryTaskDto,
+  MoveBoardCategoryTaskDto,
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
-import { MoveTaskDto } from "./dtos/move-task.dto";
 
 @Controller("board")
 @UseGuards(AuthGuard)
@@ -100,7 +100,7 @@ export class BoardController {
   createColumn(
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
-    @Body() body: CreateColumnDto
+    @Body() body: CreateBoardColumnDto
   ): Promise<BoardColumnResponseDto> {
     return this.boardService.createColumn(userId, boardId, body);
   }
@@ -111,7 +111,7 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
-    @Body() body: UpdateColumnDto
+    @Body() body: UpdateBoardColumnDto
   ): Promise<ApiResponseStatus> {
     return this.boardService.updateColumn(userId, boardId, columnId, body);
   }
@@ -132,8 +132,8 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
-    @Body() body: CreateTaskDto
-  ): Promise<BoardTaskResponseDto> {
+    @Body() body: CreateBoardCategoryTaskDto
+  ): Promise<BoardColumnTaskResponseDto> {
     return this.boardService.createTask(userId, boardId, columnId, body);
   }
 
@@ -144,7 +144,7 @@ export class BoardController {
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
     @Param("taskId") taskId: string,
-    @Body() body: UpdateTaskDto
+    @Body() body: UpdateBoardCategoryTaskDto
   ): Promise<ApiResponseStatus> {
     return this.boardService.updateTask(
       userId,
@@ -162,7 +162,7 @@ export class BoardController {
     @Param("boardId") boardId: string,
     @Param("columnId") columnId: string,
     @Param("taskId") taskId: string,
-    @Body() body: MoveTaskDto
+    @Body() body: MoveBoardCategoryTaskDto
   ): Promise<ApiResponseStatus> {
     return this.boardService.moveTask(userId, boardId, columnId, taskId, body);
   }
@@ -183,7 +183,7 @@ export class BoardController {
   createTag(
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
-    @Body() body: CreateTagDto
+    @Body() body: CreateBoardTagDto
   ): Promise<BoardTagResponseDto> {
     return this.boardService.createTag(userId, boardId, body);
   }
@@ -194,7 +194,7 @@ export class BoardController {
     @CurrentUser() userId: string,
     @Param("boardId") boardId: string,
     @Param("tagId") tagId: string,
-    @Body() body: UpdateTagDto
+    @Body() body: UpdateBoardTagDto
   ): Promise<ApiResponseStatus> {
     return this.boardService.updateTag(userId, boardId, tagId, body);
   }

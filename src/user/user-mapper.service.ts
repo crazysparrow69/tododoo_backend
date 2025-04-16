@@ -88,9 +88,6 @@ export class UserMapperService {
   }
 
   toUsersBase(users: User[]): UserBaseDto[] {
-    return mapDocuments<User, UserBaseDto>(
-      users,
-      this.toUserBase.bind(this)
-    );
+    return mapDocuments<User, UserBaseDto>(users, this.toUserBase.bind(this));
   }
 }
