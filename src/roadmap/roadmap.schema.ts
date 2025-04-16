@@ -36,13 +36,13 @@ export class RoadmapCategoryRowTask extends AbstractDocument {
   @Prop({ required: true, type: String })
   title: string;
 
-  @Prop({ required: true, type: Number })
+  @Prop({ type: Number, default: 0 })
   progress: number;
 
-  @Prop({ required: true, type: Number })
+  @Prop({ type: Number, default: 0 })
   start: number;
 
-  @Prop({ required: true, type: Number })
+  @Prop({ type: Number, default: 0 })
   end: number;
 }
 
