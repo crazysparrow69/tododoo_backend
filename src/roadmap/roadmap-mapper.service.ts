@@ -94,7 +94,7 @@ export class RoadmapMapperService {
   toQuarters(quarters: RoadmapQuarter[]): RoadmapQuarterResponseDto[] {
     return mapDocuments<RoadmapQuarter, RoadmapQuarterResponseDto>(
       quarters,
-      this.toQuarters.bind(this)
+      this.toQuarter.bind(this)
     );
   }
 
