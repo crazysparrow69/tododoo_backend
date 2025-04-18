@@ -86,7 +86,7 @@ export class AdminService {
       await this.imageService.createProfileEffect(createProfileEffectDto);
 
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(
         "Error uploading profile effect: " + error.message
       );
@@ -126,7 +126,7 @@ export class AdminService {
       await this.imageService.createUserAvatarEffect(createUserAvatarEffectDto);
 
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(
         "Error uploading profile effect: " + error.message
       );

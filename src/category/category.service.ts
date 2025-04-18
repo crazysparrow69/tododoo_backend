@@ -38,7 +38,7 @@ export class CategoryService {
       });
 
       return this.categoryMapperService.toCategoryResponse(createdCategory);
-    } catch (err) {
+    } catch (err: any) {
       throw new UnprocessableEntityException(err.message);
     }
   }

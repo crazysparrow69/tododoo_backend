@@ -112,7 +112,7 @@ export class ImageService implements OnModuleInit {
       }
 
       return this.userAvatarMapperService.toUserAvatar(result.newAvatar);
-    } catch (err) {
+    } catch (err: any) {
       throw new BadRequestException(err.message);
     }
   }
@@ -188,7 +188,7 @@ export class ImageService implements OnModuleInit {
   async deleteFileLocal(filePath: string): Promise<void> {
     try {
       await fs.promises.unlink(filePath);
-    } catch (err) {
+    } catch (err: any) {
       if (err.code !== "ENOENT") {
         throw err;
       }

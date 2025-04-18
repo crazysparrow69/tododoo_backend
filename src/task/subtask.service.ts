@@ -6,9 +6,13 @@ import {
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model, Types } from "mongoose";
 
-import { CreateSubtaskDto, QueryTaskDto } from "./dtos";
-import { SubtaskAssignedDto, SubtaskFullDto } from "./dtos/response";
-import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
+import {
+  CreateSubtaskDto,
+  QueryTaskDto,
+  SubtaskAssignedDto,
+  SubtaskFullDto,
+  SubtaskResponseDto,
+} from "./dtos";
 import { Subtask, SubtaskDocument, Task } from "./schemas";
 import { SubtaskMapperService } from "./subtask-mapper.service";
 import { CheckStatusForSubtask, QueryParamsSubtask } from "./types";
@@ -280,7 +284,7 @@ export class SubtaskService {
       ]);
 
       return this.subtaskMapperService.toFullSubtask(foundSubtask);
-    } catch (err) {
+    } catch (err: any) {
       throw new BadRequestException(err.message);
     }
   }

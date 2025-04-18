@@ -35,7 +35,7 @@ export class AdminGuard implements CanActivate {
         throw new UnauthorizedException();
 
       request.user = { sub: foundToken.userId };
-    } catch (err) {
+    } catch (err: any) {
       throw new UnauthorizedException(err.message);
     }
     return true;
