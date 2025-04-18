@@ -119,7 +119,7 @@ export class QueryTaskDto {
       "nodeadline",
     ];
     if (allowed.includes(value)) return value;
-    
+
     throw new BadRequestException("deadline is invalid");
   })
   deadline: string;

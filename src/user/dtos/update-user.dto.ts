@@ -1,4 +1,10 @@
-import { IsEmail, IsMongoId, IsOptional, IsString, Length } from "class-validator";
+import {
+  IsEmail,
+  IsMongoId,
+  IsOptional,
+  IsString,
+  Length,
+} from "class-validator";
 import { USER } from "src/common/constants";
 
 export class UpdateUserDto {

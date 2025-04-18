@@ -54,6 +54,6 @@ export const USER = {
   },
   PASSWORD: {
     MIN: 6,
-    MAX: 20
-  }
-}; 
+    MAX: 20,
+  },
+};

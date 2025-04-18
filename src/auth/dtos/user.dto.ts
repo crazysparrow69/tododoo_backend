@@ -22,4 +22,3 @@ export class SigninUserDto {
   @Length(USER.PASSWORD.MIN, USER.PASSWORD.MAX)
   password: string;
 }
-
