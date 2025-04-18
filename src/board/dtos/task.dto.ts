@@ -7,8 +7,8 @@ import {
   IsString,
   Length,
   Min,
-} from 'class-validator';
-import { BOARD, TASK } from 'src/common/constants';
+} from "class-validator";
+import { BOARD, TASK } from "src/common/constants";
 
 export class CreateBoardCategoryTaskDto {
   @IsString()

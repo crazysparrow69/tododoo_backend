@@ -1,5 +1,5 @@
-import { IsOptional, IsString, Length } from 'class-validator';
-import { BOARD } from 'src/common/constants';
+import { IsOptional, IsString, Length } from "class-validator";
+import { BOARD } from "src/common/constants";
 
 export class CreateBoardDto {
   @IsString()
