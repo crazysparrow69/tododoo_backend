@@ -7,32 +7,29 @@ import {
   IsString,
   Length,
   Min,
-} from "class-validator";
-import {
-  BOARD_COLUMN_TASK_ASSIGNEEIDS_MAX_LENGTH,
-  BOARD_COLUMN_TASK_TAGIDS_MAX_LENGTH,
-} from "src/common/constants";
+} from 'class-validator';
+import { BOARD, TASK } from 'src/common/constants';
 
 export class CreateBoardCategoryTaskDto {
   @IsString()
-  @Length(1, 50)
+  @Length(TASK.TITLE.MIN, TASK.TITLE.MAX)
   title: string;
 
   @IsOptional()
   @IsString()
-  @Length(0, 1000)
+  @Length(TASK.DESCRIPTION.MIN, TASK.DESCRIPTION.MAX)
   description?: string;
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(BOARD_COLUMN_TASK_ASSIGNEEIDS_MAX_LENGTH)
-  assigneeIds?: string;
+  @ArrayMaxSize(BOARD.COLUMNS.TASKS.ASSIGNEE_IDS.MAX)
+  assigneeIds?: string[];
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(BOARD_COLUMN_TASK_TAGIDS_MAX_LENGTH)
+  @ArrayMaxSize(BOARD.COLUMNS.TASKS.TAG_IDS.MAX)
   tagIds?: string[];
 
   @IsOptional()
@@ -44,24 +41,24 @@ export class CreateBoardCategoryTaskDto {
 export class UpdateBoardCategoryTaskDto {
   @IsOptional()
   @IsString()
-  @Length(1, 50)
+  @Length(TASK.TITLE.MIN, TASK.TITLE.MAX)
   title?: string;
 
   @IsOptional()
   @IsString()
-  @Length(0, 1000)
+  @Length(TASK.DESCRIPTION.MIN, TASK.DESCRIPTION.MAX)
   description?: string;
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(BOARD_COLUMN_TASK_ASSIGNEEIDS_MAX_LENGTH)
-  assigneeIds?: string;
+  @ArrayMaxSize(BOARD.COLUMNS.TASKS.ASSIGNEE_IDS.MAX)
+  assigneeIds?: string[];
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(BOARD_COLUMN_TASK_TAGIDS_MAX_LENGTH)
+  @ArrayMaxSize(BOARD.COLUMNS.TASKS.TAG_IDS.MAX)
   tagIds?: string[];
 
   @IsOptional()

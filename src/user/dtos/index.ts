@@ -1,6 +1,5 @@
 export * from "./change-password.dto";
 export * from "./query-user.dto";
-export * from "../../auth/dtos/signin-user.dto";
 export * from "./update-user.dto";
 export * from "./oauth-user.dto";
 

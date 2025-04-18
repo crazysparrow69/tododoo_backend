@@ -5,36 +5,37 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsMongoId,
   IsOptional,
   IsString,
   Length,
 } from "class-validator";
-import { Types } from "mongoose";
 import { Category } from "src/category/category.schema";
+import { SUBTASK } from "src/common/constants";
 
 export class CreateSubtaskDto {
   @IsString()
-  @Length(3, 50)
+  @Length(SUBTASK.TITLE.MIN, SUBTASK.TITLE.MAX)
   title: string;
 
   @IsString()
-  @Length(3, 1000)
+  @Length(SUBTASK.DESCRIPTION.MIN, SUBTASK.DESCRIPTION.MAX)
   description: string;
 
-  @IsString()
+  @IsMongoId()
   assigneeId: string;
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isCompleted: boolean;
 
-  @IsArray()
-  @ArrayMaxSize(10)
   @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(SUBTASK.LINKS.MAX)
   links: Array<string>;
 
-  @IsDate()
   @IsOptional()
+  @IsDate()
   @Transform(({ value }) => {
     if (value === null) {
       return null;
@@ -50,41 +51,33 @@ export class CreateSubtaskDto {
 }
 
 export class UpdateSubtaskDto {
-  @IsString()
   @IsOptional()
-  @Length(3, 50)
+  @IsString()
+  @Length(SUBTASK.TITLE.MIN, SUBTASK.TITLE.MAX)
   title: string;
 
-  @IsString()
   @IsOptional()
-  @Length(3, 1000)
+  @IsString()
+  @Length(SUBTASK.DESCRIPTION.MIN, SUBTASK.DESCRIPTION.MAX)
   description: string;
 
-  @IsArray()
-  @ArrayMaxSize(5)
   @IsOptional()
-  @Transform(({ value }) => {
-    for (const id of value) {
-      if (typeof id !== "string" || !Types.ObjectId.isValid(id))
-        throw new BadRequestException(
-          "categories must be an array of ObjectId"
-        );
-    }
-    return value;
-  })
+  @IsArray()
+  @ArrayMaxSize(SUBTASK.CATEGORIES.MAX)
+  @IsMongoId({ each: true })
   categories: Category[];
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isCompleted: boolean;
 
-  @IsArray()
   @IsOptional()
-  @ArrayMaxSize(10)
+  @IsArray()
+  @ArrayMaxSize(SUBTASK.LINKS.MAX)
   links: string[];
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isRejected: boolean;
 
   @IsOptional()

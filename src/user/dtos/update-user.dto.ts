@@ -1,23 +1,21 @@
-import { IsEmail, IsOptional, IsString, Length } from "class-validator";
+import { IsEmail, IsMongoId, IsOptional, IsString, Length } from "class-validator";
+import { USER } from "src/common/constants";
 
 export class UpdateUserDto {
-  @IsString()
-  @Length(3, 20)
   @IsOptional()
+  @IsString()
+  @Length(USER.USERNAME.MIN, USER.USERNAME.MAX)
   username?: string;
 
-  @IsEmail()
-  @Length(1, 100)
   @IsOptional()
+  @IsEmail()
   email?: string;
 
-  @IsString()
-  @Length(24, 24)
   @IsOptional()
+  @IsMongoId()
   profileEffectId?: string;
 
-  @IsString()
-  @Length(24, 24)
   @IsOptional()
+  @IsMongoId()
   avatarEffectId?: string;
 }
