@@ -21,13 +21,14 @@ export class SubtaskMapperService {
       isCompleted: subtask.isCompleted,
       categories: this.categoryMapperService.toCategories(subtask.categories),
       links: subtask.links,
-      creator:
-        subtask.assigneeId._id.toString() !== subtask.userId.toString()
-          ? this.userMapperService.toUserReference(subtask.userId)
-          : null,
-      dateOfCompletion: subtask.dateOfCompletion || null,
-      deadline: subtask.deadline || null,
       type: TaskTypes.SUBTASK,
+      ...(subtask.assigneeId._id.toString() !== subtask.userId.toString()
+        ? { creator: this.userMapperService.toUserReference(subtask.userId) }
+        : {}),
+      ...(subtask.dateOfCompletion
+        ? { dateOfCompletion: subtask.dateOfCompletion }
+        : {}),
+      ...(subtask.deadline ? { deadline: subtask.deadline } : {}),
     };
   }
 
@@ -41,8 +42,10 @@ export class SubtaskMapperService {
       isRejected: subtask.isRejected,
       links: subtask.links,
       assignee: this.userMapperService.toUserReference(subtask.assigneeId),
-      dateOfCompletion: subtask.dateOfCompletion || null,
-      deadline: subtask.deadline || null,
+      ...(subtask.dateOfCompletion
+        ? { dateOfCompletion: subtask.dateOfCompletion }
+        : {}),
+      ...(subtask.deadline ? { deadline: subtask.deadline } : {}),
     };
   }
 
@@ -58,23 +61,19 @@ export class SubtaskMapperService {
       links: subtask.links,
       creator: this.userMapperService.toUserReference(subtask.userId),
       assignee: this.userMapperService.toUserReference(subtask.assigneeId),
-      dateOfCompletion: subtask.dateOfCompletion || null,
-      deadline: subtask.deadline || null,
       type: TaskTypes.SUBTASK,
+      ...(subtask.dateOfCompletion
+        ? { dateOfCompletion: subtask.dateOfCompletion }
+        : {}),
+      ...(subtask.deadline ? { deadline: subtask.deadline } : {}),
     };
   }
 
   toSubtasks(subtasks: Subtask[]): SubtaskResponseDto[] {
-    return mapDocuments<Subtask, SubtaskResponseDto>(
-      subtasks,
-      this.toSubtaskResponse.bind(this)
-    );
+    return mapDocuments(subtasks, this.toSubtaskResponse.bind(this));
   }
 
   toAssignedSubtasks(subtasks: Subtask[]): SubtaskAssignedDto[] {
-    return mapDocuments<Subtask, SubtaskAssignedDto>(
-      subtasks,
-      this.toAssignedSubtask.bind(this)
-    );
+    return mapDocuments(subtasks, this.toAssignedSubtask.bind(this));
   }
 }

@@ -10,7 +10,7 @@ export class TaskResponseDto {
   categories: CategoryResponseDto[];
   links: string[];
   subtasks: SubtaskAssignedDto[];
-  dateOfCompletion: Date | null;
-  deadline: Date | null;
+  dateOfCompletion?: Date;
+  deadline?: Date;
   type: TaskTypes.TASK;
 }
