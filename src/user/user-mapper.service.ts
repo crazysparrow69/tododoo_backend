@@ -75,19 +75,16 @@ export class UserMapperService {
             ),
           }
         : {}),
-      createdAt: user.createdAt,
       roles: user.roles,
+      createdAt: user.createdAt,
     };
   }
 
   toUserReferences(users: User[]): UserReferenceDto[] {
-    return mapDocuments<User, UserReferenceDto>(
-      users,
-      this.toUserReference.bind(this)
-    );
+    return mapDocuments(users, this.toUserReference.bind(this));
   }
 
   toUsersBase(users: User[]): UserBaseDto[] {
-    return mapDocuments<User, UserBaseDto>(users, this.toUserBase.bind(this));
+    return mapDocuments(users, this.toUserBase.bind(this));
   }
 }

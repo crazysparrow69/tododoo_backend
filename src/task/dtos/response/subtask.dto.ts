@@ -9,10 +9,10 @@ export class SubtaskResponseDto {
   isCompleted: boolean;
   categories: CategoryResponseDto[];
   links: string[];
-  creator: UserReference | null;
-  dateOfCompletion: Date | null;
-  deadline: Date | null;
   type: TaskTypes.SUBTASK;
+  creator?: UserReference;
+  dateOfCompletion?: Date;
+  deadline?: Date;
 }
 
 export class SubtaskFullDto extends SubtaskResponseDto {
@@ -30,6 +30,6 @@ export class SubtaskAssignedDto {
   isRejected: boolean;
   links: string[];
   assignee: UserReference;
-  dateOfCompletion: Date | null;
-  deadline: Date | null;
+  dateOfCompletion?: Date;
+  deadline?: Date;
 }

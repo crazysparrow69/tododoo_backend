@@ -23,16 +23,15 @@ export class TaskMapperService {
       categories: this.categoryMapperService.toCategories(task.categories),
       links: task.links,
       subtasks: this.subtaskMapperService.toAssignedSubtasks(task.subtasks),
-      dateOfCompletion: task.dateOfCompletion || null,
-      deadline: task.deadline || null,
       type: TaskTypes.TASK,
+      ...(task.dateOfCompletion
+        ? { dateOfCompletion: task.dateOfCompletion }
+        : {}),
+      ...(task.deadline ? { deadline: task.deadline } : {}),
     };
   }
 
   toTasks(tasks: Task[]): TaskResponseDto[] {
-    return mapDocuments<Task, TaskResponseDto>(
-      tasks,
-      this.toTaskResponse.bind(this)
-    );
+    return mapDocuments(tasks, this.toTaskResponse.bind(this));
   }
 }
