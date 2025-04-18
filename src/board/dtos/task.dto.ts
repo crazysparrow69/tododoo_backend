@@ -22,13 +22,13 @@ export class CreateBoardCategoryTaskDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(10)
+  @ArrayMaxSize(BOARD_COLUMN_TASK_ASSIGNEEIDS_MAX_LENGTH)
   assigneeIds?: string;
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(10)
+  @ArrayMaxSize(BOARD_COLUMN_TASK_TAGIDS_MAX_LENGTH)
   tagIds?: string[];
 
   @IsOptional()
@@ -51,13 +51,13 @@ export class UpdateBoardCategoryTaskDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(10)
+  @ArrayMaxSize(BOARD_COLUMN_TASK_ASSIGNEEIDS_MAX_LENGTH)
   assigneeIds?: string;
 
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  @ArrayMaxSize(10)
+  @ArrayMaxSize(BOARD_COLUMN_TASK_TAGIDS_MAX_LENGTH)
   tagIds?: string[];
 
   @IsOptional()
