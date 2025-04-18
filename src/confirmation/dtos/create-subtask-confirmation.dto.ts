@@ -1,4 +1,4 @@
-import { IsMongoId, IsString } from "class-validator";
+import { IsMongoId } from "class-validator";
 
 export class CreateSubtaskConfirmationDto {
   @IsMongoId()
