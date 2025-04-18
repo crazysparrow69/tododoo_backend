@@ -5,6 +5,7 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsMongoId,
   IsNumber,
   IsOptional,
   IsString,
@@ -12,111 +13,86 @@ import {
 } from "class-validator";
 
 import { Category } from "../../category/category.schema";
-import { Types } from "mongoose";
+import { TASK } from "src/common/constants";
 
 export class CreateTaskDto {
   @IsString()
-  @Length(3, 50)
+  @Length(TASK.TITLE.MIN, TASK.TITLE.MAX)
   title: string;
 
   @IsString()
-  @Length(3, 1000)
+  @Length(TASK.DESCRIPTION.MIN, TASK.DESCRIPTION.MAX)
   description: string;
 
-  @IsArray()
-  @ArrayMaxSize(5)
   @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(TASK.CATEGORIES.MAX)
   categories: Category[];
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isCompleted: boolean;
 
+  @IsOptional()
   @IsArray()
-  @ArrayMaxSize(10)
-  @IsOptional()
-  links: Array<string>;
+  @ArrayMaxSize(TASK.LINKS.MAX)
+  links: string[];
 
-  @IsDate()
   @IsOptional()
+  @IsDate()
   @Transform(({ value }) => {
-    if (value === null) {
-      return null;
-    }
+    if (value === null) return null;
     const date = new Date(value);
     if (typeof value !== "string" || isNaN(date.getTime())) {
       throw new BadRequestException("Invalid date format for deadline");
     }
-
     return date;
   })
   deadline: Date;
 }
 
 export class UpdateTaskDto {
-  @IsString()
   @IsOptional()
-  @Length(3, 50)
+  @IsString()
+  @Length(TASK.TITLE.MIN, TASK.TITLE.MAX)
   title: string;
 
-  @IsString()
   @IsOptional()
-  @Length(3, 1000)
+  @IsString()
+  @Length(TASK.DESCRIPTION.MIN, TASK.DESCRIPTION.MAX)
   description: string;
 
-  @IsArray()
-  @ArrayMaxSize(5)
   @IsOptional()
-  @Transform(({ value }) => {
-    for (const id of value) {
-      if (typeof id !== "string" || !Types.ObjectId.isValid(id))
-        throw new BadRequestException(
-          "categories must be an array of ObjectId"
-        );
-    }
-    return value;
-  })
+  @IsArray()
+  @ArrayMaxSize(TASK.CATEGORIES.MAX)
+  @IsMongoId({ each: true })
   categories: Category[];
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isCompleted: boolean;
 
-  @IsArray()
   @IsOptional()
-  @ArrayMaxSize(10)
+  @IsArray()
+  @ArrayMaxSize(TASK.LINKS.MAX)
   links: string[];
 
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === null) {
-      return null;
-    }
+    if (value === null) return null;
     const date = new Date(value);
     if (typeof value !== "string" || isNaN(date.getTime())) {
       throw new BadRequestException("Invalid date format for deadline");
     }
-
     return date;
   })
-  deadline: null | Date;
+  deadline: Date | null;
 }
 
 export class QueryTaskDto {
-  @IsArray()
   @IsOptional()
-  @Transform(({ value }) => {
-    try {
-      const parsed = JSON.parse(value);
-      for (const id of parsed) {
-        if (typeof id !== "string" || !Types.ObjectId.isValid(id))
-          throw new Error();
-      }
-      return parsed;
-    } catch (err) {
-      throw new BadRequestException("categories must be an array of ObjectId");
-    }
-  })
+  @IsArray()
+  @IsMongoId({ each: true })
   categories: string[];
 
   @IsOptional()
@@ -125,7 +101,7 @@ export class QueryTaskDto {
       const parsed = JSON.parse(value);
       if (typeof parsed !== "boolean") throw new Error();
       return parsed;
-    } catch (err) {
+    } catch {
       throw new BadRequestException("isCompleted must be boolean");
     }
   })
@@ -133,7 +109,7 @@ export class QueryTaskDto {
 
   @IsOptional()
   @Transform(({ value }) => {
-    const deadlines = [
+    const allowed = [
       "day",
       "week",
       "month",
@@ -142,20 +118,19 @@ export class QueryTaskDto {
       "all",
       "nodeadline",
     ];
-    for (const deadline of deadlines) {
-      if (value === deadline) return value;
-    }
+    if (allowed.includes(value)) return value;
+    
     throw new BadRequestException("deadline is invalid");
   })
   deadline: string;
 
-  @IsNumber()
   @IsOptional()
+  @IsNumber()
   @Transform(({ value }) => parseInt(value))
   page?: number;
 
-  @IsNumber()
   @IsOptional()
+  @IsNumber()
   @Transform(({ value }) => parseInt(value))
   limit?: number;
 }

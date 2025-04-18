@@ -35,12 +35,7 @@ import {
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
-import {
-  BOARD_COLUMN_TASKS_MAX_LENGTH,
-  BOARD_COLUMNS_MAX_LENGTH,
-  BOARD_TAGIDS_MAX_LENGTH,
-  BOARD_USERIDS_MAX_LENGTH,
-} from "src/common/constants";
+import { BOARD } from "src/common/constants";
 
 @Injectable()
 export class BoardService {
@@ -185,9 +180,9 @@ export class BoardService {
     if (board.userIds.includes(targetUserId as any)) {
       throw new BadRequestException("This user is already in the board");
     }
-    if (board.userIds.length >= BOARD_USERIDS_MAX_LENGTH) {
+    if (board.userIds.length >= BOARD.USER_IDS.MAX) {
       throw new BadRequestException(
-        `Cannot add more than ${BOARD_USERIDS_MAX_LENGTH} users to a board`
+        `Cannot add more than ${BOARD.USER_IDS.MAX} users to a board`
       );
     }
 
@@ -266,9 +261,9 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException("Board not found");
     }
-    if (board.columns.length >= BOARD_COLUMNS_MAX_LENGTH) {
+    if (board.columns.length >= BOARD.COLUMNS.MAX) {
       throw new NotFoundException(
-        `Cannot create more than ${BOARD_COLUMNS_MAX_LENGTH} columns on a board`
+        `Cannot create more than ${BOARD.COLUMNS.MAX} columns on a board`
       );
     }
 
@@ -381,9 +376,9 @@ export class BoardService {
     if (!column) {
       throw new NotFoundException("Column not found");
     }
-    if (column.tasks.length >= BOARD_COLUMN_TASKS_MAX_LENGTH) {
+    if (column.tasks.length >= BOARD.COLUMNS.TASKS.MAX) {
       throw new BadRequestException(
-        `Cannot create more than ${BOARD_COLUMN_TASKS_MAX_LENGTH} tasks on a column`
+        `Cannot create more than ${BOARD.COLUMNS.TASKS.MAX} tasks on a column`
       );
     }
 
@@ -484,9 +479,9 @@ export class BoardService {
     if (!toColumn) {
       throw new NotFoundException("Target column not found");
     }
-    if (toColumn.tasks.length > BOARD_COLUMN_TASKS_MAX_LENGTH) {
+    if (toColumn.tasks.length > BOARD.COLUMNS.TASKS.MAX) {
       throw new BadRequestException(
-        `Column cannot have more than ${BOARD_COLUMN_TASKS_MAX_LENGTH} tasks`
+        `Column cannot have more than ${BOARD.COLUMNS.TASKS.MAX} tasks`
       );
     }
 
@@ -575,9 +570,9 @@ export class BoardService {
       if (!board) {
         throw new NotFoundException("Board not found");
       }
-      if (board.tagIds.length > BOARD_TAGIDS_MAX_LENGTH) {
+      if (board.tagIds.length > BOARD.TAG_IDS.MAX) {
         throw new BadRequestException(
-          `Cannot create more than ${BOARD_TAGIDS_MAX_LENGTH} tags on a board`
+          `Cannot create more than ${BOARD.TAG_IDS.MAX} tags on a board`
         );
       }
 

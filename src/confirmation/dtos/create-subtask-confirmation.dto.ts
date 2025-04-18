@@ -1,18 +1,9 @@
-import { BadRequestException } from "@nestjs/common";
-import { Transform } from "class-transformer";
-import { IsString } from "class-validator";
-import { Types } from "mongoose";
+import { IsMongoId, IsString } from "class-validator";
 
 export class CreateSubtaskConfirmationDto {
-  @IsString()
+  @IsMongoId()
   assigneeId: string;
 
-  @IsString()
-  @Transform(({ value }) => {
-    if (!Types.ObjectId.isValid(value)) {
-      throw new BadRequestException("Invalid subtaskId");
-    }
-    return value;
-  })
+  @IsMongoId()
   subtaskId: string;
 }

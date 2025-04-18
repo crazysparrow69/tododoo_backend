@@ -1,15 +1,16 @@
-import { IsNumber, IsOptional, IsString, Length, Min } from "class-validator";
+import { IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
+import { BOARD } from 'src/common/constants';
 
 export class CreateBoardColumnDto {
   @IsString()
-  @Length(1, 50)
+  @Length(BOARD.COLUMNS.TITLE.MIN, BOARD.COLUMNS.TITLE.MAX)
   title: string;
 }
 
 export class UpdateBoardColumnDto {
   @IsOptional()
   @IsString()
-  @Length(1, 50)
+  @Length(BOARD.COLUMNS.TITLE.MIN, BOARD.COLUMNS.TITLE.MAX)
   title?: string;
 
   @IsOptional()

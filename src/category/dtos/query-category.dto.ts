@@ -1,19 +1,19 @@
 import { IsOptional, IsString } from "class-validator";
 
 export class QueryCategoryDto {
-  @IsString()
   @IsOptional()
+  @IsString()
   title: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   color: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   page: number;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   limit: number;
 }
