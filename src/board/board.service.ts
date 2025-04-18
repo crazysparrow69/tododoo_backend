@@ -630,35 +630,34 @@ export class BoardService {
       .findOne({ _id: boardId, userId })
       .exec();
     if (!board) {
-      throw new NotFoundException('Board not found');
+      throw new NotFoundException("Board not found");
     }
     if (!board.tagIds.includes(tagId as any)) {
       throw new NotFoundException("Tag doesn't exit on the board");
     }
-  
+
     try {
-      await transaction(this.connection, async session => {
+      await transaction(this.connection, async (session) => {
         const deletedTag = await this.boardTagModel.findOneAndDelete(
           { _id: tagId },
           { session }
         );
         if (!deletedTag) {
-          throw new NotFoundException('Tag not found');
+          throw new NotFoundException("Tag not found");
         }
-  
-        board.tagIds = board.tagIds.filter(id => id.toString() !== tagId);
-  
-        board.columns.forEach(col => {
-          col.tasks.forEach(task => {
+
+        board.tagIds = board.tagIds.filter((id) => id.toString() !== tagId);
+        board.columns.forEach((col) => {
+          col.tasks.forEach((task) => {
             if (task.tagIds?.length) {
-              task.tagIds = task.tagIds.filter(id => id.toString() !== tagId);
+              task.tagIds = task.tagIds.filter((id) => id.toString() !== tagId);
             }
           });
         });
-  
+
         await board.save({ session });
       });
-  
+
       return { success: true };
     } catch (err) {
       throw new InternalServerErrorException(err.message);
