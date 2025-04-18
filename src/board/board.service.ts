@@ -179,6 +179,11 @@ export class BoardService {
     if (board.userIds.includes(targetUserId as any)) {
       throw new BadRequestException("This user is already in the board");
     }
+    if (board.userIds.length >= BOARD_USERIDS_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Cannot add more than ${BOARD_USERIDS_MAX_LENGTH} users to a board`
+      );
+    }
 
     board.userIds.push(targetUserId as any);
     board.updatedAt = new Date();
@@ -196,7 +201,6 @@ export class BoardService {
     if (!Types.ObjectId.isValid(targetUserId)) {
       throw new BadRequestException("Target user id is not a valid mongo id");
     }
-
     if (userId === targetUserId) {
       throw new BadRequestException(
         "The creator cannot remove himself from the board"
@@ -255,6 +259,11 @@ export class BoardService {
       .exec();
     if (!board) {
       throw new NotFoundException("Board not found");
+    }
+    if (board.columns.length >= BOARD_COLUMNS_MAX_LENGTH) {
+      throw new NotFoundException(
+        `Cannot create more than ${BOARD_COLUMNS_MAX_LENGTH} columns on a board`
+      );
     }
 
     const newColumn = board.columns.create({
@@ -366,6 +375,11 @@ export class BoardService {
     if (!column) {
       throw new NotFoundException("Column not found");
     }
+    if (column.tasks.length >= BOARD_COLUMN_TASKS_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Cannot create more than ${BOARD_COLUMN_TASKS_MAX_LENGTH} tasks on a column`
+      );
+    }
 
     if (dto.tagIds?.length > 0) {
       this.validateTaskTags(board, dto.tagIds);
@@ -464,6 +478,11 @@ export class BoardService {
     if (!toColumn) {
       throw new NotFoundException("Target column not found");
     }
+    if (toColumn.tasks.length > BOARD_COLUMN_TASKS_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Column cannot have more than ${BOARD_COLUMN_TASKS_MAX_LENGTH} tasks`
+      );
+    }
 
     const task = fromColumn.tasks.id(taskId);
     if (!task) {
@@ -550,9 +569,9 @@ export class BoardService {
       if (!board) {
         throw new NotFoundException("Board not found");
       }
-      if (board.tagIds.length > 20) {
+      if (board.tagIds.length > BOARD_TAGIDS_MAX_LENGTH) {
         throw new BadRequestException(
-          "Cannot create more than 20 tags on a board"
+          `Cannot create more than ${BOARD_TAGIDS_MAX_LENGTH} tags on a board`
         );
       }
 
