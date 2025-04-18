@@ -9,8 +9,7 @@ import {
 import { Types } from "mongoose";
 
 import { NotificationService } from "./../notification/notification.service";
-import { UpdateSubtaskDto } from "./dtos";
-import { SubtaskFullDto } from "./dtos/response";
+import { SubtaskFullDto, UpdateSubtaskDto } from "./dtos";
 import { SubtaskService } from "./subtask.service";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";

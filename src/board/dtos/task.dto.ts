@@ -8,6 +8,10 @@ import {
   Length,
   Min,
 } from "class-validator";
+import {
+  BOARD_COLUMN_TASK_ASSIGNEEIDS_MAX_LENGTH,
+  BOARD_COLUMN_TASK_TAGIDS_MAX_LENGTH,
+} from "src/common/constants";
 
 export class CreateBoardCategoryTaskDto {
   @IsString()

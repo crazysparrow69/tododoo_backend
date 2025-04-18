@@ -60,7 +60,7 @@ export class NotificationGateway
       console.log(`User with id ${userId} connected`);
       console.log(`Number of connected sockets: ${sockets.size}`);
       console.log(this.connections);
-    } catch (err) {
+    } catch (err: any) {
       client.emit(NotificationServerEvents.ERROR, err.message);
       client.disconnect();
     }

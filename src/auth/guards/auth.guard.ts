@@ -34,7 +34,7 @@ export class AuthGuard implements CanActivate {
       if (!foundUser) throw new UnauthorizedException();
 
       request.user = { sub: foundToken.userId, isBanned: foundUser.isBanned };
-    } catch (err) {
+    } catch (err: any) {
       throw new UnauthorizedException(err.message);
     }
     return true;

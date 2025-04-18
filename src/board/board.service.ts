@@ -35,6 +35,12 @@ import {
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
+import {
+  BOARD_COLUMN_TASKS_MAX_LENGTH,
+  BOARD_COLUMNS_MAX_LENGTH,
+  BOARD_TAGIDS_MAX_LENGTH,
+  BOARD_USERIDS_MAX_LENGTH,
+} from "src/common/constants";
 
 @Injectable()
 export class BoardService {
@@ -244,7 +250,7 @@ export class BoardService {
       });
 
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       throw new InternalServerErrorException(err.message);
     }
   }
@@ -590,7 +596,7 @@ export class BoardService {
       );
 
       return this.boardMapperService.toTag(newTag);
-    } catch (err) {
+    } catch (err: any) {
       throw new InternalServerErrorException(err.message);
     }
   }
@@ -635,7 +641,7 @@ export class BoardService {
       });
 
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       throw new InternalServerErrorException(err.message);
     }
   }
@@ -678,7 +684,7 @@ export class BoardService {
       });
 
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       throw new InternalServerErrorException(err.message);
     }
   }

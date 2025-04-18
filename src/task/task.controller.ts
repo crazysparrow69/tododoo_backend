@@ -15,11 +15,11 @@ import {
   CreateSubtaskDto,
   CreateTaskDto,
   QueryTaskDto,
+  SubtaskAssignedDto,
+  SubtaskResponseDto,
   TaskResponseDto,
   UpdateTaskDto,
 } from "./dtos";
-import { SubtaskAssignedDto } from "./dtos/response";
-import { SubtaskResponseDto } from "./dtos/response/subtask-response.dto";
 import { SubtaskService } from "./subtask.service";
 import { TaskService } from "./task.service";
 import { UserTasksStats } from "./types";
