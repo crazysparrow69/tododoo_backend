@@ -403,7 +403,7 @@ export class RoadmapService {
     fromRow.tasks.pull(taskId);
     const now = new Date();
     toRow.tasks.push({
-      ...task,
+      ...task.toObject(),
       start: dto.start,
       end: dto.end,
       updatedAt: now,
