@@ -181,7 +181,7 @@ export class RoadmapController {
     );
   }
 
-  @Post(":roadmapId/category/:categoryId/row/:rowId/task/:taskId/move")
+  @Patch(":roadmapId/category/:categoryId/row/:rowId/task/:taskId/move")
   @UseGuards(BannedUserGuard)
   moveTask(
     @CurrentUser() userId: string,
