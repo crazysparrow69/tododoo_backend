@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { Roadmap, RoadmapDocument } from "./roadmap.schema";
 import { RoadmapMapperService } from "./roadmap-mapper.service";
 import {
@@ -21,15 +25,19 @@ import {
   UpdateRoadmapQuarterDto,
   UpdateRoadmapCategoryRowTaskDto,
   UpdateRoadmapDto,
+  MoveRoadmapCategoryRowTaskDto,
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
+import { User, UserDocument } from "src/user/user.schema";
+import { ROADMAP } from "src/common/constants";
 
 @Injectable()
 export class RoadmapService {
   constructor(
     @InjectModel(Roadmap.name)
     private readonly roadmapModel: Model<RoadmapDocument>,
-    private readonly roadmapMapperService: RoadmapMapperService
+    private readonly roadmapMapperService: RoadmapMapperService,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>
   ) {}
 
   async createRoadmap(
@@ -97,6 +105,68 @@ export class RoadmapService {
         { _id: roadmapId, userId },
         { ...dto, updatedAt: new Date() },
         { new: true }
+      )
+      .lean();
+    if (!roadmap) {
+      throw new NotFoundException("Roadmap not found");
+    }
+
+    return { success: true };
+  }
+
+  async addUser(
+    userId: string,
+    roadmapId: string,
+    targetUserId: string
+  ): Promise<ApiResponseStatus> {
+    if (!Types.ObjectId.isValid(targetUserId)) {
+      throw new BadRequestException("Target user id is not a valid mongo id");
+    }
+
+    const targetUser = await this.userModel.findById(targetUserId).lean();
+    if (!targetUser) {
+      throw new NotFoundException("Target user not found");
+    }
+
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) {
+      throw new NotFoundException("Board not found");
+    }
+    if (roadmap.userIds.includes(targetUserId as any)) {
+      throw new BadRequestException("This user is already in the roadmap");
+    }
+    if (roadmap.userIds.length >= ROADMAP.USER_IDS.MAX) {
+      throw new BadRequestException(
+        `Cannot add more than ${ROADMAP.USER_IDS.MAX} users to a roadmap`
+      );
+    }
+
+    roadmap.userIds.push(targetUserId as any);
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
+  async removeUser(
+    userId: string,
+    roadmapId: string,
+    targetUserId: string
+  ): Promise<ApiResponseStatus> {
+    if (!Types.ObjectId.isValid(targetUserId)) {
+      throw new BadRequestException("Target user id is not a valid mongo id");
+    }
+    if (userId === targetUserId) {
+      throw new BadRequestException(
+        "The creator cannot remove himself from the roadmap"
+      );
+    }
+
+    const roadmap = await this.roadmapModel
+      .findOneAndUpdate(
+        { _id: roadmapId, userId },
+        { $pull: { userIds: targetUserId }, updatedAt: new Date() }
       )
       .lean();
     if (!roadmap) {
@@ -304,6 +374,47 @@ export class RoadmapService {
     return { success: true };
   }
 
+  async moveTask(
+    userId: string,
+    roadmapId: string,
+    taskId: string,
+    fromCategoryId: string,
+    fromRowId: string,
+    dto: MoveRoadmapCategoryRowTaskDto
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const fromCategory = roadmap.categories.id(fromCategoryId);
+    if (!fromCategory) throw new NotFoundException("Category not found");
+
+    const fromRow = fromCategory.rows.id(fromRowId);
+    if (!fromRow) throw new NotFoundException("Row not found");
+
+    const task = fromRow.tasks.id(taskId);
+    if (!task) throw new NotFoundException("Task not found");
+
+    const toCategory = roadmap.categories.id(dto.toCategoryId);
+    if (!toCategory) throw new NotFoundException("Target category not found");
+
+    const toRow = toCategory.rows.id(dto.toRowId);
+    if (!toRow) throw new NotFoundException("Target row not found");
+
+    fromRow.tasks.pull(taskId);
+    toRow.tasks.push({ ...task, start: dto.start, end: dto.end });
+
+    const now = new Date();
+    fromCategory.updatedAt = now;
+    fromRow.updatedAt = now;
+    toCategory.updatedAt = now;
+    toRow.updatedAt = now;
+    roadmap.updatedAt = now;
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
   async deleteTask(
     userId: string,
     roadmapId: string,
@@ -439,48 +550,6 @@ export class RoadmapService {
 
     quarter.deleteOne();
     roadmap.updatedAt = new Date();
-
-    await roadmap.save();
-
-    return { success: true };
-  }
-
-  async moveTask(
-    userId: string,
-    roadmapId: string,
-    taskId: string,
-    fromCategoryId: string,
-    fromRowId: string,
-    toCategoryId: string,
-    toRowId: string
-  ): Promise<ApiResponseStatus> {
-    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
-    if (!roadmap) throw new NotFoundException("Roadmap not found");
-
-    const fromCategory = roadmap.categories.id(fromCategoryId);
-    if (!fromCategory) throw new NotFoundException("Category not found");
-
-    const fromRow = fromCategory.rows.id(fromRowId);
-    if (!fromRow) throw new NotFoundException("Row not found");
-
-    const task = fromRow.tasks.id(taskId);
-    if (!task) throw new NotFoundException("Task not found");
-
-    const toCategory = roadmap.categories.id(toCategoryId);
-    if (!toCategory) throw new NotFoundException("Target category not found");
-
-    const toRow = toCategory.rows.id(toRowId);
-    if (!toRow) throw new NotFoundException("Target row not found");
-
-    fromRow.tasks.pull(taskId);
-    toRow.tasks.push(task);
-
-    const now = new Date();
-    fromCategory.updatedAt = now;
-    fromRow.updatedAt = now;
-    toCategory.updatedAt = now;
-    toRow.updatedAt = now;
-    roadmap.updatedAt = now;
 
     await roadmap.save();
 

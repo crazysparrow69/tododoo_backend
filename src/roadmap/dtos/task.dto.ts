@@ -7,16 +7,20 @@ import {
   Max,
   Min,
 } from "class-validator";
+import { ROADMAP } from "src/common/constants";
 
 export class CreateRoadmapCategoryRowTaskDto {
   @IsString()
-  @Length(1, 50)
+  @Length(
+    ROADMAP.CATEGORIES.ROWS.TASKS.TITLE.MIN,
+    ROADMAP.CATEGORIES.ROWS.TASKS.TITLE.MAX
+  )
   title: string;
 
   @IsOptional()
   @IsNumber()
-  @Min(0)
-  @Max(100)
+  @Min(ROADMAP.CATEGORIES.ROWS.TASKS.PROGRESS.MIN)
+  @Max(ROADMAP.CATEGORIES.ROWS.TASKS.PROGRESS.MAX)
   progress?: number;
 
   @IsOptional()
@@ -33,13 +37,16 @@ export class CreateRoadmapCategoryRowTaskDto {
 export class UpdateRoadmapCategoryRowTaskDto {
   @IsOptional()
   @IsString()
-  @Length(1, 50)
+  @Length(
+    ROADMAP.CATEGORIES.ROWS.TASKS.TITLE.MIN,
+    ROADMAP.CATEGORIES.ROWS.TASKS.TITLE.MAX
+  )
   title?: string;
 
   @IsOptional()
   @IsNumber()
-  @Min(0)
-  @Max(100)
+  @Min(ROADMAP.CATEGORIES.ROWS.TASKS.PROGRESS.MIN)
+  @Max(ROADMAP.CATEGORIES.ROWS.TASKS.PROGRESS.MAX)
   progress?: number;
 
   @IsOptional()
@@ -59,4 +66,12 @@ export class MoveRoadmapCategoryRowTaskDto {
 
   @IsMongoId()
   toRowId: string;
+
+  @IsNumber()
+  @Min(0)
+  start: number;
+
+  @IsNumber()
+  @Min(0)
+  end: number;
 }

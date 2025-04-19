@@ -1,8 +1,9 @@
 import { IsNumber, IsOptional, IsString, Length, Min } from "class-validator";
+import { ROADMAP } from "src/common/constants";
 
 export class CreateRoadmapQuarterDto {
   @IsString()
-  @Length(1, 50)
+  @Length(ROADMAP.QUARTERS.TITLE.MIN, ROADMAP.QUARTERS.TITLE.MAX)
   title: string;
 
   @IsNumber()
@@ -17,7 +18,7 @@ export class CreateRoadmapQuarterDto {
 export class UpdateRoadmapQuarterDto {
   @IsOptional()
   @IsString()
-  @Length(1, 50)
+  @Length(ROADMAP.QUARTERS.TITLE.MIN, ROADMAP.QUARTERS.TITLE.MAX)
   title?: string;
 
   @IsOptional()

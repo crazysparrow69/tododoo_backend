@@ -277,16 +277,13 @@ export class RoadmapController {
     @Body()
     body: MoveRoadmapCategoryRowTaskDto
   ): Promise<ApiResponseStatus> {
-    const { toCategoryId, toRowId } = body;
-
     return this.roadmapService.moveTask(
       userId,
       roadmapId,
       taskId,
       categoryId,
       rowId,
-      toCategoryId,
-      toRowId
+      body
     );
   }
 }
