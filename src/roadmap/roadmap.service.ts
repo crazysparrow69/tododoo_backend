@@ -401,7 +401,12 @@ export class RoadmapService {
     if (!toRow) throw new NotFoundException("Target row not found");
 
     fromRow.tasks.pull(taskId);
-    toRow.tasks.push({ ...task, start: dto.start, end: dto.end });
+    toRow.tasks.push({
+      ...task,
+      start: dto.start,
+      end: dto.end,
+      updatedAt: new Date(),
+    });
 
     const now = new Date();
     fromCategory.updatedAt = now;
