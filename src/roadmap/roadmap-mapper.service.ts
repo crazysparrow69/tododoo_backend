@@ -105,11 +105,13 @@ export class RoadmapMapperService {
     );
   }
 
-  toTasks(tasks: RoadmapCategoryRowTask[]): RoadmapCategoryRowTaskResponseDto[] {
-    return mapDocuments<RoadmapCategoryRowTask, RoadmapCategoryRowTaskResponseDto>(
-      tasks,
-      this.toTask.bind(this)
-    );
+  toTasks(
+    tasks: RoadmapCategoryRowTask[]
+  ): RoadmapCategoryRowTaskResponseDto[] {
+    return mapDocuments<
+      RoadmapCategoryRowTask,
+      RoadmapCategoryRowTaskResponseDto
+    >(tasks, this.toTask.bind(this));
   }
 
   toCategoryRows(rows: RoadmapCategoryRow[]): RoadmapCategoryRowResponseDto[] {

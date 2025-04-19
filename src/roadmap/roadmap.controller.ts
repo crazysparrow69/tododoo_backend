@@ -29,6 +29,7 @@ import {
   UpdateRoadmapQuarterDto,
   UpdateRoadmapCategoryRowTaskDto,
   UpdateRoadmapDto,
+  MoveRoadmapCategoryRowTaskDto,
 } from "./dtos";
 import { ApiResponseStatus } from "src/common/interfaces";
 
@@ -263,5 +264,29 @@ export class RoadmapController {
     @Param("quarterId") quarterId: string
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.deleteQuarter(userId, roadmapId, quarterId);
+  }
+
+  @Post(":roadmapId/category/:categoryId/row/:rowId/task/:taskId/move")
+  @UseGuards(BannedUserGuard)
+  moveTask(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Param("rowId") rowId: string,
+    @Param("taskId") taskId: string,
+    @Body()
+    body: MoveRoadmapCategoryRowTaskDto
+  ): Promise<ApiResponseStatus> {
+    const { toCategoryId, toRowId } = body;
+
+    return this.roadmapService.moveTask(
+      userId,
+      roadmapId,
+      taskId,
+      categoryId,
+      rowId,
+      toCategoryId,
+      toRowId
+    );
   }
 }
