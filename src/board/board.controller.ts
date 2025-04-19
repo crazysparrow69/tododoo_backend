@@ -76,7 +76,7 @@ export class BoardController {
     return this.boardService.addUser(userId, id, targetUserId);
   }
 
-  @Post(":id/remove-user/:targetUserId")
+  @Delete(":id/remove-user/:targetUserId")
   @UseGuards(BannedUserGuard)
   removeUser(
     @CurrentUser() userId: string,

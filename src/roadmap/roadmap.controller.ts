@@ -72,6 +72,26 @@ export class RoadmapController {
     return this.roadmapService.updateRoadmap(userId, id, dto);
   }
 
+  @Post(":id/add-user/:targetUserId")
+  @UseGuards(BannedUserGuard)
+  addUser(
+    @CurrentUser() userId: string,
+    @Param("id") id: string,
+    @Param("targetUserId") targetUserId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.addUser(userId, id, targetUserId);
+  }
+
+  @Delete(":id/remove-user/:targetUserId")
+  @UseGuards(BannedUserGuard)
+  removeUser(
+    @CurrentUser() userId: string,
+    @Param("id") id: string,
+    @Param("targetUserId") targetUserId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.removeUser(userId, id, targetUserId);
+  }
+
   @Delete(":id")
   @UseGuards(BannedUserGuard)
   deleteRoadmap(
