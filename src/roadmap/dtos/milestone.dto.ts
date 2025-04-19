@@ -1,8 +1,9 @@
 import { IsNumber, IsOptional, IsString, Length, Min } from "class-validator";
+import { ROADMAP } from "src/common/constants";
 
 export class CreateRoadmapMilestoneDto {
   @IsString()
-  @Length(1, 50)
+  @Length(ROADMAP.MILESTONES.TITLE.MIN, ROADMAP.MILESTONES.TITLE.MAX)
   title: string;
 
   @IsNumber()
@@ -13,7 +14,7 @@ export class CreateRoadmapMilestoneDto {
 export class UpdateRoadmapMilestoneDto {
   @IsOptional()
   @IsString()
-  @Length(1, 50)
+  @Length(ROADMAP.MILESTONES.TITLE.MIN, ROADMAP.MILESTONES.TITLE.MAX)
   title?: string;
 
   @IsOptional()
