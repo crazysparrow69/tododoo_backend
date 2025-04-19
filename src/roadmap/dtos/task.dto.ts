@@ -1,4 +1,5 @@
 import {
+  IsMongoId,
   IsNumber,
   IsOptional,
   IsString,
@@ -50,4 +51,12 @@ export class UpdateRoadmapCategoryRowTaskDto {
   @IsNumber()
   @Min(0)
   end?: number;
+}
+
+export class MoveRoadmapCategoryRowTaskDto {
+  @IsMongoId()
+  toCategoryId: string;
+
+  @IsMongoId()
+  toRowId: string;
 }

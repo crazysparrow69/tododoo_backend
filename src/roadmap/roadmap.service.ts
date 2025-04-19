@@ -444,4 +444,46 @@ export class RoadmapService {
 
     return { success: true };
   }
+
+  async moveTask(
+    userId: string,
+    roadmapId: string,
+    taskId: string,
+    fromCategoryId: string,
+    fromRowId: string,
+    toCategoryId: string,
+    toRowId: string
+  ): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
+    if (!roadmap) throw new NotFoundException("Roadmap not found");
+
+    const fromCategory = roadmap.categories.id(fromCategoryId);
+    if (!fromCategory) throw new NotFoundException("Category not found");
+
+    const fromRow = fromCategory.rows.id(fromRowId);
+    if (!fromRow) throw new NotFoundException("Row not found");
+
+    const task = fromRow.tasks.id(taskId);
+    if (!task) throw new NotFoundException("Task not found");
+
+    const toCategory = roadmap.categories.id(toCategoryId);
+    if (!toCategory) throw new NotFoundException("Target category not found");
+
+    const toRow = toCategory.rows.id(toRowId);
+    if (!toRow) throw new NotFoundException("Target row not found");
+
+    fromRow.tasks.pull(taskId);
+    toRow.tasks.push(task);
+
+    const now = new Date();
+    fromCategory.updatedAt = now;
+    fromRow.updatedAt = now;
+    toCategory.updatedAt = now;
+    toRow.updatedAt = now;
+    roadmap.updatedAt = now;
+
+    await roadmap.save();
+
+    return { success: true };
+  }
 }
