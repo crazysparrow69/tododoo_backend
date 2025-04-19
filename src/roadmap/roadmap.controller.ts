@@ -92,6 +92,15 @@ export class RoadmapController {
     return this.roadmapService.removeUser(userId, id, targetUserId);
   }
 
+  @Delete(":id/leave")
+  @UseGuards(BannedUserGuard)
+  leaveRoadmap(
+    @CurrentUser() userId: string,
+    @Param("id") roadmapId: string
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.leave(userId, roadmapId);
+  }
+
   @Delete(":id")
   @UseGuards(BannedUserGuard)
   deleteRoadmap(
