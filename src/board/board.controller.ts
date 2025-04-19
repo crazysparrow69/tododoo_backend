@@ -86,6 +86,15 @@ export class BoardController {
     return this.boardService.removeUser(userId, id, targetUserId);
   }
 
+  @Delete(":id/leave")
+  @UseGuards(BannedUserGuard)
+  leaveRoadmap(
+    @CurrentUser() userId: string,
+    @Param("id") boardId: string
+  ): Promise<ApiResponseStatus> {
+    return this.boardService.leave(userId, boardId);
+  }
+
   @Delete(":id")
   @UseGuards(BannedUserGuard)
   removeBoard(

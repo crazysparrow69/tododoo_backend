@@ -176,6 +176,26 @@ export class RoadmapService {
     return { success: true };
   }
 
+  async leave(userId: string, roadmapId: string): Promise<ApiResponseStatus> {
+    const roadmap = await this.roadmapModel.findOne({
+      _id: roadmapId,
+      userIds: userId,
+    });
+    if (!roadmap) {
+      throw new NotFoundException("Roadmap not found");
+    }
+    if (roadmap.userId.toString() === userId) {
+      throw new BadRequestException("Creator cannot leave the roadmap");
+    }
+
+    roadmap.userIds = roadmap.userIds.filter((id) => id.toString() !== userId);
+    roadmap.updatedAt = new Date();
+
+    await roadmap.save();
+
+    return { success: true };
+  }
+
   async deleteRoadmap(
     userId: string,
     roadmapId: string

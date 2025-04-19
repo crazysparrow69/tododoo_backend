@@ -221,6 +221,26 @@ export class BoardService {
     return { success: true };
   }
 
+  async leave(userId: string, boardId: string): Promise<ApiResponseStatus> {
+    const board = await this.boardModel.findOne({
+      _id: boardId,
+      userIds: userId,
+    });
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
+    if (board.userId.toString() === userId) {
+      throw new BadRequestException("Creator cannot leave the board");
+    }
+
+    board.userIds = board.userIds.filter((id) => id.toString() !== userId);
+    board.updatedAt = new Date();
+
+    await board.save();
+
+    return { success: true };
+  }
+
   async deleteBoard(
     userId: string,
     boardId: string
