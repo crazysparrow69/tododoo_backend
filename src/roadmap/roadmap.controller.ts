@@ -181,6 +181,27 @@ export class RoadmapController {
     );
   }
 
+  @Post(":roadmapId/category/:categoryId/row/:rowId/task/:taskId/move")
+  @UseGuards(BannedUserGuard)
+  moveTask(
+    @CurrentUser() userId: string,
+    @Param("roadmapId") roadmapId: string,
+    @Param("categoryId") categoryId: string,
+    @Param("rowId") rowId: string,
+    @Param("taskId") taskId: string,
+    @Body()
+    body: MoveRoadmapCategoryRowTaskDto
+  ): Promise<ApiResponseStatus> {
+    return this.roadmapService.moveTask(
+      userId,
+      roadmapId,
+      taskId,
+      categoryId,
+      rowId,
+      body
+    );
+  }
+
   @Delete(":roadmapId/category/:categoryId/row/:rowId/task/:taskId")
   @UseGuards(BannedUserGuard)
   deleteCategoryRowTask(
@@ -264,26 +285,5 @@ export class RoadmapController {
     @Param("quarterId") quarterId: string
   ): Promise<ApiResponseStatus> {
     return this.roadmapService.deleteQuarter(userId, roadmapId, quarterId);
-  }
-
-  @Post(":roadmapId/category/:categoryId/row/:rowId/task/:taskId/move")
-  @UseGuards(BannedUserGuard)
-  moveTask(
-    @CurrentUser() userId: string,
-    @Param("roadmapId") roadmapId: string,
-    @Param("categoryId") categoryId: string,
-    @Param("rowId") rowId: string,
-    @Param("taskId") taskId: string,
-    @Body()
-    body: MoveRoadmapCategoryRowTaskDto
-  ): Promise<ApiResponseStatus> {
-    return this.roadmapService.moveTask(
-      userId,
-      roadmapId,
-      taskId,
-      categoryId,
-      rowId,
-      body
-    );
   }
 }
