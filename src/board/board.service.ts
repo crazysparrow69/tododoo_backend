@@ -36,6 +36,7 @@ import {
 import { ApiResponseStatus } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
 import { BOARD } from "src/common/constants";
+import { getBoardPopulate } from "./board.populate";
 
 @Injectable()
 export class BoardService {
@@ -71,58 +72,9 @@ export class BoardService {
   }
 
   async findBoard(userId: string, boardId: string): Promise<BoardResponseDto> {
-    const populateParams = [
-      {
-        path: "tagIds",
-        model: "BoardTag",
-        select: "-__v -createdAt -updatedAt",
-      },
-      {
-        path: "columns",
-        populate: {
-          path: "tasks",
-          populate: [
-            {
-              path: "tagIds",
-              model: "BoardTag",
-              select: "-__v -createdAt -updatedAt",
-            },
-            {
-              path: "assigneeIds",
-              select: "_id username avatarId avatarEffectId",
-              populate: [
-                {
-                  path: "avatarId",
-                  select: "-_id url",
-                },
-                {
-                  path: "avatarEffectId",
-                  select: "preview.url animated.url",
-                },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        path: "userIds",
-        select: "_id username avatarId avatarEffectId",
-        populate: [
-          {
-            path: "avatarId",
-            select: "-_id url",
-          },
-          {
-            path: "avatarEffectId",
-            select: "preview.url animated.url",
-          },
-        ],
-      },
-    ];
-
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
-      .populate(populateParams)
+      .populate(getBoardPopulate())
       .lean();
     if (!board) {
       throw new NotFoundException("Board not found");

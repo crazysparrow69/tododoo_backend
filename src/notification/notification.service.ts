@@ -17,6 +17,7 @@ import { NotificationServerEvents } from "./types";
 import { CreateSubtaskConfirmationDto } from "../confirmation/dtos/create-subtask-confirmation.dto";
 import { SubtaskConfirmation } from "../confirmation/subtask-confirmation.schema";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
+import { getUserReferencePopulate } from "src/user/user.populate";
 
 @Injectable()
 export class NotificationService {
@@ -73,7 +74,7 @@ export class NotificationService {
       await this.subtaskConfirmService.getSubtaskConfirmations(userId);
     const foundNotifications = await this.notificationModel
       .find({ userId, isRead: false })
-      .populate(["subtaskId", "actionByUserId"]);
+      .populate(["subtaskId", getUserReferencePopulate("actionByUserId")]);
     const mappedNotifications =
       this.notificationMapperService.toNotifications(foundNotifications);
 
@@ -121,7 +122,7 @@ export class NotificationService {
 
   async create(dto: CreateNotificationDto): Promise<NotificationResponseDto> {
     const createdNotification = await this.notificationModel.create(dto);
-    await createdNotification.populate(["actionByUserId", "subtaskId"]);
+    await createdNotification.populate([getUserReferencePopulate("actionByUserId"), "subtaskId"]);
 
     return this.notificationMapperService.toNotificationResponse(
       createdNotification

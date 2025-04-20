@@ -31,12 +31,13 @@ import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
 import { UserAvatar } from "src/image/schemas";
 import { ApiResponseStatus } from "src/common/interfaces";
+import { getUserPopulate } from "./user.populate";
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService implements OnModuleInit {
-  populateParams: PopulateOptions[];
+
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
@@ -45,22 +46,7 @@ export class UserService implements OnModuleInit {
     private imageService: ImageService,
     private userMapperService: UserMapperService,
     @InjectConnection() private readonly connection: mongoose.Connection
-  ) {
-    this.populateParams = [
-      {
-        path: "avatarId",
-        select: "-_id url",
-      },
-      {
-        path: "profileEffectId",
-        select: "intro.url preview.url sides.url top.url",
-      },
-      {
-        path: "avatarEffectId",
-        select: "preview.url animated.url",
-      },
-    ];
-  }
+  ) {}
 
   async onModuleInit() {
     try {
@@ -82,7 +68,7 @@ export class UserService implements OnModuleInit {
         createdAt: 1,
         roles: 1,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -100,7 +86,7 @@ export class UserService implements OnModuleInit {
         createdAt: 1,
         isBanned: 1,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -136,7 +122,7 @@ export class UserService implements OnModuleInit {
         avatarEffectId: 1,
         profileEffectId: 0,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean()
       .limit(limit)
       .skip((page - 1) * limit)
@@ -196,7 +182,7 @@ export class UserService implements OnModuleInit {
       .findByIdAndUpdate(id, attrs, {
         new: true,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean()
       .select([
         "_id",

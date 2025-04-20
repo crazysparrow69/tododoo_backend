@@ -30,6 +30,7 @@ import {
 import { ApiResponseStatus } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
 import { ROADMAP } from "src/common/constants";
+import { getUserReferencePopulate } from "src/user/user.populate";
 
 @Injectable()
 export class RoadmapService {
@@ -71,22 +72,7 @@ export class RoadmapService {
   ): Promise<RoadmapResponseDto> {
     const roadmap = await this.roadmapModel
       .findOne({ _id: roadmapId, userIds: userId })
-      .populate([
-        {
-          path: "userIds",
-          select: "_id username avatarId avatarEffectId",
-          populate: [
-            {
-              path: "avatarId",
-              select: "-_id url",
-            },
-            {
-              path: "avatarEffectId",
-              select: "preview.url animated.url",
-            },
-          ],
-        },
-      ])
+      .populate(getUserReferencePopulate("userIds"))
       .lean();
     if (!roadmap) {
       throw new NotFoundException("Roadmap not found");
