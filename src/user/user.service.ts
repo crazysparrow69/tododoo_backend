@@ -10,7 +10,6 @@ import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import mongoose, {
   ClientSession,
   Model,
-  PopulateOptions,
   ProjectionType,
   Types,
 } from "mongoose";
