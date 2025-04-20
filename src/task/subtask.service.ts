@@ -221,8 +221,8 @@ export class SubtaskService {
 
       await foundSubtask.save();
       await foundSubtask.populate([
-        getUserReferencePopulate(("userId")),
-        getUserReferencePopulate("assigneeId")
+        getUserReferencePopulate("userId"),
+        getUserReferencePopulate("assigneeId"),
       ]);
 
       return this.subtaskMapperService.toFullSubtask(foundSubtask);

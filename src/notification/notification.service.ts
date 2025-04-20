@@ -122,7 +122,10 @@ export class NotificationService {
 
   async create(dto: CreateNotificationDto): Promise<NotificationResponseDto> {
     const createdNotification = await this.notificationModel.create(dto);
-    await createdNotification.populate([getUserReferencePopulate("actionByUserId"), "subtaskId"]);
+    await createdNotification.populate([
+      getUserReferencePopulate("actionByUserId"),
+      "subtaskId",
+    ]);
 
     return this.notificationMapperService.toNotificationResponse(
       createdNotification

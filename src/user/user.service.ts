@@ -37,7 +37,6 @@ const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService implements OnModuleInit {
-
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
