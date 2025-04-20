@@ -14,6 +14,7 @@ import {
 
 import { Category } from "../../category/category.schema";
 import { TASK } from "src/common/constants";
+import { Types } from "mongoose";
 
 export class CreateTaskDto {
   @IsString()
@@ -92,7 +93,18 @@ export class UpdateTaskDto {
 export class QueryTaskDto {
   @IsOptional()
   @IsArray()
-  @IsMongoId({ each: true })
+  @Transform(({ value }) => {
+    try {
+      const parsed = JSON.parse(value);
+      for (const id of parsed) {
+        if (typeof id !== "string" || !Types.ObjectId.isValid(id))
+          throw new Error();
+      }
+      return parsed;
+    } catch (err) {
+      throw new BadRequestException("categories must be an array of ObjectId");
+    }
+  })
   categories: string[];
 
   @IsOptional()

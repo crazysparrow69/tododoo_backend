@@ -13,6 +13,7 @@ import { UserTasksStats, QueryParamsTask } from "./types";
 import { Category } from "../category/category.schema";
 import { getDeadlineFilter } from "../common";
 import { transaction } from "src/common/transaction";
+import { getTaskPopulate } from "./task.populate";
 
 @Injectable()
 export class TaskService {
@@ -84,30 +85,6 @@ export class TaskService {
       queryParams.deadline = getDeadlineFilter(deadline);
     }
 
-    const populateParams = [
-      {
-        path: "categories",
-        select: "-__v",
-      },
-      {
-        path: "subtasks",
-        select: "-_v -createdAt -updatedAt -categories -links",
-        populate: {
-          path: "assigneeId",
-          select: "username avatarId avatarEffectId",
-          populate: [
-            {
-              path: "avatarId",
-              select: "-_id url",
-            },
-            {
-              path: "avatarEffectId",
-              select: "preview.url animated.url",
-            },
-          ],
-        },
-      },
-    ];
     const projection = {
       _id: 1,
       title: 1,
@@ -127,7 +104,7 @@ export class TaskService {
       const foundTasks = await this.taskModel
         .find(queryParams, projection)
         .lean()
-        .populate(populateParams)
+        .populate(getTaskPopulate())
         .limit(limit)
         .skip((page - 1) * limit);
 
@@ -140,7 +117,7 @@ export class TaskService {
       const foundTasks = await this.taskModel
         .find(queryParams, projection)
         .lean()
-        .populate(populateParams);
+        .populate(getTaskPopulate());
 
       return this.taskMapperService.toTasks(foundTasks);
     }
@@ -154,7 +131,7 @@ export class TaskService {
       userId,
       ...createTaskDto,
     });
-    await createdTask.populate("categories");
+    await createdTask.populate(getTaskPopulate());
 
     return this.taskMapperService.toTaskResponse(createdTask);
   }
@@ -187,25 +164,7 @@ export class TaskService {
     const updatedTask = await this.taskModel
       .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
       .lean()
-      .populate([
-        { path: "categories", select: "_id title color" },
-        {
-          path: "subtasks",
-          select:
-            "_id title description isCompleted isConfirmed isRejected links assigneeId dateOfCompletion deadline",
-          populate: {
-            path: "assigneeId",
-            select: "_id username avatarId avatarEffectId",
-            populate: [
-              { path: "avatarId", select: "-_id url" },
-              {
-                path: "avatarEffectId",
-                select: "preview.url animated.url",
-              },
-            ],
-          },
-        },
-      ])
+      .populate(getTaskPopulate())
       .select([
         "_id",
         "title",

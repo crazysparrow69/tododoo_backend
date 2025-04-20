@@ -4,6 +4,7 @@ import { Model, Types } from "mongoose";
 
 import { CreateSubtaskConfirmationDto } from "./dtos";
 import { SubtaskConfirmation } from "./subtask-confirmation.schema";
+import { getUserReferencePopulate } from "src/user/user.populate";
 
 @Injectable()
 export class SubtaskConfirmService {
@@ -28,14 +29,7 @@ export class SubtaskConfirmService {
         path: "subtaskId",
         select: "title description deadline",
       },
-      {
-        path: "userId",
-        select: "username avatarId",
-        populate: {
-          path: "avatarId",
-          select: "-_id url",
-        },
-      },
+      getUserReferencePopulate("userId")
     ];
 
     return createdSubtConf.populate(populateParams);
@@ -53,14 +47,7 @@ export class SubtaskConfirmService {
           path: "subtaskId",
           select: "title description deadline",
         },
-        {
-          path: "userId",
-          select: "username avatarId",
-          populate: {
-            path: "avatarId",
-            select: "-_id url",
-          },
-        },
+        getUserReferencePopulate("userId")
       ]);
 
     return foundConfirmations.map((c) => ({

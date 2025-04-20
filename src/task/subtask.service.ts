@@ -26,6 +26,8 @@ import {
 } from "../notification/types";
 import { transaction } from "src/common/transaction";
 import { ApiResponseStatus } from "src/common/interfaces";
+import { getUserReferencePopulate } from "src/user/user.populate";
+import { getSubtaskPopulate } from "./task.populate";
 
 @Injectable()
 export class SubtaskService {
@@ -78,26 +80,6 @@ export class SubtaskService {
       queryParams.deadline = getDeadlineFilter(deadline);
     }
 
-    const populateParams = [
-      {
-        path: "categories",
-        select: "_id title color",
-      },
-      {
-        path: "userId",
-        select: "_id username avatarId avatarEffectId",
-        populate: [
-          {
-            path: "avatarId",
-            select: "-_id url",
-          },
-          {
-            path: "avatarEffectId",
-            select: "preview.url animated.url",
-          },
-        ],
-      },
-    ];
     const projection = {
       _id: 1,
       title: 1,
@@ -110,14 +92,13 @@ export class SubtaskService {
       dateOfCompletion: 1,
       deadline: 1,
     };
-
     if (query.page || query.limit) {
       const count = await this.subtaskModel.countDocuments(queryParams);
       const totalPages = Math.ceil(count / limit);
 
       const foundSubtasks = await this.subtaskModel
         .find(queryParams, projection)
-        .populate(populateParams)
+        .populate(getSubtaskPopulate())
         .limit(limit)
         .skip((page - 1) * limit);
 
@@ -129,7 +110,7 @@ export class SubtaskService {
     } else {
       const foundSubtasks = await this.subtaskModel
         .find(queryParams, projection)
-        .populate(populateParams);
+        .populate(getSubtaskPopulate());
 
       return this.subtaskMapperService.toSubtasks(foundSubtasks);
     }
@@ -167,20 +148,7 @@ export class SubtaskService {
       }
     );
 
-    await createdSubtask.populate({
-      path: "assigneeId",
-      select: "_id username avatarId avatarEffectId",
-      populate: [
-        {
-          path: "avatarId",
-          select: "-_id url",
-        },
-        {
-          path: "avatarEffectId",
-          select: "preview.url animated.url",
-        },
-      ],
-    });
+    await createdSubtask.populate(getUserReferencePopulate("assigneeId"));
 
     return this.subtaskMapperService.toAssignedSubtask(createdSubtask);
   }
@@ -253,34 +221,8 @@ export class SubtaskService {
 
       await foundSubtask.save();
       await foundSubtask.populate([
-        {
-          path: "userId",
-          select: "_id username avatarId avatarEffectId",
-          populate: [
-            {
-              path: "avatarId",
-              select: "-_id url",
-            },
-            {
-              path: "avatarEffectId",
-              select: "preview.url animated.url",
-            },
-          ],
-        },
-        {
-          path: "assigneeId",
-          select: "_id username avatarId avatarEffectId",
-          populate: [
-            {
-              path: "avatarId",
-              select: "-_id url",
-            },
-            {
-              path: "avatarEffectId",
-              select: "preview.url animated.url",
-            },
-          ],
-        },
+        getUserReferencePopulate(("userId")),
+        getUserReferencePopulate("assigneeId")
       ]);
 
       return this.subtaskMapperService.toFullSubtask(foundSubtask);
