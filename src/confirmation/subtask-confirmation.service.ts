@@ -29,7 +29,7 @@ export class SubtaskConfirmService {
         path: "subtaskId",
         select: "title description deadline",
       },
-      getUserReferencePopulate("userId")
+      getUserReferencePopulate("userId"),
     ];
 
     return createdSubtConf.populate(populateParams);
@@ -47,7 +47,7 @@ export class SubtaskConfirmService {
           path: "subtaskId",
           select: "title description deadline",
         },
-        getUserReferencePopulate("userId")
+        getUserReferencePopulate("userId"),
       ]);
 
     return foundConfirmations.map((c) => ({
