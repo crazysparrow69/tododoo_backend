@@ -312,7 +312,7 @@ export class RoadmapController {
     @CurrentUser() userId: string,
     @Param("roadmapId") roadmapId: string,
     @Param("quarterId") quarterId: string
-  ): Promise<ApiResponseStatus> {
+  ): Promise<RoadmapResponseDto> {
     return this.roadmapService.deleteQuarter(userId, roadmapId, quarterId);
   }
 }
