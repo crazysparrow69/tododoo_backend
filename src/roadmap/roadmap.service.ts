@@ -559,7 +559,13 @@ export class RoadmapService {
     if (!quarter) throw new NotFoundException("Quarter not found");
 
     const cutoffStart = quarter.start - 10; // tasks that start after this will be removed
-    quarter.deleteOne(); // remove the quarter itself
+
+    // remove milestones whose position falls inside the removed quarter
+    for (const ms of [...roadmap.milestones]) {
+      if (ms.position >= quarter.start && ms.position <= quarter.end) {
+        roadmap.milestones.pull(ms._id);
+      }
+    }
 
     // Determine the latest remaining quarter’s end date
     const lastQuarterEnd =
@@ -593,6 +599,7 @@ export class RoadmapService {
       category.updatedAt = now;
     }
 
+    quarter.deleteOne(); // remove the quarter itself
     roadmap.updatedAt = now;
 
     await roadmap.save();
