@@ -21,7 +21,7 @@ import {
 import { UserService } from "./user.service";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Controller("user")
 export class UserController {
@@ -41,11 +41,7 @@ export class UserController {
 
   @Get()
   @UseGuards(AuthGuard)
-  getUsers(@Query() query: QueryUserDto): Promise<{
-    foundUsers: UserBaseDto[];
-    page: number;
-    totalPages: number;
-  }> {
+  getUsers(@Query() query: QueryUserDto): Promise<WithPagination<UserBaseDto>> {
     return this.userService.findUsersByUsername(query);
   }
 

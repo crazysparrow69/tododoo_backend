@@ -18,6 +18,7 @@ import { CreateSubtaskConfirmationDto } from "../confirmation/dtos/create-subtas
 import { SubtaskConfirmation } from "../confirmation/subtask-confirmation.schema";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
 import { getUserReferencePopulate } from "src/user/user.populate";
+import { WithPagination } from "src/common/interfaces";
 
 @Injectable()
 export class NotificationService {
@@ -65,11 +66,7 @@ export class NotificationService {
     page: number,
     limit: number,
     skip: number
-  ): Promise<{
-    notifications: Array<SubtaskConfirmation | NotificationResponseDto>;
-    currentPage: number;
-    totalPages: number;
-  }> {
+  ): Promise<WithPagination<SubtaskConfirmation | NotificationResponseDto>> {
     const foundSubtaskConf =
       await this.subtaskConfirmService.getSubtaskConfirmations(userId);
     const foundNotifications = await this.notificationModel
@@ -98,7 +95,7 @@ export class NotificationService {
       page * limit + skip
     );
 
-    return { notifications: notificationsSlice, currentPage: page, totalPages };
+    return { results: notificationsSlice, page, totalPages };
   }
 
   async deleteSubtaskConf(subtaskId: string): Promise<void> {
