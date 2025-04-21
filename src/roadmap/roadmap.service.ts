@@ -27,7 +27,7 @@ import {
   UpdateRoadmapDto,
   MoveRoadmapCategoryRowTaskDto,
 } from "./dtos";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
 import { ROADMAP } from "src/common/constants";
 import { getUserReferencePopulate } from "src/user/user.populate";
@@ -54,16 +54,29 @@ export class RoadmapService {
     return this.roadmapMapperService.toBaseRoadmap(newRoadmap);
   }
 
-  async findRoadmaps(userId: string): Promise<RoadmapBaseResponseDto[]> {
-    const roadmaps = await this.roadmapModel
-      .find(
-        { userIds: userId },
-        { __v: 0, quarters: 0, milestones: 0, categories: 0, createdAt: 0 }
-      )
-      .sort({ updatedAt: -1 })
-      .lean();
+  async findRoadmaps(
+    userId: string,
+    page = 1,
+    limit = 20
+  ): Promise<WithPagination<RoadmapBaseResponseDto>> {
+    const [total, roadmaps] = await Promise.all([
+      this.roadmapModel.countDocuments({ userIds: userId }),
+      this.roadmapModel
+        .find(
+          { userIds: userId },
+          { __v: 0, quarters: 0, milestones: 0, categories: 0, createdAt: 0 }
+        )
+        .sort({ updatedAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+    ]);
 
-    return this.roadmapMapperService.toBaseRoadmaps(roadmaps);
+    return {
+      results: this.roadmapMapperService.toBaseRoadmaps(roadmaps),
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findRoadmap(

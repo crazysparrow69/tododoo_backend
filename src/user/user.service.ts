@@ -29,7 +29,7 @@ import { ImageService } from "../image/image.service";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
 import { UserAvatar } from "src/image/schemas";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 import { getUserPopulate } from "./user.populate";
 
 const scrypt = promisify(_scrypt);
@@ -95,44 +95,28 @@ export class UserService implements OnModuleInit {
     username,
     page = 1,
     limit = 10,
-  }: QueryUserDto): Promise<{
-    foundUsers: UserBaseDto[];
-    page: number;
-    totalPages: number;
-  }> {
-    const query = {
-      username: { $regex: username, $options: "i" },
-    };
+  }: QueryUserDto): Promise<WithPagination<UserBaseDto>> {
+    const query = { username: { $regex: username, $options: "i" } };
 
-    const count = await this.userModel.countDocuments(query);
-    if (count === 0) {
-      return {
-        foundUsers: [],
-        page: 0,
-        totalPages: 0,
-      };
-    }
-
-    const foundUsers = await this.userModel
-      .find(query, {
-        username: 1,
-        avatarId: 1,
-        avatarEffectId: 1,
-        profileEffectId: 0,
-      })
-      .populate(getUserPopulate())
-      .lean()
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .sort("username")
-      .exec();
-
-    const totalPages = Math.ceil(count / limit);
+    const [total, foundUsers] = await Promise.all([
+      this.userModel.countDocuments(query),
+      this.userModel
+        .find(query, {
+          username: 1,
+          avatarId: 1,
+          avatarEffectId: 1,
+        })
+        .populate(getUserPopulate())
+        .lean()
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .sort("username"),
+    ]);
 
     return {
-      foundUsers: this.userMapperService.toUsersBase(foundUsers),
+      results: this.userMapperService.toUsersBase(foundUsers),
       page,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
     };
   }
 

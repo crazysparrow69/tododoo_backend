@@ -15,6 +15,7 @@ import {
 import { Category } from "../../category/category.schema";
 import { TASK } from "src/common/constants";
 import { Types } from "mongoose";
+import { PaginationDto } from "src/common/dtos";
 
 export class CreateTaskDto {
   @IsString()
@@ -90,7 +91,7 @@ export class UpdateTaskDto {
   deadline: Date | null;
 }
 
-export class QueryTaskDto {
+export class QueryTaskDto extends PaginationDto {
   @IsOptional()
   @IsArray()
   @Transform(({ value }) => {
@@ -135,14 +136,4 @@ export class QueryTaskDto {
     throw new BadRequestException("deadline is invalid");
   })
   deadline: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseInt(value))
-  page?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseInt(value))
-  limit?: number;
 }

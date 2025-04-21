@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
 } from "@nestjs/common";
 import { RoadmapService } from "./roadmap.service";
 import { AuthGuard, BannedUserGuard } from "src/auth/guards";
@@ -31,7 +32,8 @@ import {
   UpdateRoadmapDto,
   MoveRoadmapCategoryRowTaskDto,
 } from "./dtos";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
+import { PaginationDto } from "src/common/dtos";
 
 @Controller("roadmap")
 @UseGuards(AuthGuard)
@@ -40,9 +42,10 @@ export class RoadmapController {
 
   @Get()
   getRoadmaps(
-    @CurrentUser() userId: string
-  ): Promise<RoadmapBaseResponseDto[]> {
-    return this.roadmapService.findRoadmaps(userId);
+    @CurrentUser() userId: string,
+    @Query() query: PaginationDto
+  ): Promise<WithPagination<RoadmapBaseResponseDto>> {
+    return this.roadmapService.findRoadmaps(userId, query.page, query.limit);
   }
 
   @Get(":id")
