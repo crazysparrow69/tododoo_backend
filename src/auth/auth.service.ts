@@ -16,6 +16,11 @@ import { UserService } from "../user/user.service";
 import { transaction } from "src/common/transaction";
 import { ConfigService } from "@nestjs/config";
 import { AuthResponse } from "./interfaces";
+import { ApiResponseStatus } from "src/common/interfaces";
+import { CodeService } from "src/code/code.service";
+import { CodeTypes } from "src/code/code.schema";
+import { MailService } from "src/mail/mail.service";
+import { User } from "src/user/user.schema";
 
 @Injectable()
 export class AuthService {
@@ -23,10 +28,14 @@ export class AuthService {
 
   constructor(
     @InjectModel(Session.name)
-    private sessionModel: Model<Session>,
-    private userService: UserService,
-    private jwtService: JwtService,
+    private readonly sessionModel: Model<Session>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<User>,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly codeService: CodeService,
+    private readonly mailService: MailService,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {
     this.oAuth2Client = new OAuth2Client({
@@ -36,30 +45,29 @@ export class AuthService {
     });
   }
 
-  async signup(dto: SignupUserDto): Promise<AuthResponse> {
-    const newToken = await transaction<string>(
-      this.connection,
-      async (session) => {
-        const createdUser = await this.userService.create(dto, session);
+  async signUp(dto: SignupUserDto): Promise<ApiResponseStatus> {
+    await transaction(this.connection, async (session) => {
+      const createdUser = await this.userService.create(dto, session);
+      const generatedCode = await this.codeService.create(
+        createdUser._id.toString(),
+        CodeTypes.EMAIL_VERIFICATION,
+        session
+      );
 
-        const token = await this.jwtService.signAsync({
-          sub: createdUser._id,
-        });
+      const verificationLink = `${this.configService.get("CLIENT_URL")}/auth/verify-email/${generatedCode}`;
 
-        const newSession = new this.sessionModel({
-          userId: createdUser._id,
-          token,
-        });
-        await newSession.save({ session });
+      await this.mailService.send({
+        from: this.configService.get("EMAIL_FROM"),
+        to: createdUser.email,
+        subject: "Email Verification",
+        text: `Hello ${createdUser.username}. Thanks for signing up for Tododoo! Please confirm your email address by clicking the link below (valid for 10 minutes): ${verificationLink}. If you did not create a Tododoo account, simply ignore this email and no changes will be made.`,
+      });
+    });
 
-        return token;
-      }
-    );
-
-    return { token: newToken };
+    return { success: true };
   }
 
-  async signin(email: string, password: string): Promise<AuthResponse> {
+  async signIn(email: string, password: string): Promise<AuthResponse> {
     const [foundUser] = await this.userService.find({ email } as QueryUserDto, {
       _id: 1,
       password: 1,
@@ -88,9 +96,7 @@ export class AuthService {
           await foundToken.save({ session });
         }
 
-        const token = await this.jwtService.signAsync({
-          sub: foundUser._id,
-        });
+        const token = await this.jwtService.signAsync({ sub: foundUser._id });
 
         const newSession = new this.sessionModel({
           userId: foundUser._id,
@@ -131,22 +137,14 @@ export class AuthService {
           let user = (await this.userService.find({ email }))[0];
           if (!user) {
             user = await this.userService.createOAuthUser(
-              {
-                username: name + lastName,
-                email,
-              },
+              { username: name + lastName, email },
               session
             );
           }
 
-          const token = await this.jwtService.signAsync({
-            sub: user._id,
-          });
+          const token = await this.jwtService.signAsync({ sub: user._id });
 
-          const newSession = new this.sessionModel({
-            userId: user._id,
-            token,
-          });
+          const newSession = new this.sessionModel({ userId: user._id, token });
           await newSession.save({ session });
 
           return token;
@@ -157,5 +155,23 @@ export class AuthService {
     } catch (err: any) {
       throw new InternalServerErrorException();
     }
+  }
+
+  async verifyEmail(code: string): Promise<ApiResponseStatus> {
+    const foundCode = await this.codeService.validateCode(code);
+
+    await transaction(this.connection, async (session) => {
+      foundCode.isValid = false;
+      await Promise.all([
+        this.userModel.findByIdAndUpdate(
+          foundCode.userId,
+          { isEmailVerified: true },
+          { session }
+        ),
+        foundCode.save({ session }),
+      ]);
+    });
+
+    return { success: true };
   }
 }

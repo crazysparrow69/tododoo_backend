@@ -101,11 +101,7 @@ export class UserService implements OnModuleInit {
     const [total, foundUsers] = await Promise.all([
       this.userModel.countDocuments(query),
       this.userModel
-        .find(query, {
-          username: 1,
-          avatarId: 1,
-          avatarEffectId: 1,
-        })
+        .find(query, { username: 1, avatarId: 1, avatarEffectId: 1 })
         .populate(getUserPopulate())
         .lean()
         .limit(limit)
@@ -146,14 +142,12 @@ export class UserService implements OnModuleInit {
     dto: OAuthUserDto,
     session?: ClientSession
   ): Promise<User> {
-    const foundUser = await this.userModel.findOne({
-      email: dto.email,
-    });
+    const foundUser = await this.userModel.findOne({ email: dto.email });
     if (foundUser) {
       throw new BadRequestException("Email already in use");
     }
 
-    const newUser = new this.userModel(dto);
+    const newUser = new this.userModel({ ...dto, isEmailVerified: true });
     await newUser.save({ session });
 
     return newUser;
@@ -161,9 +155,7 @@ export class UserService implements OnModuleInit {
 
   async update(id: string, attrs: Partial<User>): Promise<UserProfileDto> {
     const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, attrs, {
-        new: true,
-      })
+      .findByIdAndUpdate(id, attrs, { new: true })
       .populate(getUserPopulate())
       .lean()
       .select([

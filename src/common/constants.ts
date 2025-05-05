@@ -1,5 +1,7 @@
 export const COLOR_MIN = 3;
 export const COLOR_MAX = 20;
+export const CODE_LENGTH = 20;
+export const CODE_TTL = 10 * 60 * 1000; // 10 min
 
 export const BOARD = {
   TITLE: { MIN: 1, MAX: 50 },

@@ -16,6 +16,8 @@ import { TaskModule } from "./task/task.module";
 import { UserModule } from "./user/user.module";
 import { BoardModule } from "./board/board.module";
 import { RoadmapModule } from "./roadmap/roadmap.module";
+import { MailModule } from './mail/mail.module';
+import { CodeModule } from './code/code.module';
 
 @Module({
   imports: [
@@ -31,6 +33,9 @@ import { RoadmapModule } from "./roadmap/roadmap.module";
         CLOUDINARY_API_SECRET: Joi.string().required(),
         GOOGLE_CLIENT_ID: Joi.string().required(),
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        SENDGRID_API_KEY: Joi.string().required(),
+        EMAIL_FROM: Joi.string().email().required(),
+        CLIENT_URL: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
       }),
     }),
     JwtModule.register({
@@ -49,6 +54,8 @@ import { RoadmapModule } from "./roadmap/roadmap.module";
     AdminModule,
     BoardModule,
     RoadmapModule,
+    MailModule,
+    CodeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

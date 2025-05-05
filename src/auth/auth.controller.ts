@@ -1,8 +1,16 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+} from "@nestjs/common";
 
 import { SignupUserDto, SigninUserDto, GoogleOAuthDto } from "./dtos";
 import { AuthService } from "../auth/auth.service";
 import { AuthResponse } from "./interfaces";
+import { ApiResponseStatus } from "src/common/interfaces";
 
 @Controller("auth")
 export class AuthController {
@@ -10,17 +18,22 @@ export class AuthController {
 
   @Post("signup")
   @HttpCode(HttpStatus.CREATED)
-  createUser(@Body() body: SignupUserDto): Promise<AuthResponse> {
-    return this.authService.signup(body);
+  signUp(@Body() body: SignupUserDto): Promise<ApiResponseStatus> {
+    return this.authService.signUp(body);
   }
 
   @Post("signin")
   signIn(@Body() body: SigninUserDto): Promise<AuthResponse> {
-    return this.authService.signin(body.email, body.password);
+    return this.authService.signIn(body.email, body.password);
   }
 
   @Post("google")
   googleOAuth(@Body() body: GoogleOAuthDto): Promise<AuthResponse> {
     return this.authService.googleLogin(body.code);
+  }
+
+  @Post("verify-email/:code")
+  verifyEmail(@Param("code") code: string): Promise<ApiResponseStatus> {
+    return this.authService.verifyEmail(code);
   }
 }
