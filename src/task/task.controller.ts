@@ -26,6 +26,7 @@ import { UserTasksStats } from "./types";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 import { WithPagination } from "src/common/interfaces";
+import { Throttle } from "@nestjs/throttler";
 
 @Controller("task")
 @UseGuards(AuthGuard, EmailVerifiedGuard)
@@ -45,6 +46,7 @@ export class TaskController {
   }
 
   @Get("")
+  @Throttle({ default: { limit: 60, ttl: 1000 * 60 } })
   async getTasks(
     @CurrentUser() userId: string,
     @Query() query: QueryTaskDto
