@@ -17,6 +17,8 @@ import { NotificationServerEvents } from "./types";
 import { CreateSubtaskConfirmationDto } from "../confirmation/dtos/create-subtask-confirmation.dto";
 import { SubtaskConfirmation } from "../confirmation/subtask-confirmation.schema";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
+import { getUserReferencePopulate } from "src/user/user.populate";
+import { WithPagination } from "src/common/interfaces";
 
 @Injectable()
 export class NotificationService {
@@ -64,16 +66,12 @@ export class NotificationService {
     page: number,
     limit: number,
     skip: number
-  ): Promise<{
-    notifications: Array<SubtaskConfirmation | NotificationResponseDto>;
-    currentPage: number;
-    totalPages: number;
-  }> {
+  ): Promise<WithPagination<SubtaskConfirmation | NotificationResponseDto>> {
     const foundSubtaskConf =
       await this.subtaskConfirmService.getSubtaskConfirmations(userId);
     const foundNotifications = await this.notificationModel
       .find({ userId, isRead: false })
-      .populate(["subtaskId", "actionByUserId"]);
+      .populate(["subtaskId", getUserReferencePopulate("actionByUserId")]);
     const mappedNotifications =
       this.notificationMapperService.toNotifications(foundNotifications);
 
@@ -97,7 +95,7 @@ export class NotificationService {
       page * limit + skip
     );
 
-    return { notifications: notificationsSlice, currentPage: page, totalPages };
+    return { results: notificationsSlice, page, totalPages };
   }
 
   async deleteSubtaskConf(subtaskId: string): Promise<void> {
@@ -121,7 +119,10 @@ export class NotificationService {
 
   async create(dto: CreateNotificationDto): Promise<NotificationResponseDto> {
     const createdNotification = await this.notificationModel.create(dto);
-    await createdNotification.populate(["actionByUserId", "subtaskId"]);
+    await createdNotification.populate([
+      getUserReferencePopulate("actionByUserId"),
+      "subtaskId",
+    ]);
 
     return this.notificationMapperService.toNotificationResponse(
       createdNotification

@@ -10,7 +10,6 @@ import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import mongoose, {
   ClientSession,
   Model,
-  PopulateOptions,
   ProjectionType,
   Types,
 } from "mongoose";
@@ -30,13 +29,13 @@ import { ImageService } from "../image/image.service";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
 import { UserAvatar } from "src/image/schemas";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
+import { getUserPopulate } from "./user.populate";
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService implements OnModuleInit {
-  populateParams: PopulateOptions[];
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
@@ -45,22 +44,7 @@ export class UserService implements OnModuleInit {
     private imageService: ImageService,
     private userMapperService: UserMapperService,
     @InjectConnection() private readonly connection: mongoose.Connection
-  ) {
-    this.populateParams = [
-      {
-        path: "avatarId",
-        select: "-_id url",
-      },
-      {
-        path: "profileEffectId",
-        select: "intro.url preview.url sides.url top.url",
-      },
-      {
-        path: "avatarEffectId",
-        select: "preview.url animated.url",
-      },
-    ];
-  }
+  ) {}
 
   async onModuleInit() {
     try {
@@ -82,7 +66,7 @@ export class UserService implements OnModuleInit {
         createdAt: 1,
         roles: 1,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -100,7 +84,7 @@ export class UserService implements OnModuleInit {
         createdAt: 1,
         isBanned: 1,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean();
     if (!foundUser) throw new NotFoundException("User not found");
 
@@ -111,44 +95,28 @@ export class UserService implements OnModuleInit {
     username,
     page = 1,
     limit = 10,
-  }: QueryUserDto): Promise<{
-    foundUsers: UserBaseDto[];
-    page: number;
-    totalPages: number;
-  }> {
-    const query = {
-      username: { $regex: username, $options: "i" },
-    };
+  }: QueryUserDto): Promise<WithPagination<UserBaseDto>> {
+    const query = { username: { $regex: username, $options: "i" } };
 
-    const count = await this.userModel.countDocuments(query);
-    if (count === 0) {
-      return {
-        foundUsers: [],
-        page: 0,
-        totalPages: 0,
-      };
-    }
-
-    const foundUsers = await this.userModel
-      .find(query, {
-        username: 1,
-        avatarId: 1,
-        avatarEffectId: 1,
-        profileEffectId: 0,
-      })
-      .populate(this.populateParams)
-      .lean()
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .sort("username")
-      .exec();
-
-    const totalPages = Math.ceil(count / limit);
+    const [total, foundUsers] = await Promise.all([
+      this.userModel.countDocuments(query),
+      this.userModel
+        .find(query, {
+          username: 1,
+          avatarId: 1,
+          avatarEffectId: 1,
+        })
+        .populate(getUserPopulate())
+        .lean()
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .sort("username"),
+    ]);
 
     return {
-      foundUsers: this.userMapperService.toUsersBase(foundUsers),
+      results: this.userMapperService.toUsersBase(foundUsers),
       page,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -196,7 +164,7 @@ export class UserService implements OnModuleInit {
       .findByIdAndUpdate(id, attrs, {
         new: true,
       })
-      .populate(this.populateParams)
+      .populate(getUserPopulate())
       .lean()
       .select([
         "_id",

@@ -17,6 +17,27 @@ export const BOARD = {
   },
 };
 
+export const ROADMAP = {
+  TITLE: { MIN: 1, MAX: 50 },
+  DESCRIPTION: { MIN: 0, MAX: 1000 },
+  USER_IDS: { MAX: 100 },
+  QUARTERS: {
+    TITLE: { MIN: 1, MAX: 50 },
+  },
+  MILESTONES: {
+    TITLE: { MIN: 1, MAX: 50 },
+  },
+  CATEGORIES: {
+    TITLE: { MIN: 1, MAX: 50 },
+    ROWS: {
+      TASKS: {
+        TITLE: { MIN: 1, MAX: 50 },
+        PROGRESS: { MIN: 0, MAX: 100 },
+      },
+    },
+  },
+};
+
 export const TAG = {
   TITLE: { MIN: 1, MAX: 20 },
   COLOR: { MIN: 3, MAX: 20 },

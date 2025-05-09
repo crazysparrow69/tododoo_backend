@@ -25,6 +25,7 @@ import { TaskService } from "./task.service";
 import { UserTasksStats } from "./types";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { WithPagination } from "src/common/interfaces";
 
 @Controller("task")
 @UseGuards(AuthGuard)
@@ -44,7 +45,10 @@ export class TaskController {
   }
 
   @Get("")
-  async getTasks(@CurrentUser() userId: string, @Query() query: QueryTaskDto) {
+  async getTasks(
+    @CurrentUser() userId: string,
+    @Query() query: QueryTaskDto
+  ): Promise<WithPagination<TaskResponseDto | SubtaskResponseDto>> {
     const { page = 1, limit = 10, ...queryParams } = query;
 
     const foundTasks = (await this.taskService.findByQuery(
@@ -73,7 +77,7 @@ export class TaskController {
       (foundTasks.length + foundSubtasks.length) / limit
     );
 
-    return { tasks, currentPage: page, totalPages };
+    return { results: tasks, page, totalPages };
   }
 
   @Post("")

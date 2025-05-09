@@ -1,5 +1,6 @@
 import { IsOptional, IsString, Length } from "class-validator";
 import { BOARD } from "src/common/constants";
+import { PaginationDto } from "src/common/dtos";
 
 export class CreateBoardDto {
   @IsString()

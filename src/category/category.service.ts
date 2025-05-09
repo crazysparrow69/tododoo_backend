@@ -16,7 +16,7 @@ import {
 } from "./dtos";
 import { Task } from "../task/schemas";
 import { transaction } from "src/common/transaction";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Injectable()
 export class CategoryService {
@@ -59,11 +59,7 @@ export class CategoryService {
   async find(
     userId: string,
     query: QueryCategoryDto
-  ): Promise<{
-    categories: CategoryResponseDto[];
-    currentPage: number;
-    totalPages: number;
-  }> {
+  ): Promise<WithPagination<CategoryResponseDto>> {
     const { page = 1, limit = 10, ...params } = query;
 
     const queryParams = {
@@ -82,8 +78,8 @@ export class CategoryService {
       .exec();
 
     return {
-      categories: this.categoryMapperService.toCategories(foundCategories),
-      currentPage: page,
+      results: this.categoryMapperService.toCategories(foundCategories),
+      page,
       totalPages,
     };
   }

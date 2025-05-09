@@ -33,9 +33,10 @@ import {
   BoardTagResponseDto,
   BoardColumnTaskResponseDto,
 } from "./dtos";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 import { User, UserDocument } from "src/user/user.schema";
 import { BOARD } from "src/common/constants";
+import { getBoardPopulate } from "./board.populate";
 
 @Injectable()
 export class BoardService {
@@ -61,68 +62,35 @@ export class BoardService {
     return this.boardMapperService.toBaseBoard(newBoard);
   }
 
-  async findBoards(userId: string): Promise<BoardBaseResponseDto[]> {
-    const boards = await this.boardModel
-      .find({ userIds: userId }, { __v: 0, columns: 0, tags: 0, createdAt: 0 })
-      .sort({ updatedAt: -1 })
-      .lean();
+  async findBoards(
+    userId: string,
+    page = 1,
+    limit = 20
+  ): Promise<WithPagination<BoardBaseResponseDto>> {
+    const [total, boards] = await Promise.all([
+      this.boardModel.countDocuments({ userIds: userId }),
+      this.boardModel
+        .find(
+          { userIds: userId },
+          { __v: 0, columns: 0, tags: 0, createdAt: 0 }
+        )
+        .sort({ updatedAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+    ]);
 
-    return this.boardMapperService.toBaseBoards(boards);
+    return {
+      results: this.boardMapperService.toBaseBoards(boards),
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findBoard(userId: string, boardId: string): Promise<BoardResponseDto> {
-    const populateParams = [
-      {
-        path: "tagIds",
-        model: "BoardTag",
-        select: "-__v -createdAt -updatedAt",
-      },
-      {
-        path: "columns",
-        populate: {
-          path: "tasks",
-          populate: [
-            {
-              path: "tagIds",
-              model: "BoardTag",
-              select: "-__v -createdAt -updatedAt",
-            },
-            {
-              path: "assigneeIds",
-              select: "_id username avatarId avatarEffectId",
-              populate: [
-                {
-                  path: "avatarId",
-                  select: "-_id url",
-                },
-                {
-                  path: "avatarEffectId",
-                  select: "preview.url animated.url",
-                },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        path: "userIds",
-        select: "_id username avatarId avatarEffectId",
-        populate: [
-          {
-            path: "avatarId",
-            select: "-_id url",
-          },
-          {
-            path: "avatarEffectId",
-            select: "preview.url animated.url",
-          },
-        ],
-      },
-    ];
-
     const board = await this.boardModel
       .findOne({ _id: boardId, userIds: userId })
-      .populate(populateParams)
+      .populate(getBoardPopulate())
       .lean();
     if (!board) {
       throw new NotFoundException("Board not found");
@@ -217,6 +185,26 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException("Board not found");
     }
+
+    return { success: true };
+  }
+
+  async leave(userId: string, boardId: string): Promise<ApiResponseStatus> {
+    const board = await this.boardModel.findOne({
+      _id: boardId,
+      userIds: userId,
+    });
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
+    if (board.userId.toString() === userId) {
+      throw new BadRequestException("Creator cannot leave the board");
+    }
+
+    board.userIds = board.userIds.filter((id) => id.toString() !== userId);
+    board.updatedAt = new Date();
+
+    await board.save();
 
     return { success: true };
   }

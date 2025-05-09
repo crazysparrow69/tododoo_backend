@@ -1,6 +1,7 @@
 import { IsOptional, IsString } from "class-validator";
+import { PaginationDto } from "src/common/dtos";
 
-export class QueryCategoryDto {
+export class QueryCategoryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   title: string;
@@ -8,12 +9,4 @@ export class QueryCategoryDto {
   @IsOptional()
   @IsString()
   color: string;
-
-  @IsOptional()
-  @IsString()
-  page: number;
-
-  @IsOptional()
-  @IsString()
-  limit: number;
 }

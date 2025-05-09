@@ -21,7 +21,7 @@ import {
 } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
 import { AuthGuard, BannedUserGuard } from "../auth/guards";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Controller("category")
 @UseGuards(AuthGuard)
@@ -40,11 +40,7 @@ export class CategoryController {
   getCategories(
     @CurrentUser() userId: string,
     @Query() query: QueryCategoryDto
-  ): Promise<{
-    categories: CategoryResponseDto[];
-    currentPage: number;
-    totalPages: number;
-  }> {
+  ): Promise<WithPagination<CategoryResponseDto>> {
     return this.categoryService.find(userId, query);
   }
 

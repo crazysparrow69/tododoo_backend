@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { BoardService } from "./board.service";
@@ -27,7 +28,8 @@ import {
   UpdateBoardCategoryTaskDto,
   MoveBoardCategoryTaskDto,
 } from "./dtos";
-import { ApiResponseStatus } from "src/common/interfaces";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
+import { PaginationDto } from "src/common/dtos";
 
 @Controller("board")
 @UseGuards(AuthGuard)
@@ -42,12 +44,15 @@ export class BoardController {
     return this.boardService.findBoard(userId, id);
   }
 
-  @Get("")
-  getBoards(@CurrentUser() userId: string): Promise<BoardBaseResponseDto[]> {
-    return this.boardService.findBoards(userId);
+  @Get()
+  getBoards(
+    @CurrentUser() userId: string,
+    @Query() query: PaginationDto
+  ): Promise<WithPagination<BoardBaseResponseDto>> {
+    return this.boardService.findBoards(userId, query.page, query.limit);
   }
 
-  @Post("")
+  @Post()
   @UseGuards(BannedUserGuard)
   createBoard(
     @CurrentUser() userId: string,
@@ -76,7 +81,7 @@ export class BoardController {
     return this.boardService.addUser(userId, id, targetUserId);
   }
 
-  @Post(":id/remove-user/:targetUserId")
+  @Delete(":id/remove-user/:targetUserId")
   @UseGuards(BannedUserGuard)
   removeUser(
     @CurrentUser() userId: string,
@@ -84,6 +89,15 @@ export class BoardController {
     @Param("targetUserId") targetUserId: string
   ): Promise<ApiResponseStatus> {
     return this.boardService.removeUser(userId, id, targetUserId);
+  }
+
+  @Delete(":id/leave")
+  @UseGuards(BannedUserGuard)
+  leaveRoadmap(
+    @CurrentUser() userId: string,
+    @Param("id") boardId: string
+  ): Promise<ApiResponseStatus> {
+    return this.boardService.leave(userId, boardId);
   }
 
   @Delete(":id")
