@@ -33,7 +33,11 @@ export class AuthGuard implements CanActivate {
       const foundUser = await this.userModel.findById(foundToken.userId);
       if (!foundUser) throw new UnauthorizedException();
 
-      request.user = { sub: foundToken.userId, isBanned: foundUser.isBanned };
+      request.user = {
+        sub: foundToken.userId,
+        isBanned: foundUser.isBanned,
+        isEmailVerified: foundUser.isEmailVerified,
+      };
     } catch (err: any) {
       throw new UnauthorizedException(err.message);
     }

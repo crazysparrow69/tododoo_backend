@@ -10,6 +10,7 @@ import { User, UserSchema } from "../user/user.schema";
 import { CodeModule } from "src/code/code.module";
 import { Code, CodeSchema } from "src/code/code.schema";
 import { MailModule } from "src/mail/mail.module";
+import { ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { MailModule } from "src/mail/mail.module";
     ]),
     forwardRef(() => UserModule),
     CodeModule,
-    MailModule
+    MailModule,
   ],
   providers: [AuthGuard, AuthService],
   controllers: [AuthController],

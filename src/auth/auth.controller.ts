@@ -7,10 +7,16 @@ import {
   Post,
 } from "@nestjs/common";
 
-import { SignupUserDto, SigninUserDto, GoogleOAuthDto } from "./dtos";
+import {
+  SignupUserDto,
+  SigninUserDto,
+  GoogleOAuthDto,
+  ResendEmailVerificationDto,
+} from "./dtos";
 import { AuthService } from "../auth/auth.service";
 import { AuthResponse } from "./interfaces";
 import { ApiResponseStatus } from "src/common/interfaces";
+import { Throttle } from "@nestjs/throttler";
 
 @Controller("auth")
 export class AuthController {
@@ -23,6 +29,7 @@ export class AuthController {
   }
 
   @Post("signin")
+  @Throttle({ default: { limit: 3, ttl: 1000 * 60 } })
   signIn(@Body() body: SigninUserDto): Promise<AuthResponse> {
     return this.authService.signIn(body.email, body.password);
   }
@@ -35,5 +42,12 @@ export class AuthController {
   @Post("verify-email/:code")
   verifyEmail(@Param("code") code: string): Promise<ApiResponseStatus> {
     return this.authService.verifyEmail(code);
+  }
+
+  @Post("resend-email-verification")
+  resendEmailVerification(
+    @Body() body: ResendEmailVerificationDto
+  ): Promise<void> {
+    return this.authService.resendEmailVerification(body.email);
   }
 }

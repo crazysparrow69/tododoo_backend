@@ -12,7 +12,7 @@ import { NotificationService } from "./../notification/notification.service";
 import { SubtaskFullDto, UpdateSubtaskDto } from "./dtos";
 import { SubtaskService } from "./subtask.service";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 
 @Controller("subtask")
 @UseGuards(AuthGuard)
@@ -24,6 +24,7 @@ export class SubtaskController {
 
   @Patch(":id")
   @UseGuards(BannedUserGuard)
+  @UseGuards(EmailVerifiedGuard)
   updateSubtask(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string,
@@ -34,6 +35,7 @@ export class SubtaskController {
 
   @Delete(":id")
   @UseGuards(BannedUserGuard)
+  @UseGuards(EmailVerifiedGuard)
   async removeSubtask(
     @CurrentUser() userId: Types.ObjectId,
     @Param("id") id: string

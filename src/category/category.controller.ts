@@ -20,11 +20,11 @@ import {
   UpdateCategoryDto,
 } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Controller("category")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, EmailVerifiedGuard)
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 

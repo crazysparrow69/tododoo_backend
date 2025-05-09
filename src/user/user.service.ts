@@ -60,6 +60,7 @@ export class UserService implements OnModuleInit {
         _id: 1,
         username: 1,
         email: 1,
+        isEmailVerified: 1,
         avatarId: 1,
         profileEffectId: 1,
         avatarEffectId: 1,

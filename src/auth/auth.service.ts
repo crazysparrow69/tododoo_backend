@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common/exceptions";
 import { JwtService } from "@nestjs/jwt";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model } from "mongoose";
+import mongoose, { ClientSession, Model } from "mongoose";
 import { OAuth2Client } from "google-auth-library";
 
 import { SignupUserDto } from "./dtos";
@@ -18,9 +18,10 @@ import { ConfigService } from "@nestjs/config";
 import { AuthResponse } from "./interfaces";
 import { ApiResponseStatus } from "src/common/interfaces";
 import { CodeService } from "src/code/code.service";
-import { CodeTypes } from "src/code/code.schema";
+import { Code, CodeTypes } from "src/code/code.schema";
 import { MailService } from "src/mail/mail.service";
 import { User } from "src/user/user.schema";
+import { CODE_REQUEST_EMAIL_VERIFICATION_LIMIT } from "src/common/constants";
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly sessionModel: Model<Session>,
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+    @InjectModel(Code.name) private readonly codeModel: Model<Code>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -48,20 +50,7 @@ export class AuthService {
   async signUp(dto: SignupUserDto): Promise<ApiResponseStatus> {
     await transaction(this.connection, async (session) => {
       const createdUser = await this.userService.create(dto, session);
-      const generatedCode = await this.codeService.create(
-        createdUser._id.toString(),
-        CodeTypes.EMAIL_VERIFICATION,
-        session
-      );
-
-      const verificationLink = `${this.configService.get("CLIENT_URL")}/auth/verify-email/${generatedCode}`;
-
-      await this.mailService.send({
-        from: this.configService.get("EMAIL_FROM"),
-        to: createdUser.email,
-        subject: "Email Verification",
-        text: `Hello ${createdUser.username}. Thanks for signing up for Tododoo! Please confirm your email address by clicking the link below (valid for 10 minutes): ${verificationLink}. If you did not create a Tododoo account, simply ignore this email and no changes will be made.`,
-      });
+      await this.requestEmailVerification(createdUser, session);
     });
 
     return { success: true };
@@ -161,17 +150,60 @@ export class AuthService {
     const foundCode = await this.codeService.validateCode(code);
 
     await transaction(this.connection, async (session) => {
+      await this.userModel.findByIdAndUpdate(
+        foundCode.userId,
+        { isEmailVerified: true },
+        { session }
+      );
+
       foundCode.isValid = false;
-      await Promise.all([
-        this.userModel.findByIdAndUpdate(
-          foundCode.userId,
-          { isEmailVerified: true },
-          { session }
-        ),
-        foundCode.save({ session }),
-      ]);
+      await foundCode.save({ session });
     });
 
     return { success: true };
+  }
+
+  async resendEmailVerification(email: string): Promise<void> {
+    const user = await this.userModel.findOne({ email }).lean();
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    if (user.isEmailVerified) {
+      throw new BadRequestException("Email is already verified");
+    }
+
+    const lastCode = await this.codeModel
+      .findOne({ userId: user._id, type: CodeTypes.EMAIL_VERIFICATION })
+      .sort({ createdAt: -1 });
+    if (lastCode) {
+      const age = Date.now() - lastCode.createdAt.getTime();
+      if (age < CODE_REQUEST_EMAIL_VERIFICATION_LIMIT) {
+        throw new BadRequestException(
+          "You can request email verification once per 15 min"
+        );
+      }
+    }
+
+    await this.requestEmailVerification(user);
+  }
+
+  private async requestEmailVerification(
+    user: User,
+    session?: ClientSession
+  ): Promise<void> {
+    const generatedCode = await this.codeService.create(
+      user._id.toString(),
+      CodeTypes.EMAIL_VERIFICATION,
+      session
+    );
+
+    const verificationLink = `${this.configService.get("CLIENT_URL")}/auth/verify-email/${generatedCode}`;
+
+    await this.mailService.send({
+      from: this.configService.get("EMAIL_FROM"),
+      to: user.email,
+      subject: "Email Verification",
+      text: `Hello ${user.username}. Thanks for signing up for Tododoo! Please confirm your email address by clicking the link below (valid for 15 min): ${verificationLink}. If you did not create a Tododoo account, simply ignore this email and no changes will be made.`,
+    });
   }
 }

@@ -24,11 +24,11 @@ import { SubtaskService } from "./subtask.service";
 import { TaskService } from "./task.service";
 import { UserTasksStats } from "./types";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 import { WithPagination } from "src/common/interfaces";
 
 @Controller("task")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, EmailVerifiedGuard)
 export class TaskController {
   constructor(
     private readonly taskService: TaskService,

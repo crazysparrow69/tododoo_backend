@@ -1,13 +1,15 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { BadRequestException, Injectable, OnModuleInit } from "@nestjs/common";
 import { ClientSession, Model } from "mongoose";
 import { Code, CodeDocument } from "./code.schema";
 import { InjectModel } from "@nestjs/mongoose";
-import { CODE_LENGTH, CODE_TTL } from "src/common/constants";
+import { CODE_LENGTH, CODE_EMAIL_VERIFICATION_TTL } from "src/common/constants";
 const { nanoid } = require("fix-esm").require("nanoid");
 
 @Injectable()
 export class CodeService implements OnModuleInit {
-  constructor(@InjectModel(Code.name) private codeModel: Model<Code>) {}
+  constructor(
+    @InjectModel(Code.name) private readonly codeModel: Model<Code>
+  ) {}
 
   async onModuleInit() {
     try {
@@ -25,6 +27,8 @@ export class CodeService implements OnModuleInit {
     const generatedCode = await this.generateUniqueCode();
 
     const code = new this.codeModel({ userId, code: generatedCode, type });
+
+    await this.codeModel.updateMany({ userId, type }, { isValid: false });
     await code.save({ session });
 
     return generatedCode;
@@ -33,12 +37,12 @@ export class CodeService implements OnModuleInit {
   async validateCode(code: string): Promise<CodeDocument> {
     const foundCode = await this.codeModel.findOne({ code });
     if (!foundCode || !foundCode.isValid) {
-      throw new Error("Code is invalid");
+      throw new BadRequestException("Code is invalid");
     }
 
     const age = Date.now() - foundCode.createdAt.getTime();
-    if (age > CODE_TTL) {
-      throw new Error("Code has expired");
+    if (age > CODE_EMAIL_VERIFICATION_TTL) {
+      throw new BadRequestException("Code has expired");
     }
 
     return foundCode;

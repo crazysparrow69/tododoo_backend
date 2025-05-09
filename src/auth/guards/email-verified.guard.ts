@@ -6,13 +6,13 @@ import {
 } from "@nestjs/common";
 
 @Injectable()
-export class BannedUserGuard implements CanActivate {
+export class EmailVerifiedGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (user.isBanned) {
-      throw new ForbiddenException("User is banned");
+    if (!user.isEmailVerified) {
+      throw new ForbiddenException("Email not verified");
     }
 
     return true;

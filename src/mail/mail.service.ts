@@ -1,17 +1,19 @@
-// src/mail/mail.service.ts
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import * as SendGrid from '@sendgrid/mail';
+import { CreateEmailOptions, Resend } from "resend";
 
 @Injectable()
 export class MailService {
+  private readonly resend: Resend;
+
   constructor(private readonly configService: ConfigService) {
-    SendGrid.setApiKey(this.configService.get("SENDGRID_API_KEY"));
+    this.resend = new Resend(this.configService.get("RESEND_API_KEY"));
   }
 
-  async send(mail: SendGrid.MailDataRequired): Promise<void> {
+  async send(options: CreateEmailOptions): Promise<void> {
     try {
-      await SendGrid.send(mail);
+      await this.resend.emails.send(options);
+      console.debug(`Email has been sent to: ${options.to}`);
     } catch (error) {
       throw error;
     }

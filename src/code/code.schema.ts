@@ -21,7 +21,7 @@ export class Code extends AbstractDocument {
   @Prop({ type: Boolean, default: true })
   isValid: boolean;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String, index: true })
   type: CodeTypes;
 }
 
