@@ -10,7 +10,11 @@ import {
   Query,
 } from "@nestjs/common";
 import { RoadmapService } from "./roadmap.service";
-import { AuthGuard, BannedUserGuard } from "src/auth/guards";
+import {
+  AuthGuard,
+  BannedUserGuard,
+  EmailVerifiedGuard,
+} from "src/auth/guards";
 import { CurrentUser } from "src/auth/decorators";
 import {
   CreateRoadmapCategoryDto,
@@ -36,7 +40,7 @@ import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 import { PaginationDto } from "src/common/dtos";
 
 @Controller("roadmap")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, EmailVerifiedGuard)
 export class RoadmapController {
   constructor(private readonly roadmapService: RoadmapService) {}
 

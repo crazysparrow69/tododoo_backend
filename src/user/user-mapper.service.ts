@@ -60,6 +60,7 @@ export class UserMapperService {
       _id: user._id.toString(),
       username: user.username,
       email: user.email,
+      isEmailVerified: user.isEmailVerified,
       ...(user.avatarId ? { avatar: user.avatarId.url } : {}),
       ...(user.profileEffectId
         ? {

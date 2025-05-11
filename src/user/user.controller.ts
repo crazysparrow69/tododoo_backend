@@ -20,8 +20,9 @@ import {
 } from "./dtos";
 import { UserService } from "./user.service";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
+import { Throttle } from "@nestjs/throttler";
 
 @Controller("user")
 export class UserController {
@@ -34,20 +35,20 @@ export class UserController {
   }
 
   @Get("profile/:id")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, EmailVerifiedGuard)
   getUserPublicProfile(@Param("id") userId: string): Promise<UserBaseDto> {
     return this.userService.getUserPublicProfile(userId);
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, EmailVerifiedGuard)
+  @Throttle({ default: { limit: 60, ttl: 1000 * 60 } })
   getUsers(@Query() query: QueryUserDto): Promise<WithPagination<UserBaseDto>> {
     return this.userService.findUsersByUsername(query);
   }
 
   @Patch()
-  @UseGuards(BannedUserGuard)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, BannedUserGuard, EmailVerifiedGuard)
   updateUser(
     @CurrentUser() userId: string,
     @Body() body: UpdateUserDto
@@ -56,15 +57,13 @@ export class UserController {
   }
 
   @Delete()
-  @UseGuards(BannedUserGuard)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, BannedUserGuard, EmailVerifiedGuard)
   removeUser(@CurrentUser() userId: string): Promise<ApiResponseStatus> {
     return this.userService.remove(userId);
   }
 
   @Post("password")
-  @UseGuards(BannedUserGuard)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, BannedUserGuard, EmailVerifiedGuard)
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto

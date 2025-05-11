@@ -22,6 +22,9 @@ export class User extends AbstractDocument {
   @Prop({ required: true, unique: true, index: true, type: String })
   email: string;
 
+  @Prop({ type: Boolean, default: false })
+  isEmailVerified: boolean;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "UserAvatar" })
   avatarId?: UserAvatar;
 

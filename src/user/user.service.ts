@@ -22,7 +22,7 @@ import {
   UserProfileDto,
 } from "./dtos";
 import { UserMapperService } from "./user-mapper.service";
-import { User } from "./user.schema";
+import { User, UserDocument } from "./user.schema";
 import { SignupUserDto } from "../auth/dtos";
 import { Category } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
@@ -60,6 +60,7 @@ export class UserService implements OnModuleInit {
         _id: 1,
         username: 1,
         email: 1,
+        isEmailVerified: 1,
         avatarId: 1,
         profileEffectId: 1,
         avatarEffectId: 1,
@@ -101,11 +102,7 @@ export class UserService implements OnModuleInit {
     const [total, foundUsers] = await Promise.all([
       this.userModel.countDocuments(query),
       this.userModel
-        .find(query, {
-          username: 1,
-          avatarId: 1,
-          avatarEffectId: 1,
-        })
+        .find(query, { username: 1, avatarId: 1, avatarEffectId: 1 })
         .populate(getUserPopulate())
         .lean()
         .limit(limit)
@@ -145,15 +142,13 @@ export class UserService implements OnModuleInit {
   async createOAuthUser(
     dto: OAuthUserDto,
     session?: ClientSession
-  ): Promise<User> {
-    const foundUser = await this.userModel.findOne({
-      email: dto.email,
-    });
+  ): Promise<UserDocument> {
+    const foundUser = await this.userModel.findOne({ email: dto.email });
     if (foundUser) {
       throw new BadRequestException("Email already in use");
     }
 
-    const newUser = new this.userModel(dto);
+    const newUser = new this.userModel({ ...dto, isEmailVerified: true });
     await newUser.save({ session });
 
     return newUser;
@@ -161,9 +156,7 @@ export class UserService implements OnModuleInit {
 
   async update(id: string, attrs: Partial<User>): Promise<UserProfileDto> {
     const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, attrs, {
-        new: true,
-      })
+      .findByIdAndUpdate(id, attrs, { new: true })
       .populate(getUserPopulate())
       .lean()
       .select([

@@ -11,10 +11,10 @@ import { Types } from "mongoose";
 
 import { UpdateNotificationDto } from "./dtos";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 import { NotificationService } from "../notification/notification.service";
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, EmailVerifiedGuard)
 @Controller("notification")
 export class NotificationController {
   constructor(private notificationService: NotificationService) {}

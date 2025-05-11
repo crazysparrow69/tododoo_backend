@@ -1,5 +1,8 @@
 export const COLOR_MIN = 3;
 export const COLOR_MAX = 20;
+export const CODE_LENGTH = 20;
+export const CODE_EMAIL_VERIFICATION_TTL = 1000 * 60 * 15; // 15 min
+export const CODE_REQUEST_EMAIL_VERIFICATION_LIMIT = 1000 * 60 * 15; // 15 min
 
 export const BOARD = {
   TITLE: { MIN: 1, MAX: 50 },

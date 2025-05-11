@@ -10,9 +10,9 @@ import { FileInterceptor } from "@nestjs/platform-express";
 
 import { ImageService } from "./image.service";
 import { CurrentUser } from "../auth/decorators";
-import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { AuthGuard, BannedUserGuard, EmailVerifiedGuard } from "../auth/guards";
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, EmailVerifiedGuard)
 @Controller("image")
 export class ImageController {
   constructor(private imageService: ImageService) {}

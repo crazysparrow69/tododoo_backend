@@ -16,6 +16,10 @@ import { TaskModule } from "./task/task.module";
 import { UserModule } from "./user/user.module";
 import { BoardModule } from "./board/board.module";
 import { RoadmapModule } from "./roadmap/roadmap.module";
+import { MailModule } from "./mail/mail.module";
+import { CodeModule } from "./code/code.module";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
   imports: [
@@ -31,12 +35,25 @@ import { RoadmapModule } from "./roadmap/roadmap.module";
         CLOUDINARY_API_SECRET: Joi.string().required(),
         GOOGLE_CLIENT_ID: Joi.string().required(),
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        RESEND_API_KEY: Joi.string().required(),
+        EMAIL_FROM: Joi.string().email().required(),
+        CLIENT_URL: Joi.string()
+          .uri({ scheme: ["http", "https"] })
+          .required(),
       }),
     }),
     JwtModule.register({
       global: true,
       secret: process.env.ACCESS_TOKEN_SECRET,
       signOptions: { expiresIn: "30d" },
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 1000 * 60,
+          limit: 20,
+        },
+      ],
     }),
     DatabaseModule,
     UserModule,
@@ -49,8 +66,16 @@ import { RoadmapModule } from "./roadmap/roadmap.module";
     AdminModule,
     BoardModule,
     RoadmapModule,
+    MailModule,
+    CodeModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    AppService,
+  ],
 })
 export class AppModule {}
