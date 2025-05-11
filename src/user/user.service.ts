@@ -22,7 +22,7 @@ import {
   UserProfileDto,
 } from "./dtos";
 import { UserMapperService } from "./user-mapper.service";
-import { User } from "./user.schema";
+import { User, UserDocument } from "./user.schema";
 import { SignupUserDto } from "../auth/dtos";
 import { Category } from "../category/category.schema";
 import { ImageService } from "../image/image.service";
@@ -142,7 +142,7 @@ export class UserService implements OnModuleInit {
   async createOAuthUser(
     dto: OAuthUserDto,
     session?: ClientSession
-  ): Promise<User> {
+  ): Promise<UserDocument> {
     const foundUser = await this.userModel.findOne({ email: dto.email });
     if (foundUser) {
       throw new BadRequestException("Email already in use");

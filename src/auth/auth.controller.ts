@@ -24,7 +24,7 @@ export class AuthController {
 
   @Post("signup")
   @HttpCode(HttpStatus.CREATED)
-  signUp(@Body() body: SignupUserDto): Promise<ApiResponseStatus> {
+  signUp(@Body() body: SignupUserDto): Promise<AuthResponse> {
     return this.authService.signUp(body);
   }
 
@@ -40,7 +40,7 @@ export class AuthController {
   }
 
   @Post("verify-email/:code")
-  verifyEmail(@Param("code") code: string): Promise<ApiResponseStatus> {
+  verifyEmail(@Param("code") code: string): Promise<AuthResponse> {
     return this.authService.verifyEmail(code);
   }
 
