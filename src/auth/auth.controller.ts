@@ -10,7 +10,7 @@ export class AuthController {
 
   @Post("signup")
   @HttpCode(HttpStatus.CREATED)
-  createUser(@Body() body: SignupUserDto): Promise<AuthResponse> {
+  signUp(@Body() body: SignupUserDto): Promise<AuthResponse> {
     return this.authService.signup(body);
   }
 
