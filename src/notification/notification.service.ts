@@ -95,8 +95,6 @@ export class NotificationService {
       page * limit + skip
     );
 
-    console.log("notificationsSlice:", notificationsSlice);
-
     return { results: notificationsSlice, page, totalPages };
   }
 
