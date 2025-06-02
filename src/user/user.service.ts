@@ -81,8 +81,8 @@ export class UserService implements OnModuleInit {
         avatarId: 1,
         profileEffectId: 1,
         avatarEffectId: 1,
-        createdAt: 1,
         isBanned: 1,
+        createdAt: 1,
       })
       .populate(getUserPopulate())
       .lean();

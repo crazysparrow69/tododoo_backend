@@ -52,6 +52,7 @@ export class UserMapperService {
           }
         : {}),
       isBanned: user.isBanned,
+      createdAt: user.createdAt,
     };
   }
 

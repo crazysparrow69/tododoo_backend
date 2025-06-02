@@ -10,4 +10,5 @@ export class UserBaseDto {
   profileEffect?: ProfileEffectResponseDto;
   avatarEffect?: UserAvatarEffectResponseDto;
   isBanned?: boolean;
+  createdAt: Date;
 }
