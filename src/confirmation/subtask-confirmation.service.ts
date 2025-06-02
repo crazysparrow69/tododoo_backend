@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { ClientSession, Model, Types } from "mongoose";
 
 import { CreateSubtaskConfirmationDto } from "./dtos";
 import { SubtaskConfirmation } from "./subtask-confirmation.schema";
@@ -64,9 +64,15 @@ export class SubtaskConfirmService {
     }));
   }
 
-  removeSubtaskConfirmation(subtaskId: string): Promise<SubtaskConfirmation> {
-    return this.subtaskConfirmationModel.findOneAndDelete({
-      subtaskId: new Types.ObjectId(subtaskId),
-    });
+  removeSubtaskConfirmation(
+    subtaskId: string,
+    session?: ClientSession
+  ): Promise<SubtaskConfirmation> {
+    return this.subtaskConfirmationModel.findOneAndDelete(
+      {
+        subtaskId: new Types.ObjectId(subtaskId),
+      },
+      { session }
+    );
   }
 }

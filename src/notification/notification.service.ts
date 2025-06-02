@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { ClientSession, Model, Types } from "mongoose";
 
 import { UpdateNotificationDto } from "./dtos";
 import { CreateNotificationDto } from "./dtos/create-notification.dto";
@@ -25,6 +25,8 @@ export class NotificationService {
   constructor(
     @InjectModel(Notification.name)
     private notificationModel: Model<Notification>,
+    @InjectModel(SubtaskConfirmation.name)
+    private subtaskConfirmationModel: Model<SubtaskConfirmation>,
     @Inject(forwardRef(() => NotificationGateway))
     private notificationGateway: NotificationGateway,
     private subtaskConfirmService: SubtaskConfirmService,
@@ -68,7 +70,9 @@ export class NotificationService {
     skip: number
   ): Promise<WithPagination<SubtaskConfirmation | NotificationResponseDto>> {
     const foundSubtaskConf =
-      await this.subtaskConfirmService.getSubtaskConfirmations(new Types.ObjectId(userId));
+      await this.subtaskConfirmService.getSubtaskConfirmations(
+        new Types.ObjectId(userId)
+      );
     const foundNotifications = await this.notificationModel
       .find({ userId, isRead: false })
       .populate(["subtaskId", getUserReferencePopulate("actionByUserId")]);
@@ -98,23 +102,12 @@ export class NotificationService {
     return { results: notificationsSlice, page, totalPages };
   }
 
-  async deleteSubtaskConf(subtaskId: string): Promise<void> {
-    const deletedSubtConf =
-      await this.subtaskConfirmService.removeSubtaskConfirmation(subtaskId);
-
-    if (deletedSubtConf) {
-      const socketId = this.notificationGateway.findConnectionByUserId(
-        deletedSubtConf.assigneeId.toString()
-      );
-      if (socketId) {
-        this.notificationGateway.io
-          .to(socketId)
-          .emit(
-            NotificationServerEvents.DEL_SUBTASK_CONFIRMATION,
-            deletedSubtConf._id
-          );
-      }
-    }
+  async deleteNotifications(
+    subtaskId: string,
+    session?: ClientSession
+  ): Promise<void> {
+    await this.subtaskConfirmationModel.deleteMany({ subtaskId }, { session });
+    await this.notificationModel.deleteMany({ subtaskId }, { session });
   }
 
   async create(dto: CreateNotificationDto): Promise<NotificationResponseDto> {

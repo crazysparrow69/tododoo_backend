@@ -14,6 +14,7 @@ import { Category } from "../category/category.schema";
 import { getDeadlineFilter } from "../common";
 import { transaction } from "src/common/transaction";
 import { getTaskPopulate } from "./task.populate";
+import { NotificationService } from "src/notification/notification.service";
 
 @Injectable()
 export class TaskService {
@@ -22,6 +23,7 @@ export class TaskService {
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(Subtask.name) private subtaskModel: Model<Subtask>,
     private readonly taskMapperService: TaskMapperService,
+    private readonly notificationService: NotificationService,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
@@ -206,6 +208,13 @@ export class TaskService {
             _id: { $in: task.subtasks },
           },
           { session }
+        );
+
+        task.subtasks.forEach((el) =>
+          this.notificationService.deleteNotifications(
+            el._id.toString(),
+            session
+          )
         );
 
         return task;

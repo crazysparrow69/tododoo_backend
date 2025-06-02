@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common/exceptions";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model, Types } from "mongoose";
+import mongoose, { ClientSession, Model, Types } from "mongoose";
 
 import {
   CreateSubtaskDto,
@@ -250,21 +250,32 @@ export class SubtaskService {
     return { success: true };
   }
 
-  async remove(userId: Types.ObjectId, subtaskId: string): Promise<Subtask> {
+  async remove(
+    userId: Types.ObjectId,
+    subtaskId: string,
+    session?: ClientSession
+  ): Promise<Subtask> {
     const { status } = await this.checkStatusForSubtask(userId, subtaskId);
 
     if (status === "gigachad" || status === "owner") {
-      const removedSubtask = await this.subtaskModel.findOneAndDelete({
-        _id: new Types.ObjectId(subtaskId),
-        userId,
-      });
+      const removedSubtask = await this.subtaskModel.findOneAndDelete(
+        {
+          _id: new Types.ObjectId(subtaskId),
+          userId,
+        },
+        { session }
+      );
       if (!removedSubtask) {
         throw new NotFoundException("Cannot delete non-existent subtask");
       }
 
-      await this.taskModel.findByIdAndUpdate(removedSubtask.taskId, {
-        $pull: { subtasks: removedSubtask._id },
-      });
+      await this.taskModel.findByIdAndUpdate(
+        removedSubtask.taskId,
+        {
+          $pull: { subtasks: removedSubtask._id },
+        },
+        { session }
+      );
 
       return removedSubtask;
     } else if (status === "assignee") {

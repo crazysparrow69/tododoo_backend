@@ -101,12 +101,8 @@ export class TaskController {
 
   @Delete(":id")
   @UseGuards(BannedUserGuard)
-  async removeTask(@CurrentUser() userId: string, @Param("id") id: string) {
-    const removedTask = await this.taskService.remove(userId, id);
-    removedTask.subtasks.forEach((el) =>
-      this.notificationService.deleteSubtaskConf(el._id.toString())
-    );
-    return removedTask;
+  removeTask(@CurrentUser() userId: string, @Param("id") id: string) {
+    return this.taskService.remove(userId, id);
   }
 
   @Post("stats")
