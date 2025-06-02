@@ -48,13 +48,8 @@ export class SubtaskController {
         id,
         session
       );
-      if (
-        userId.toString() !== removedSubtask.assigneeId.toString() &&
-        !removedSubtask.isConfirmed &&
-        !removedSubtask.isRejected
-      ) {
-        await this.notificationService.deleteNotifications(id, session);
-      }
+
+      await this.notificationService.deleteNotifications(id, session);
 
       return removedSubtask;
     });
