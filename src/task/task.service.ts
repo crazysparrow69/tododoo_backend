@@ -210,12 +210,12 @@ export class TaskService {
           { session }
         );
 
-        task.subtasks.forEach((el) =>
-          this.notificationService.deleteNotifications(
-            el._id.toString(),
+        for (const subtaskId of task.subtasks) {
+          await this.notificationService.deleteNotifications(
+            subtaskId.toString(),
             session
-          )
-        );
+          );
+        }
 
         return task;
       }
