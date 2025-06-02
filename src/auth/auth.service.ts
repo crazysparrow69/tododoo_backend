@@ -79,14 +79,11 @@ export class AuthService {
     const newToken = await transaction<string>(
       this.connection,
       async (session) => {
-        const foundToken = await this.sessionModel.findOne({
-          userId: foundUser._id,
-          isValid: true,
-        });
-        if (foundToken) {
-          foundToken.isValid = false;
-          await foundToken.save({ session });
-        }
+        await this.sessionModel.updateMany(
+          { userId: foundUser._id, isValid: true },
+          { isValid: false },
+          { session }
+        );
 
         const token = await this.jwtService.signAsync({
           sub: foundUser._id,
