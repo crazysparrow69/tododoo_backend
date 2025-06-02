@@ -68,7 +68,7 @@ export class NotificationService {
     skip: number
   ): Promise<WithPagination<SubtaskConfirmation | NotificationResponseDto>> {
     const foundSubtaskConf =
-      await this.subtaskConfirmService.getSubtaskConfirmations(userId);
+      await this.subtaskConfirmService.getSubtaskConfirmations(new Types.ObjectId(userId));
     const foundNotifications = await this.notificationModel
       .find({ userId, isRead: false })
       .populate(["subtaskId", getUserReferencePopulate("actionByUserId")]);
@@ -94,6 +94,8 @@ export class NotificationService {
       (page - 1) * limit + skip,
       page * limit + skip
     );
+
+    console.log("notificationsSlice:", notificationsSlice);
 
     return { results: notificationsSlice, page, totalPages };
   }

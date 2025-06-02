@@ -19,7 +19,7 @@ export class SubtaskConfirmService {
   ): Promise<SubtaskConfirmation> {
     const createdSubtConf = await this.subtaskConfirmationModel.create({
       _id: new Types.ObjectId(),
-      userId,
+      userId: new Types.ObjectId(userId),
       ...dto,
       assigneeId: new Types.ObjectId(dto.assigneeId),
       subtaskId: new Types.ObjectId(dto.subtaskId),
