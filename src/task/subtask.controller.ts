@@ -49,8 +49,6 @@ export class SubtaskController {
         session
       );
 
-      await this.notificationService.deleteNotifications(id, session);
-
       return removedSubtask;
     });
   }

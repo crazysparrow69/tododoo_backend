@@ -277,6 +277,8 @@ export class SubtaskService {
         { session }
       );
 
+      await this.notificationService.deleteNotifications(subtaskId, session);
+
       return removedSubtask;
     } else if (status === "assignee") {
       throw new BadRequestException(

@@ -20,11 +20,13 @@ import {
   SubtaskConfirmation,
   SubtaskConfirmationSchema,
 } from "src/confirmation/subtask-confirmation.schema";
+import { Subtask, SubtaskSchema } from "src/task/schemas";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
+      { name: Subtask.name, schema: SubtaskSchema },
       { name: Notification.name, schema: NotificationSchema },
       { name: SubtaskConfirmation.name, schema: SubtaskConfirmationSchema },
       { name: Session.name, schema: SessionSchema },

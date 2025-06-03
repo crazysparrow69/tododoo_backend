@@ -106,7 +106,10 @@ export class NotificationService {
     subtaskId: string,
     session?: ClientSession
   ): Promise<void> {
-    await this.subtaskConfirmationModel.deleteMany({ subtaskId }, { session });
+    await this.subtaskConfirmationModel.deleteMany(
+      { subtaskId: new Types.ObjectId(subtaskId) },
+      { session }
+    );
     await this.notificationModel.deleteMany({ subtaskId }, { session });
   }
 
