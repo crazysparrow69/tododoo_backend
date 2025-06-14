@@ -1,12 +1,13 @@
-import { IsString, Length } from "class-validator";
+import { IsString, Length, Matches } from "class-validator";
 import { USER } from "src/common/constants";
 
 export class ChangePasswordDto {
   @IsString()
-  @Length(USER.PASSWORD.MIN, USER.PASSWORD.MAX)
   oldPassword: string;
 
   @IsString()
-  @Length(USER.PASSWORD.MIN, USER.PASSWORD.MAX)
+  @Matches(USER.PASSWORD.REGEX, {
+    message: USER.PASSWORD.ERROR_MESSAGE,
+  })
   newPassword: string;
 }

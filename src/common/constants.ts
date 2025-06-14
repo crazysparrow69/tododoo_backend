@@ -74,7 +74,8 @@ export const USER = {
     MAX: 20,
   },
   PASSWORD: {
-    MIN: 6,
-    MAX: 20,
+    REGEX: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+    ERROR_MESSAGE:
+      "Password must contain at least 8 characters, including a number, a capital letter, and a symbol",
   },
 };
