@@ -565,56 +565,61 @@ export class RoadmapService {
     roadmapId: string,
     quarterId: string
   ): Promise<RoadmapResponseDto> {
-    const roadmap = await this.roadmapModel.findOne({ _id: roadmapId, userId });
-    if (!roadmap) throw new NotFoundException("Roadmap not found");
+    const roadmap = await this.roadmapModel.findOne({
+      _id: roadmapId,
+      userIds: userId,
+    });
+    if (!roadmap) {
+      throw new NotFoundException("Roadmap not found");
+    }
 
     const quarter = roadmap.quarters.id(quarterId);
-    if (!quarter) throw new NotFoundException("Quarter not found");
+    if (!quarter) {
+      throw new NotFoundException("Quarter not found");
+    }
 
-    const cutoffStart = quarter.start - 10; // tasks that start after this will be removed
+    const { start: quarterStart, end: quarterEnd } = quarter;
+    const cutoffStart = quarterStart - 10;
 
     // remove milestones whose position falls inside the removed quarter
     for (const ms of [...roadmap.milestones]) {
-      if (ms.position >= quarter.start && ms.position <= quarter.end) {
+      if (ms.position >= quarterStart && ms.position <= quarterEnd) {
         roadmap.milestones.pull(ms._id);
       }
     }
+
+    // remove the quarter itself first
+    quarter.deleteOne();
 
     // Determine the latest remaining quarter’s end date
     const lastQuarterEnd =
       roadmap.quarters.length > 0
         ? Math.max(...roadmap.quarters.map((q) => q.end))
-        : null; // null means no quarters left
+        : null;
 
     const now = new Date();
 
     // Iterate through every category, row, task
     for (const category of roadmap.categories) {
       for (const row of category.rows) {
-        // clone the array so we can safely mutate while iterating
         for (const task of [...row.tasks]) {
           // Remove tasks whose start is later than cutoffStart
           if (task.start > cutoffStart) {
             row.tasks.pull(task._id);
             continue;
           }
-
           // Trim tasks that extend beyond the latest quarter
           if (lastQuarterEnd !== null && task.end > lastQuarterEnd) {
             task.end = lastQuarterEnd;
             task.updatedAt = now;
           }
         }
-
         row.updatedAt = now;
       }
-
       category.updatedAt = now;
     }
 
-    quarter.deleteOne(); // remove the quarter itself
     roadmap.updatedAt = now;
-
     await roadmap.save();
 
     return this.roadmapMapperService.toRoadmap(roadmap);
