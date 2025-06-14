@@ -13,9 +13,15 @@ import {
 } from "@nestjs/common";
 
 import { CategoryService } from "./category.service";
-import { CreateCategoryDto, QueryCategoryDto, UpdateCategoryDto } from "./dtos";
-import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
+import {
+  CategoryResponseDto,
+  CreateCategoryDto,
+  QueryCategoryDto,
+  UpdateCategoryDto,
+} from "./dtos";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Controller("category")
 @UseGuards(AuthGuard)
@@ -23,7 +29,10 @@ export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   @Get("/:id")
-  getCategory(@CurrentUser() userId: string, @Param("id") id: string) {
+  getCategory(
+    @CurrentUser() userId: string,
+    @Param("id") id: string
+  ): Promise<CategoryResponseDto> {
     return this.categoryService.findOne(userId, id);
   }
 
@@ -31,31 +40,36 @@ export class CategoryController {
   getCategories(
     @CurrentUser() userId: string,
     @Query() query: QueryCategoryDto
-  ) {
+  ): Promise<WithPagination<CategoryResponseDto>> {
     return this.categoryService.find(userId, query);
   }
 
   @Post("/")
+  @UseGuards(BannedUserGuard)
   @HttpCode(HttpStatus.CREATED)
   createCategory(
     @CurrentUser() userId: string,
     @Body() body: CreateCategoryDto
-  ) {
+  ): Promise<CategoryResponseDto> {
     return this.categoryService.create(userId, body);
   }
 
   @Patch("/:id")
+  @UseGuards(BannedUserGuard)
   updateCategory(
     @CurrentUser() userId: string,
     @Param("id") id: string,
     @Body() body: UpdateCategoryDto
-  ) {
+  ): Promise<CategoryResponseDto> {
     return this.categoryService.update(userId, id, body);
   }
 
   @Delete("/:id")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  removeCategory(@CurrentUser() userId: string, @Param("id") id: string) {
+  @UseGuards(BannedUserGuard)
+  removeCategory(
+    @CurrentUser() userId: string,
+    @Param("id") id: string
+  ): Promise<ApiResponseStatus> {
     return this.categoryService.remove(userId, id);
   }
 }

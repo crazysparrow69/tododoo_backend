@@ -1,5 +1,5 @@
-export { CreateSubtaskDto } from "./create-subtask.dto";
-export { CreateTaskDto } from "./create-task.dto";
-export { QueryTaskDto } from "./query-task.dto";
-export { UpdateSubtaskDto } from "./update-subtask.dto";
-export { UpdateTaskDto } from "./update-task.dto";
+export * from "./task.dto";
+export * from "./subtask.dto";
+
+export * from "./response/task.dto";
+export * from "./response/subtask.dto";

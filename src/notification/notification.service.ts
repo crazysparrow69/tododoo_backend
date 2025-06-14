@@ -1,16 +1,36 @@
-import { Injectable } from "@nestjs/common";
-import { Types } from "mongoose";
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { ClientSession, Model, Types } from "mongoose";
 
+import { UpdateNotificationDto } from "./dtos";
+import { CreateNotificationDto } from "./dtos/create-notification.dto";
+import { NotificationResponseDto } from "./dtos/response/notification-response.dto";
+import { NotificationMapperService } from "./notification-mapper.service";
 import { NotificationGateway } from "./notification.gateway";
+import { Notification } from "./notification.schema";
+import { NotificationServerEvents } from "./types";
 import { CreateSubtaskConfirmationDto } from "../confirmation/dtos/create-subtask-confirmation.dto";
 import { SubtaskConfirmation } from "../confirmation/subtask-confirmation.schema";
 import { SubtaskConfirmService } from "../confirmation/subtask-confirmation.service";
+import { getUserReferencePopulate } from "src/user/user.populate";
+import { WithPagination } from "src/common/interfaces";
 
 @Injectable()
 export class NotificationService {
   constructor(
+    @InjectModel(Notification.name)
+    private notificationModel: Model<Notification>,
+    @InjectModel(SubtaskConfirmation.name)
+    private subtaskConfirmationModel: Model<SubtaskConfirmation>,
+    @Inject(forwardRef(() => NotificationGateway))
+    private notificationGateway: NotificationGateway,
     private subtaskConfirmService: SubtaskConfirmService,
-    private notificationGateway: NotificationGateway
+    private readonly notificationMapperService: NotificationMapperService
   ) {}
 
   async createSubtaskConf(
@@ -27,7 +47,18 @@ export class NotificationService {
       if (socketId) {
         this.notificationGateway.io
           .to(socketId)
-          .emit("newSubtaskConfirmation", createdSubtConf);
+          .emit(NotificationServerEvents.NEW_SUBTASK_CONFIRMATION, {
+            _id: createdSubtConf._id.toString(),
+            creator: {
+              _id: createdSubtConf.userId._id.toString(),
+              username: (createdSubtConf.userId as any).username,
+              avatar: (createdSubtConf.userId as any)?.avatar?.url || "",
+            },
+            assigneeId: createdSubtConf.assigneeId.toString(),
+            subtaskId: createdSubtConf.subtaskId,
+            type: createdSubtConf.type,
+            createdAt: createdSubtConf.createdAt,
+          });
       }
     }
   }
@@ -37,24 +68,29 @@ export class NotificationService {
     page: number,
     limit: number,
     skip: number
-  ): Promise<{
-    notifications: Array<SubtaskConfirmation>;
-    currentPage: number;
-    totalPages: number;
-  }> {
+  ): Promise<WithPagination<SubtaskConfirmation | NotificationResponseDto>> {
     const foundSubtaskConf =
-      await this.subtaskConfirmService.getSubtaskConfirmations(userId);
+      await this.subtaskConfirmService.getSubtaskConfirmations(
+        new Types.ObjectId(userId)
+      );
+    const foundNotifications = await this.notificationModel
+      .find({ userId, isRead: false })
+      .populate(["subtaskId", getUserReferencePopulate("actionByUserId")]);
+    const mappedNotifications =
+      this.notificationMapperService.toNotifications(foundNotifications);
 
-    const notifications = [...foundSubtaskConf].sort((a, b) => {
-      const createdAtA = a.createdAt
-        ? new Date(a.createdAt).getTime()
-        : Infinity;
-      const createdAtB = b.createdAt
-        ? new Date(b.createdAt).getTime()
-        : Infinity;
+    const notifications = [...foundSubtaskConf, ...mappedNotifications].sort(
+      (a, b) => {
+        const createdAtA = a.createdAt
+          ? new Date(a.createdAt).getTime()
+          : Infinity;
+        const createdAtB = b.createdAt
+          ? new Date(b.createdAt).getTime()
+          : Infinity;
 
-      return createdAtB - createdAtA;
-    });
+        return createdAtB - createdAtA;
+      }
+    );
 
     const totalPages = Math.ceil(notifications.length / limit);
 
@@ -63,22 +99,48 @@ export class NotificationService {
       page * limit + skip
     );
 
-    return { notifications: notificationsSlice, currentPage: page, totalPages };
+    return { results: notificationsSlice, page, totalPages };
   }
 
-  async deleteSubtaskConf(subtaskId: string): Promise<void> {
-    const deletedSubtConf =
-      await this.subtaskConfirmService.removeSubtaskConfirmation(subtaskId);
+  async deleteNotifications(
+    subtaskId: string,
+    session?: ClientSession
+  ): Promise<void> {
+    await this.subtaskConfirmationModel.deleteMany(
+      { subtaskId: new Types.ObjectId(subtaskId) },
+      { session }
+    );
+    await this.notificationModel.deleteMany({ subtaskId }, { session });
+  }
 
-    if (deletedSubtConf) {
-      const socketId = this.notificationGateway.findConnectionByUserId(
-        deletedSubtConf.assigneeId.toString()
-      );
-      if (socketId) {
-        this.notificationGateway.io
-          .to(socketId)
-          .emit("delSubtaskConfirmation", deletedSubtConf._id);
-      }
+  async create(dto: CreateNotificationDto): Promise<NotificationResponseDto> {
+    const createdNotification = await this.notificationModel.create(dto);
+    await createdNotification.populate([
+      getUserReferencePopulate("actionByUserId"),
+      "subtaskId",
+    ]);
+
+    return this.notificationMapperService.toNotificationResponse(
+      createdNotification
+    );
+  }
+
+  async update(
+    userId: Types.ObjectId,
+    notificationId: string,
+    updateNotificationDto: UpdateNotificationDto
+  ): Promise<{ success: true }> {
+    const foundNotification = await this.notificationModel.findOne({
+      _id: notificationId,
+      userId,
+    });
+    if (!foundNotification) {
+      throw new NotFoundException("Notification not found");
     }
+
+    Object.assign(foundNotification, updateNotificationDto);
+    await foundNotification.save();
+
+    return { success: true };
   }
 }

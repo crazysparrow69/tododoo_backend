@@ -2,117 +2,131 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import mongoose, { Model, Types } from "mongoose";
 
+import { CategoryMapperService } from "./category-mapper.service";
 import { Category } from "./category.schema";
-import { CreateCategoryDto, QueryCategoryDto } from "./dtos";
-import { Task } from "../task/task.schema";
-import { User } from "../user/user.schema";
+import {
+  CategoryResponseDto,
+  CreateCategoryDto,
+  QueryCategoryDto,
+} from "./dtos";
+import { Task } from "../task/schemas";
+import { transaction } from "src/common/transaction";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Injectable()
 export class CategoryService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
-    @InjectModel(Category.name) private categoryModel: Model<Category>
+    @InjectModel(Category.name) private categoryModel: Model<Category>,
+    private readonly categoryMapperService: CategoryMapperService,
+    @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 
   async create(
     userId: string,
     createCategoryDto: CreateCategoryDto
-  ): Promise<Category> {
-    const createdCategory = await this.categoryModel.create({
-      userId,
-      ...createCategoryDto,
-    });
+  ): Promise<CategoryResponseDto> {
+    try {
+      const createdCategory = await this.categoryModel.create({
+        userId,
+        ...createCategoryDto,
+      });
 
-    await this.userModel.findByIdAndUpdate(userId, {
-      $push: { categories: createdCategory._id },
-    });
-
-    return createdCategory.toObject();
+      return this.categoryMapperService.toCategoryResponse(createdCategory);
+    } catch (err: any) {
+      throw new UnprocessableEntityException(err.message);
+    }
   }
 
-  async findOne(userId: string, id: string): Promise<Category> {
+  async findOne(userId: string, id: string): Promise<CategoryResponseDto> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
     const foundCategory = await this.categoryModel
       .findOne({ _id: id, userId })
-      .select(["-__v"]);
+      .lean()
+      .select(["_id", "title", "color"]);
     if (!foundCategory) throw new NotFoundException("Category not found");
 
-    return foundCategory;
+    return this.categoryMapperService.toCategoryResponse(foundCategory);
   }
 
   async find(
     userId: string,
     query: QueryCategoryDto
-  ): Promise<{
-    categories: Category[];
-    currentPage: number;
-    totalPages: number;
-  }> {
+  ): Promise<WithPagination<CategoryResponseDto>> {
     const { page = 1, limit = 10, ...params } = query;
 
     const queryParams = {
       userId,
       ...params,
     };
-
     const count = await this.categoryModel.countDocuments(queryParams);
-
     const totalPages = Math.ceil(count / limit);
 
     const foundCategories = await this.categoryModel
       .find(queryParams)
-      .limit(limit * 1)
+      .lean()
+      .limit(limit)
       .skip((page - 1) * limit)
-      .select(["-__v"])
+      .select(["_id", "title", "color"])
       .exec();
 
-    return { categories: foundCategories, currentPage: page, totalPages };
+    return {
+      results: this.categoryMapperService.toCategories(foundCategories),
+      page,
+      totalPages,
+    };
   }
 
   async update(
     userId: string,
     id: string,
     attrs: Partial<Category>
-  ): Promise<Category> {
+  ): Promise<CategoryResponseDto> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
     const updatedCategory = await this.categoryModel
       .findOneAndUpdate({ _id: id, userId }, attrs, { new: true })
-      .select(["-__v"]);
+      .lean()
+      .select(["_id", "title", "color"]);
     if (!updatedCategory) throw new NotFoundException("Category not found");
 
-    return updatedCategory;
+    return this.categoryMapperService.toCategoryResponse(updatedCategory);
   }
 
-  async remove(userId: string, id: string): Promise<Category> {
+  async remove(userId: string, id: string): Promise<ApiResponseStatus> {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException("Invalid ObjectId");
 
-    const deletedCategory = await this.categoryModel.findOneAndDelete({
-      _id: id,
-      userId,
+    await transaction(this.connection, async (session) => {
+      const deletedCategory = await this.categoryModel.findOneAndDelete(
+        {
+          _id: id,
+          userId,
+        },
+        { session }
+      );
+
+      if (!deletedCategory) {
+        throw new NotFoundException("Cannot delete non-existent category");
+      } else {
+        await this.taskModel.updateMany(
+          { categories: deletedCategory._id },
+          {
+            $pull: { categories: deletedCategory._id },
+          },
+          { session }
+        );
+      }
     });
 
-    if (deletedCategory) {
-      await this.userModel.findByIdAndUpdate(userId, {
-        $pull: { categories: deletedCategory._id },
-      });
-      await this.taskModel.updateMany(
-        { categories: deletedCategory._id },
-        {
-          $pull: { categories: deletedCategory._id },
-        }
-      );
-    }
-
-    return;
+    return { success: true };
   }
 }

@@ -4,20 +4,19 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Request } from "express";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 
 import { User } from "../../user/user.schema";
+import { Session } from "../session.schema";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private readonly configService: ConfigService,
-    @InjectModel(User.name) private userModel: Model<User>
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Session.name)
+    private sessionModel: Model<Session>
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -26,17 +25,16 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException();
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get("ACCESS_TOKEN_SECRET"),
-      });
+      const foundToken = await this.sessionModel.findOne({ token });
+      const now = new Date();
+      if (!foundToken || !foundToken.isValid || foundToken.expiresAt < now)
+        throw new UnauthorizedException();
 
-      payload.sub = new Types.ObjectId(payload.sub);
-
-      const foundUser = await this.userModel.findById(payload.sub);
+      const foundUser = await this.userModel.findById(foundToken.userId);
       if (!foundUser) throw new UnauthorizedException();
 
-      request["user"] = payload;
-    } catch (err) {
+      request.user = { sub: foundToken.userId, isBanned: foundUser.isBanned };
+    } catch (err: any) {
       throw new UnauthorizedException(err.message);
     }
     return true;

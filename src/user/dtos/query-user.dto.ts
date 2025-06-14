@@ -1,15 +1,15 @@
 import { Transform } from "class-transformer";
 import { IsEmail, IsOptional, IsString, Length } from "class-validator";
+import { USER } from "src/common/constants";
 
 export class QueryUserDto {
-  @IsString()
-  @Length(1, 20)
   @IsOptional()
+  @IsString()
+  @Length(1, USER.USERNAME.MAX)
   username: string;
 
-  @IsEmail()
-  @Length(1, 100)
   @IsOptional()
+  @IsEmail()
   email: string;
 
   @IsOptional()

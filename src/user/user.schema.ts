@@ -1,46 +1,41 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 
-import { Avatar } from "./user.interface";
-import { Category } from "../category/category.schema";
-import { Task } from "../task/task.schema";
+import { AbstractDocument } from "../database";
+import { ProfileEffect, UserAvatar, UserAvatarEffect } from "../image/schemas";
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
-export class User {
-  @Prop()
-  _id: mongoose.Types.ObjectId;
+export enum UserRoles {
+  USER = "user",
+  ADMIN = "admin",
+}
 
-  @Prop({ required: true })
+@Schema()
+export class User extends AbstractDocument {
+  @Prop({ required: true, index: true, type: String })
   username: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String })
   password: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, index: true, type: String })
   email: string;
 
-  @Prop({
-    required: false,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
-  })
-  tasks: Task[];
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "UserAvatar" })
+  avatarId?: UserAvatar;
 
-  @Prop({
-    required: false,
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
-  })
-  categories: Category[];
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "ProfileEffect" })
+  profileEffectId?: string | ProfileEffect;
 
-  @Prop({ default: null, type: Object })
-  avatar: Avatar;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "UserAvatarEffect" })
+  avatarEffectId?: string | UserAvatarEffect;
 
-  @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
-  createdAt: Date;
+  @Prop({ type: Boolean, default: false })
+  isBanned: boolean;
 
-  @Prop({ type: mongoose.Schema.Types.Date, default: Date.now })
-  updatedAt: Date;
+  @Prop({ type: Array, default: [UserRoles.USER] })
+  roles: UserRoles[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import * as Joi from "joi";
 
+import { AdminModule } from "./admin/admin.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
@@ -13,6 +14,8 @@ import { ImageModule } from "./image/image.module";
 import { NotificationModule } from "./notification/notification.module";
 import { TaskModule } from "./task/task.module";
 import { UserModule } from "./user/user.module";
+import { BoardModule } from "./board/board.module";
+import { RoadmapModule } from "./roadmap/roadmap.module";
 
 @Module({
   imports: [
@@ -26,6 +29,8 @@ import { UserModule } from "./user/user.module";
         CLOUDINARY_CLOUD_NAME: Joi.string().required(),
         CLOUDINARY_API_KEY: Joi.string().required(),
         CLOUDINARY_API_SECRET: Joi.string().required(),
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     JwtModule.register({
@@ -41,6 +46,9 @@ import { UserModule } from "./user/user.module";
     ImageModule,
     NotificationModule,
     ConfirmationModule,
+    AdminModule,
+    BoardModule,
+    RoadmapModule,
   ],
   controllers: [AppController],
   providers: [AppService],

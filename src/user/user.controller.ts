@@ -3,8 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
+  Param,
   Patch,
   Post,
   Query,
@@ -12,47 +11,64 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { ChangePasswordDto, QueryUserDto, UpdateUserDto } from "./dtos";
+import {
+  ChangePasswordDto,
+  QueryUserDto,
+  UpdateUserDto,
+  UserBaseDto,
+  UserProfileDto,
+} from "./dtos";
 import { UserService } from "./user.service";
-import { AuthGuard } from "../auth/guards/auth.guard";
-import { CurrentUser } from "../decorators/current-user.decorator";
+import { CurrentUser } from "../auth/decorators";
+import { AuthGuard, BannedUserGuard } from "../auth/guards";
+import { ApiResponseStatus, WithPagination } from "src/common/interfaces";
 
 @Controller("user")
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get("/me")
+  @Get("me")
   @UseGuards(AuthGuard)
-  getUser(@Request() req) {
-    return this.userService.findOne(req.user.sub);
+  getUserProfile(@Request() req): Promise<UserProfileDto> {
+    return this.userService.getUserProfile(req.user.sub);
   }
 
-  @Get("/")
+  @Get("profile/:id")
   @UseGuards(AuthGuard)
-  getUsers(@Query() query: QueryUserDto) {
+  getUserPublicProfile(@Param("id") userId: string): Promise<UserBaseDto> {
+    return this.userService.getUserPublicProfile(userId);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  getUsers(@Query() query: QueryUserDto): Promise<WithPagination<UserBaseDto>> {
     return this.userService.findUsersByUsername(query);
   }
 
-  @Patch("/")
+  @Patch()
+  @UseGuards(BannedUserGuard)
   @UseGuards(AuthGuard)
-  updateUser(@CurrentUser() userId: string, @Body() body: UpdateUserDto) {
+  updateUser(
+    @CurrentUser() userId: string,
+    @Body() body: UpdateUserDto
+  ): Promise<UserProfileDto> {
     return this.userService.update(userId, body);
   }
 
-  @Delete("/")
+  @Delete()
+  @UseGuards(BannedUserGuard)
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  removeUser(@CurrentUser() userId: string) {
+  removeUser(@CurrentUser() userId: string): Promise<ApiResponseStatus> {
     return this.userService.remove(userId);
   }
 
-  @Post("/password")
+  @Post("password")
+  @UseGuards(BannedUserGuard)
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.OK)
   changePassword(
     @CurrentUser() userId: string,
     @Body() passwords: ChangePasswordDto
-  ) {
+  ): Promise<ApiResponseStatus> {
     return this.userService.changePassword(userId, passwords);
   }
 }

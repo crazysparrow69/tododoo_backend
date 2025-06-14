@@ -1,3 +1,5 @@
-export { CreateCategoryDto } from "./create-category.dto";
-export { QueryCategoryDto } from "./query-category.dto";
-export { UpdateCategoryDto } from "./update-category.dto";
+export * from "./create-category.dto";
+export * from "./query-category.dto";
+export * from "./update-category.dto";
+
+export * from "./response/category-response.dto";
