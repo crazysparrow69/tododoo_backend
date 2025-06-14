@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Length } from "class-validator";
+import { IsEmail, IsString, Length, Matches } from "class-validator";
 import { USER } from "src/common/constants";
 
 export class SignupUserDto {
@@ -7,7 +7,9 @@ export class SignupUserDto {
   username: string;
 
   @IsString()
-  @Length(USER.PASSWORD.MIN, USER.PASSWORD.MAX)
+  @Matches(USER.PASSWORD.REGEX, {
+    message: USER.PASSWORD.ERROR_MESSAGE,
+  })
   password: string;
 
   @IsEmail()
@@ -19,6 +21,5 @@ export class SigninUserDto {
   email: string;
 
   @IsString()
-  @Length(USER.PASSWORD.MIN, USER.PASSWORD.MAX)
   password: string;
 }
