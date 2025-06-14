@@ -14,10 +14,6 @@ export class UpdateUserDto {
   username?: string;
 
   @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @IsOptional()
   @IsMongoId()
   profileEffectId?: string;
 
